@@ -1,0 +1,1184 @@
+// App.jsx — RemitChain with Login, Signup, KYC, QR Code
+import React, { useState, useEffect, useCallback } from 'react'
+import {
+  CURRENCIES,
+  isFreighterInstalled, connectFreighter,
+  fetchBalance, fetchTransactions, sendRemittance, fundTestnetAccount,
+  isValidStellarAddress, shortAddress, convertToXLM, convertFromXLM,
+  formatBalance, generateOTP,
+  saveUser, getUserByPhone, saveSession, getSession, clearSession, cache,
+} from './stellar.js'
+import './App.css'
+
+
+// ── Country Phone Codes (All Countries — Alphabetical) ──────────────────────
+const COUNTRY_CODES = [
+  { code: '+93', country: 'AF', flag: '🇦🇫', name: 'Afghanistan', digits: 9 },
+  { code: '+213', country: 'DZ', flag: '🇩🇿', name: 'Algeria', digits: 9 },
+  { code: '+54', country: 'AR', flag: '🇦🇷', name: 'Argentina', digits: 10 },
+  { code: '+61', country: 'AU', flag: '🇦🇺', name: 'Australia', digits: 9 },
+  { code: '+43', country: 'AT', flag: '🇦🇹', name: 'Austria', digits: 10 },
+  { code: '+973', country: 'BH', flag: '🇧🇭', name: 'Bahrain', digits: 8 },
+  { code: '+880', country: 'BD', flag: '🇧🇩', name: 'Bangladesh', digits: 10 },
+  { code: '+375', country: 'BY', flag: '🇧🇾', name: 'Belarus', digits: 9 },
+  { code: '+32', country: 'BE', flag: '🇧🇪', name: 'Belgium', digits: 9 },
+  { code: '+591', country: 'BO', flag: '🇧🇴', name: 'Bolivia', digits: 8 },
+  { code: '+387', country: 'BA', flag: '🇧🇦', name: 'Bosnia', digits: 8 },
+  { code: '+55', country: 'BR', flag: '🇧🇷', name: 'Brazil', digits: 11 },
+  { code: '+673', country: 'BN', flag: '🇧🇳', name: 'Brunei', digits: 7 },
+  { code: '+359', country: 'BG', flag: '🇧🇬', name: 'Bulgaria', digits: 9 },
+  { code: '+855', country: 'KH', flag: '🇰🇭', name: 'Cambodia', digits: 9 },
+  { code: '+1', country: 'CA', flag: '🇨🇦', name: 'Canada', digits: 10 },
+  { code: '+56', country: 'CL', flag: '🇨🇱', name: 'Chile', digits: 9 },
+  { code: '+86', country: 'CN', flag: '🇨🇳', name: 'China', digits: 11 },
+  { code: '+57', country: 'CO', flag: '🇨🇴', name: 'Colombia', digits: 10 },
+  { code: '+385', country: 'HR', flag: '🇭🇷', name: 'Croatia', digits: 9 },
+  { code: '+420', country: 'CZ', flag: '🇨🇿', name: 'Czech Republic', digits: 9 },
+  { code: '+45', country: 'DK', flag: '🇩🇰', name: 'Denmark', digits: 8 },
+  { code: '+593', country: 'EC', flag: '🇪🇨', name: 'Ecuador', digits: 9 },
+  { code: '+20', country: 'EG', flag: '🇪🇬', name: 'Egypt', digits: 10 },
+  { code: '+372', country: 'EE', flag: '🇪🇪', name: 'Estonia', digits: 8 },
+  { code: '+251', country: 'ET', flag: '🇪🇹', name: 'Ethiopia', digits: 9 },
+  { code: '+679', country: 'FJ', flag: '🇫🇯', name: 'Fiji', digits: 7 },
+  { code: '+358', country: 'FI', flag: '🇫🇮', name: 'Finland', digits: 9 },
+  { code: '+33', country: 'FR', flag: '🇫🇷', name: 'France', digits: 9 },
+  { code: '+49', country: 'DE', flag: '🇩🇪', name: 'Germany', digits: 10 },
+  { code: '+233', country: 'GH', flag: '🇬🇭', name: 'Ghana', digits: 9 },
+  { code: '+30', country: 'GR', flag: '🇬🇷', name: 'Greece', digits: 10 },
+  { code: '+852', country: 'HK', flag: '🇭🇰', name: 'Hong Kong', digits: 8 },
+  { code: '+36', country: 'HU', flag: '🇭🇺', name: 'Hungary', digits: 9 },
+  { code: '+91', country: 'IN', flag: '🇮🇳', name: 'India', digits: 10 },
+  { code: '+62', country: 'ID', flag: '🇮🇩', name: 'Indonesia', digits: 11 },
+  { code: '+98', country: 'IR', flag: '🇮🇷', name: 'Iran', digits: 10 },
+  { code: '+964', country: 'IQ', flag: '🇮🇶', name: 'Iraq', digits: 10 },
+  { code: '+353', country: 'IE', flag: '🇮🇪', name: 'Ireland', digits: 9 },
+  { code: '+972', country: 'IL', flag: '🇮🇱', name: 'Israel', digits: 9 },
+  { code: '+39', country: 'IT', flag: '🇮🇹', name: 'Italy', digits: 10 },
+  { code: '+81', country: 'JP', flag: '🇯🇵', name: 'Japan', digits: 10 },
+  { code: '+962', country: 'JO', flag: '🇯🇴', name: 'Jordan', digits: 9 },
+  { code: '+7', country: 'KZ', flag: '🇰🇿', name: 'Kazakhstan', digits: 10 },
+  { code: '+254', country: 'KE', flag: '🇰🇪', name: 'Kenya', digits: 9 },
+  { code: '+965', country: 'KW', flag: '🇰🇼', name: 'Kuwait', digits: 8 },
+  { code: '+996', country: 'KG', flag: '🇰🇬', name: 'Kyrgyzstan', digits: 9 },
+  { code: '+856', country: 'LA', flag: '🇱🇦', name: 'Laos', digits: 9 },
+  { code: '+371', country: 'LV', flag: '🇱🇻', name: 'Latvia', digits: 8 },
+  { code: '+961', country: 'LB', flag: '🇱🇧', name: 'Lebanon', digits: 8 },
+  { code: '+218', country: 'LY', flag: '🇱🇾', name: 'Libya', digits: 9 },
+  { code: '+370', country: 'LT', flag: '🇱🇹', name: 'Lithuania', digits: 8 },
+  { code: '+853', country: 'MO', flag: '🇲🇴', name: 'Macau', digits: 8 },
+  { code: '+60', country: 'MY', flag: '🇲🇾', name: 'Malaysia', digits: 9 },
+  { code: '+52', country: 'MX', flag: '🇲🇽', name: 'Mexico', digits: 10 },
+  { code: '+976', country: 'MN', flag: '🇲🇳', name: 'Mongolia', digits: 8 },
+  { code: '+212', country: 'MA', flag: '🇲🇦', name: 'Morocco', digits: 9 },
+  { code: '+95', country: 'MM', flag: '🇲🇲', name: 'Myanmar', digits: 9 },
+  { code: '+977', country: 'NP', flag: '🇳🇵', name: 'Nepal', digits: 10 },
+  { code: '+31', country: 'NL', flag: '🇳🇱', name: 'Netherlands', digits: 9 },
+  { code: '+64', country: 'NZ', flag: '🇳🇿', name: 'New Zealand', digits: 9 },
+  { code: '+234', country: 'NG', flag: '🇳🇬', name: 'Nigeria', digits: 10 },
+  { code: '+47', country: 'NO', flag: '🇳🇴', name: 'Norway', digits: 8 },
+  { code: '+968', country: 'OM', flag: '🇴🇲', name: 'Oman', digits: 8 },
+  { code: '+92', country: 'PK', flag: '🇵🇰', name: 'Pakistan', digits: 10 },
+  { code: '+595', country: 'PY', flag: '🇵🇾', name: 'Paraguay', digits: 9 },
+  { code: '+51', country: 'PE', flag: '🇵🇪', name: 'Peru', digits: 9 },
+  { code: '+63', country: 'PH', flag: '🇵🇭', name: 'Philippines', digits: 10 },
+  { code: '+48', country: 'PL', flag: '🇵🇱', name: 'Poland', digits: 9 },
+  { code: '+351', country: 'PT', flag: '🇵🇹', name: 'Portugal', digits: 9 },
+  { code: '+974', country: 'QA', flag: '🇶🇦', name: 'Qatar', digits: 8 },
+  { code: '+40', country: 'RO', flag: '🇷🇴', name: 'Romania', digits: 9 },
+  { code: '+7', country: 'RU', flag: '🇷🇺', name: 'Russia', digits: 10 },
+  { code: '+966', country: 'SA', flag: '🇸🇦', name: 'Saudi Arabia', digits: 9 },
+  { code: '+381', country: 'RS', flag: '🇷🇸', name: 'Serbia', digits: 9 },
+  { code: '+65', country: 'SG', flag: '🇸🇬', name: 'Singapore', digits: 8 },
+  { code: '+421', country: 'SK', flag: '🇸🇰', name: 'Slovakia', digits: 9 },
+  { code: '+386', country: 'SI', flag: '🇸🇮', name: 'Slovenia', digits: 8 },
+  { code: '+27', country: 'ZA', flag: '🇿🇦', name: 'South Africa', digits: 9 },
+  { code: '+82', country: 'KR', flag: '🇰🇷', name: 'South Korea', digits: 10 },
+  { code: '+34', country: 'ES', flag: '🇪🇸', name: 'Spain', digits: 9 },
+  { code: '+94', country: 'LK', flag: '🇱🇰', name: 'Sri Lanka', digits: 9 },
+  { code: '+249', country: 'SD', flag: '🇸🇩', name: 'Sudan', digits: 9 },
+  { code: '+46', country: 'SE', flag: '🇸🇪', name: 'Sweden', digits: 9 },
+  { code: '+41', country: 'CH', flag: '🇨🇭', name: 'Switzerland', digits: 9 },
+  { code: '+963', country: 'SY', flag: '🇸🇾', name: 'Syria', digits: 9 },
+  { code: '+886', country: 'TW', flag: '🇹🇼', name: 'Taiwan', digits: 9 },
+  { code: '+992', country: 'TJ', flag: '🇹🇯', name: 'Tajikistan', digits: 9 },
+  { code: '+255', country: 'TZ', flag: '🇹🇿', name: 'Tanzania', digits: 9 },
+  { code: '+66', country: 'TH', flag: '🇹🇭', name: 'Thailand', digits: 9 },
+  { code: '+670', country: 'TL', flag: '🇹🇱', name: 'Timor-Leste', digits: 7 },
+  { code: '+216', country: 'TN', flag: '🇹🇳', name: 'Tunisia', digits: 8 },
+  { code: '+993', country: 'TM', flag: '🇹🇲', name: 'Turkmenistan', digits: 8 },
+  { code: '+971', country: 'AE', flag: '🇦🇪', name: 'UAE', digits: 9 },
+  { code: '+1', country: 'US', flag: '🇺🇸', name: 'USA', digits: 10 },
+  { code: '+256', country: 'UG', flag: '🇺🇬', name: 'Uganda', digits: 9 },
+  { code: '+380', country: 'UA', flag: '🇺🇦', name: 'Ukraine', digits: 9 },
+  { code: '+44', country: 'GB', flag: '🇬🇧', name: 'United Kingdom', digits: 10 },
+  { code: '+598', country: 'UY', flag: '🇺🇾', name: 'Uruguay', digits: 9 },
+  { code: '+998', country: 'UZ', flag: '🇺🇿', name: 'Uzbekistan', digits: 9 },
+  { code: '+58', country: 'VE', flag: '🇻🇪', name: 'Venezuela', digits: 10 },
+  { code: '+84', country: 'VN', flag: '🇻🇳', name: 'Vietnam', digits: 10 },
+  { code: '+967', country: 'YE', flag: '🇾🇪', name: 'Yemen', digits: 9 },
+  { code: '+260', country: 'ZM', flag: '🇿🇲', name: 'Zambia', digits: 9 },
+  { code: '+263', country: 'ZW', flag: '🇿🇼', name: 'Zimbabwe', digits: 9 },
+]
+
+// Phone input with country code selector + search
+function PhoneInput({ countryCode, onCountryChange, phone, onPhoneChange, error }) {
+  const [open, setOpen]     = React.useState(false)
+  const [search, setSearch] = React.useState('')
+  const selected = COUNTRY_CODES.find(c => c.code === countryCode && c.country === (COUNTRY_CODES.find(x => x.code === countryCode)?.country)) || COUNTRY_CODES[0]
+
+  const filtered = search.trim()
+    ? COUNTRY_CODES.filter(c =>
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.code.includes(search) ||
+        c.country.toLowerCase().includes(search.toLowerCase())
+      )
+    : COUNTRY_CODES
+
+  function selectCountry(c) {
+    onCountryChange(c.code)
+    setOpen(false)
+    setSearch('')
+    onPhoneChange('')
+  }
+
+  return (
+    <div className="phone-wrap">
+      <div className="phone-input-row">
+        {/* Country code selector */}
+        <div className="cc-selector" onClick={() => setOpen(!open)}>
+          <span className="cc-flag">{selected.flag}</span>
+          <span className="cc-code">{selected.code}</span>
+          <span className="cc-arrow">{open ? '▲' : '▼'}</span>
+        </div>
+        {/* Phone number input */}
+        <input
+          className="phone-number-input"
+          type="tel"
+          placeholder={`${selected.digits} digit number`}
+          value={phone}
+          onChange={e => onPhoneChange(e.target.value.replace(/[^0-9]/g, ''))}
+          maxLength={selected.digits}
+        />
+        {/* Digit counter */}
+        <span className={`digit-counter ${phone.length === selected.digits ? 'valid' : phone.length > 0 ? 'counting' : ''}`}>
+          {phone.length}/{selected.digits}
+        </span>
+      </div>
+
+      {/* Dropdown with search */}
+      {open && (
+        <div className="cc-dropdown">
+          <div className="cc-search-wrap">
+            <input
+              className="cc-search"
+              placeholder="🔍 Search country or code..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              autoFocus
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+          <div className="cc-list">
+            {filtered.length === 0 ? (
+              <div className="cc-no-result">No country found</div>
+            ) : filtered.map((c, i) => (
+              <div key={i} className={`cc-option ${c.code === countryCode ? 'cc-selected' : ''}`}
+                onClick={() => selectCountry(c)}>
+                <span className="cc-flag">{c.flag}</span>
+                <span className="cc-opt-name">{c.name}</span>
+                <span className="cc-opt-code">{c.code}</span>
+                <span className="cc-opt-digits">{c.digits} digits</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Error message */}
+      {error && <div className="phone-error">{error}</div>}
+    </div>
+  )
+}
+
+// ── Spinner ───────────────────────────────────────────────────────────────────
+function Spinner({ size = 18, color = 'var(--accent)' }) {
+  return <span style={{
+    display:'inline-block', width:size, height:size,
+    border:`2.5px solid rgba(0,0,0,0.1)`, borderTopColor:color,
+    borderRadius:'50%', animation:'spin .7s linear infinite', flexShrink:0,
+  }}/>
+}
+
+// ── QR Code SVG Generator ─────────────────────────────────────────────────────
+function QRCode({ value, size = 180 }) {
+  if (!value) return null
+  // Generate a deterministic grid from the address
+  const grid = Array.from({ length: 21 }, (_, row) =>
+    Array.from({ length: 21 }, (_, col) => {
+      const idx = row * 21 + col
+      const ch  = value.charCodeAt(idx % value.length)
+      // Always fill corners (finder patterns)
+      if ((row < 3 && col < 3) || (row < 3 && col > 17) || (row > 17 && col < 3)) return true
+      return (ch + row + col) % 3 === 0
+    })
+  )
+  const cell = size / 21
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ borderRadius: 8, background: '#fff' }}>
+      {grid.map((row, r) =>
+        row.map((filled, c) =>
+          filled ? (
+            <rect key={`${r}-${c}`} x={c * cell + 1} y={r * cell + 1}
+              width={cell - 1} height={cell - 1}
+              fill="#1a1410" rx={1}
+            />
+          ) : null
+        )
+      )}
+      {/* Center logo */}
+      <rect x={size/2 - 16} y={size/2 - 16} width={32} height={32} rx={6} fill="#fff"/>
+      <text x={size/2} y={size/2 + 8} textAnchor="middle" fontSize={20}>💫</text>
+    </svg>
+  )
+}
+
+// ── Status Banner ─────────────────────────────────────────────────────────────
+function Banner({ status, hash, msg, onDismiss }) {
+  if (!status) return null
+  const MAP = {
+    pending:     { bg:'#fff3e0', border:'#ff9800', icon:<Spinner size={15} color="#ff9800"/>, text:'Processing transfer…' },
+    confirming:  { bg:'#fffde7', border:'#ffc107', icon:<Spinner size={15} color="#ffc107"/>, text:'Confirming on Stellar…' },
+    success:     { bg:'#e8f5e9', border:'#4caf50', icon:'✓', text:'Transfer successful!' },
+    error:       { bg:'#ffebee', border:'#f44336', icon:'✕', text:msg||'Transfer failed.' },
+    no_wallet:   { bg:'#fff8e1', border:'#ff9800', icon:'⚠', text:'Connect your wallet first.' },
+    insufficient:{ bg:'#ffebee', border:'#f44336', icon:'⚠', text:'Insufficient XLM balance.' },
+    rejected:    { bg:'#ffebee', border:'#f44336', icon:'✕', text:'Transaction rejected by user.' },
+    invalid_addr:{ bg:'#ffebee', border:'#f44336', icon:'⚠', text:'Invalid receiver address.' },
+  }
+  const c = MAP[status] || MAP.error
+  const canDismiss = !['pending','confirming'].includes(status)
+  return (
+    <div className="banner pop-in" style={{ background:c.bg, borderColor:c.border }}>
+      <span style={{ color:c.border, fontSize:'1rem' }}>{c.icon}</span>
+      <div style={{ flex:1 }}>
+        <div style={{ color:c.border, fontWeight:700, fontSize:'0.88rem' }}>{c.text}</div>
+        {status==='success' && hash && (
+          <a className="banner-link" href={`https://stellar.expert/explorer/testnet/tx/${hash}`} target="_blank" rel="noreferrer">
+            View on Stellar Explorer ↗
+          </a>
+        )}
+      </div>
+      {canDismiss && <button className="icon-btn" onClick={onDismiss}>✕</button>}
+    </div>
+  )
+}
+
+
+// ── PAN Card Validator ────────────────────────────────────────────────────────
+const PAN_HOLDER_TYPES = {
+  P:'Individual', C:'Company', H:'HUF', F:'Firm',
+  T:'Trust', A:'AOP', B:'BOI', G:'Government', J:'Juridical Person', L:'Local Authority'
+}
+
+function validatePAN(pan) {
+  const p = pan.toUpperCase().replace(/\s/g, '')
+  const errors = []
+
+  if (p.length === 0) return { valid:false, errors:[], info:null }
+
+  // Check 1-3: Must be alphabets
+  if (p.length >= 1 && !/^[A-Z]$/.test(p[0])) errors.push('Position 1 must be a letter (A-Z)')
+  if (p.length >= 2 && !/^[A-Z]$/.test(p[1])) errors.push('Position 2 must be a letter (A-Z)')
+  if (p.length >= 3 && !/^[A-Z]$/.test(p[2])) errors.push('Position 3 must be a letter (A-Z)')
+
+  // Check 4: Holder type
+  const holderTypes = Object.keys(PAN_HOLDER_TYPES)
+  if (p.length >= 4) {
+    if (!holderTypes.includes(p[3])) {
+      errors.push(`Position 4 must be holder type: ${holderTypes.join(', ')}`)
+    }
+  }
+
+  // Check 5: First letter of name (must be alphabet)
+  if (p.length >= 5 && !/^[A-Z]$/.test(p[4])) errors.push('Position 5 must be first letter of your surname')
+
+  // Check 6-9: Sequential numbers 0001-9999
+  if (p.length >= 9) {
+    const numPart = p.slice(5, 9)
+    if (!/^[0-9]{4}$/.test(numPart)) errors.push('Positions 6-9 must be 4 digits (0001-9999)')
+    else if (parseInt(numPart) === 0) errors.push('Positions 6-9 cannot be 0000')
+  }
+
+  // Check 10: Must be alphabet
+  if (p.length >= 10 && !/^[A-Z]$/.test(p[9])) errors.push('Position 10 must be a letter (check digit)')
+
+  const holderType = p.length >= 4 && holderTypes.includes(p[3]) ? PAN_HOLDER_TYPES[p[3]] : null
+  const isComplete = p.length === 10
+  const isValid    = isComplete && errors.length === 0
+
+  return { valid:isValid, errors, holderType, isComplete }
+}
+
+function PANInput({ value, onChange, fullName }) {
+  const pan = value.toUpperCase().replace(/\s/g, '')
+
+  // Get first letters of first name and last name from fullName
+  const nameParts     = (fullName || '').trim().toUpperCase().split(/\s+/).filter(Boolean)
+  const validPos5     = nameParts.map(p => p[0]).filter(Boolean) // first letters of each word
+  const pos5Char      = pan.length >= 5 ? pan[4] : null
+  const pos5Valid     = pos5Char ? validPos5.includes(pos5Char) : true
+
+
+  // Extend validatePAN to also check pos 5 against name
+  const result        = validatePAN(pan)
+  const nameError     = pan.length >= 5 && !pos5Valid
+    ? `Position 5 must be first letter of your name or surname. Expected: ${validPos5.join(' or ')}, Got: ${pos5Char}`
+    : null
+  const finalValid    = result.valid && !nameError
+  const finalError    = nameError || (result.errors[0] || null)
+
+  return (
+    <div>
+      {/* Input only — no format guide */}
+      <div style={{ position:'relative' }}>
+        <input
+          className="auth-input pan-input"
+          placeholder="e.g. RBCPB1234Z"
+          value={value}
+          maxLength={10}
+          onChange={e => onChange(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0,10))}
+          style={{ fontFamily:'var(--mono)', letterSpacing:'4px', fontSize:'1.1rem', fontWeight:700 }}
+        />
+        <span
+          className={`digit-counter ${pan.length === 10 ? (finalValid ? 'valid' : 'invalid-count') : pan.length > 0 ? 'counting' : ''}`}
+          style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)' }}>
+          {pan.length}/10
+        </span>
+      </div>
+
+      {/* Show error for pos 5 mismatch — no hint, just error if wrong */}
+      {pan.length >= 5 && nameError && (
+        <div className="phone-error">
+          ⚠ Position 5 must match the first letter of your name or surname.
+        </div>
+      )}
+
+      {/* Final result when all 10 chars entered */}
+      {pan.length === 10 && (
+        <div className={`pan-result ${finalValid ? 'pan-valid' : 'pan-invalid'}`}>
+          {finalValid
+            ? `✅ Valid PAN — Holder: ${result.holderType}`
+            : `❌ ${finalError}`
+          }
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── SIGNUP PAGE ───────────────────────────────────────────────────────────────
+function SignupPage({ onSignup, onGoLogin }) {
+  const [step, setStep]         = useState(1) // 1=basic, 2=kyc, 3=wallet, 4=otp
+  const [form, setForm]         = useState({ name:'', phone:'', country:'IN', idType:'aadhaar', idNumber:'', walletAddress:'' })
+  const [countryCode, setCountryCode] = useState('+91')
+  const [phoneError, setPhoneError]   = useState('')
+  const [otp, setOtp]           = useState('')
+  const [generatedOtp, setGeneratedOtp] = useState('')
+  const [error, setError]       = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [connecting, setConnecting] = useState(false)
+
+  function update(k, v) { setForm(p => ({ ...p, [k]: v })); setError('') }
+
+  function validateStep1() {
+    if (!form.name.trim())  { setError('Full name is required.'); return false }
+    if (!form.phone.trim()) { setPhoneError('Phone number is required.'); return false }
+    const required = COUNTRY_CODES.find(c => c.code === countryCode)?.digits || 10
+    const countryName = COUNTRY_CODES.find(c => c.code === countryCode)?.name || 'this country'
+    if (form.phone.length < required) {
+      setPhoneError(`Phone number must be exactly ${required} digits for ${countryName}.`)
+      return false
+    }
+    if (form.phone.length > required) {
+      setPhoneError(`Too many digits. ${countryName} numbers must be exactly ${required} digits.`)
+      return false
+    }
+    const fullPhone = countryCode + form.phone.trim()
+    // Check both with and without country code for backward compatibility
+    if (getUserByPhone(fullPhone) || getUserByPhone(form.phone.trim())) {
+      setPhoneError('This number is already registered. Please login instead.')
+      return false
+    }
+    setPhoneError('')
+    return true
+  }
+  function validateStep2() {
+    if (!form.idNumber.trim()) { setError('ID number is required.'); return false }
+    const idType  = ID_TYPES.find(t => t.code === form.idType)
+    const cleaned = form.idNumber.replace(/\s/g, '')
+    const required = idType?.digits || 6
+    // Special PAN validation
+    if (form.idType === 'pan') {
+      const panResult = validatePAN(cleaned)
+      if (!panResult.valid) {
+        setError('Invalid PAN number. ' + (panResult.errors[0] || 'Please check the format.'))
+        return false
+      }
+      // Check position 5 matches name/surname
+      const nameParts  = form.name.trim().toUpperCase().split(/\s+/).filter(Boolean)
+      const validPos5  = nameParts.map(p => p[0]).filter(Boolean)
+      const pos5Char   = cleaned[4]
+      if (validPos5.length > 0 && !validPos5.includes(pos5Char)) {
+        setError(`Invalid PAN: Position 5 must be the first letter of your name or surname.`)
+        return false
+      }
+      return true
+    }
+    if (cleaned.length < required) {
+      setError(`${idType?.name} must be exactly ${required} digits/characters. You entered ${cleaned.length}.`)
+      return false
+    }
+    if (cleaned.length > required) {
+      setError(`${idType?.name} must be exactly ${required} digits/characters. You entered ${cleaned.length} — too many.`)
+      return false
+    }
+    return true
+  }
+
+  async function connectWallet() {
+    setError(''); setConnecting(true)
+    try {
+      const inst = await isFreighterInstalled()
+      if (!inst) throw new Error('Freighter not found. Install from freighter.app')
+      const addr = await connectFreighter()
+      update('walletAddress', addr)
+    } catch (e) {
+      setError(e.message)
+    } finally { setConnecting(false) }
+  }
+
+  function sendOtp() {
+    const code = generateOTP()
+    setGeneratedOtp(code)
+    // In production this would be SMS. For testnet we show it directly.
+    alert(`[TESTNET] Your OTP is: ${code}\n\nIn production this would be sent via SMS.`)
+    setStep(4)
+  }
+
+  function verifyAndSignup() {
+    if (otp !== generatedOtp) { setError('Incorrect OTP. Try again.'); return }
+    const user = {
+      name:          form.name.trim(),
+      phone:         countryCode + form.phone.trim(),
+      country:       form.country,
+      idType:        form.idType,
+      idNumber:      form.idNumber.trim(),
+      walletAddress: form.walletAddress,
+      kycVerified:   true,
+      createdAt:     new Date().toISOString(),
+    }
+    saveUser(user)
+    saveSession(user)
+    onSignup(user)
+  }
+
+
+  const ID_TYPES = [
+    { code:'aadhaar',   name:'Aadhaar Card',       digits:12, placeholder:'XXXX XXXX XXXX',     hint:'12 digit Aadhaar number' },
+    { code:'passport',  name:'Passport',            digits:8,  placeholder:'A1234567',            hint:'8 character passport number' },
+    { code:'national',  name:'National ID',         digits:10, placeholder:'XXXXXXXXXX',          hint:'10 digit national ID' },
+    { code:'driving',   name:'Driving License',     digits:15, placeholder:'XX-XXXXXXXXXXXXX',   hint:'Up to 15 character license number' },
+    { code:'pan',       name:'PAN Card',            digits:10, placeholder:'ABCDE1234F',          hint:'10 character PAN number' },
+    { code:'voter',     name:'Voter ID',            digits:10, placeholder:'XXXXXXXXXX',          hint:'10 character voter ID' },
+  ]
+  const currentIdType = ID_TYPES.find(t => t.code === form.idType) || ID_TYPES[0]
+
+  return (
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-logo">💫 RemitChain</div>
+        <div className="auth-title">Create Account</div>
+        <div className="auth-subtitle">Join millions sending money home instantly</div>
+
+        {/* Progress */}
+        <div className="progress-steps">
+          {['Basic Info', 'KYC', 'Wallet', 'Verify'].map((s, i) => (
+            <div key={i} className={`prog-step ${step > i+1 ? 'done' : step === i+1 ? 'active' : ''}`}>
+              <div className="prog-circle">{step > i+1 ? '✓' : i+1}</div>
+              <div className="prog-label">{s}</div>
+            </div>
+          ))}
+        </div>
+
+        {error && <div className="auth-error">{error}</div>}
+
+        {/* Step 1: Basic Info */}
+        {step === 1 && (
+          <div className="auth-form">
+            <div className="field-group">
+              <label>Full Name *</label>
+              <input className="auth-input" placeholder="e.g. Vishvajit Bhagave"
+                value={form.name} onChange={e => update('name', e.target.value)} />
+            </div>
+            <div className="field-group">
+              <label>Phone Number *</label>
+              <PhoneInput
+                countryCode={countryCode}
+                onCountryChange={c => {
+                  setCountryCode(c)
+                  setPhoneError('')
+                  // Auto-fill country field from phone code selection
+                  const found = COUNTRY_CODES.find(x => x.code === c)
+                  if (found) update('country', found.country)
+                }}
+                phone={form.phone}
+                onPhoneChange={v => {
+                  update('phone', v)
+                  setPhoneError('')
+                  // Real-time duplicate check when digits are complete
+                  const required = COUNTRY_CODES.find(c => c.code === countryCode)?.digits || 10
+                  if (v.length === required) {
+                    const full1 = countryCode + v
+                    const full2 = v
+                    if (getUserByPhone(full1) || getUserByPhone(full2)) {
+                      setPhoneError('This number is already registered. Please login instead.')
+                    }
+                  }
+                }}
+                error={phoneError}
+              />
+            </div>
+            <div className="field-group">
+              <label>Country *</label>
+              <div className="country-select-wrap">
+                <select
+                  className="auth-input"
+                  value={form.country}
+                  onChange={e => {
+                    update('country', e.target.value)
+                    // Also sync country code when country is manually changed
+                    const found = COUNTRY_CODES.find(x => x.country === e.target.value)
+                    if (found) { setCountryCode(found.code); setPhoneError('') }
+                  }}
+                >
+                  {/* Sort alphabetically and deduplicate by country code */}
+                  {Array.from(new Map(
+                    COUNTRY_CODES
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map(c => [c.country, c])
+                  ).values()).map(c => (
+                    <option key={c.country} value={c.country}>
+                      {c.flag} {c.name}
+                    </option>
+                  ))}
+                </select>
+                {form.country && (
+                  <span className="country-auto-tag">
+                    {COUNTRY_CODES.find(c => c.country === form.country)?.code}
+                  </span>
+                )}
+              </div>
+              {form.country && (
+                <div className="country-hint">
+                  ✓ Auto-filled from phone number selection
+                </div>
+              )}
+            </div>
+            <button className="auth-btn" onClick={() => { if (validateStep1()) setStep(2) }}>
+              Continue →
+            </button>
+          </div>
+        )}
+
+        {/* Step 2: KYC */}
+        {step === 2 && (
+          <div className="auth-form">
+            <div className="kyc-banner">
+              🔐 KYC Verification Required<br/>
+              <span>As per RBI & FEMA regulations, identity verification is mandatory for international transfers.</span>
+            </div>
+            <div className="field-group">
+              <label>ID Type *</label>
+              <select className="auth-input" value={form.idType} onChange={e => update('idType', e.target.value)}>
+                {ID_TYPES.map(t => <option key={t.code} value={t.code}>{t.name}</option>)}
+              </select>
+            </div>
+            <div className="field-group">
+              <label>ID Number * <span className="id-hint">({currentIdType.hint})</span></label>
+
+              {/* PAN Card uses special validator */}
+              {form.idType === 'pan' ? (
+                <PANInput
+                  value={form.idNumber}
+                  onChange={v => update('idNumber', v)}
+                  fullName={form.name}
+                />
+              ) : (
+                <div>
+                  <div style={{ position:'relative' }}>
+                    <input
+                      className="auth-input"
+                      placeholder={currentIdType.placeholder}
+                      value={form.idNumber}
+                      maxLength={currentIdType.digits + 4}
+                      onChange={e => {
+                        let val = e.target.value.toUpperCase()
+                        if (form.idType === 'aadhaar') {
+                          val = val.replace(/\D/g, '').slice(0, 12)
+                          val = val.replace(/(\d{4})(\d{4})(\d{0,4})/, (_, a, b, c) => c ? `${a} ${b} ${c}` : b ? `${a} ${b}` : a)
+                        }
+                        update('idNumber', val)
+                      }}
+                    />
+                    <span className={`digit-counter ${form.idNumber.replace(/\s/g,'').length === currentIdType.digits ? 'valid' : form.idNumber.length > 0 ? 'counting' : ''}`}
+                      style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)' }}>
+                      {form.idNumber.replace(/\s/g,'').length}/{currentIdType.digits}
+                    </span>
+                  </div>
+                  {form.idType === 'aadhaar' && form.idNumber.replace(/\s/g,'').length > 0 && form.idNumber.replace(/\s/g,'').length < 12 && (
+                    <div className="phone-error">Aadhaar number must be exactly 12 digits.</div>
+                  )}
+                  {form.idNumber.replace(/\s/g,'').length === currentIdType.digits && (
+                    <div className="id-valid">✓ Valid {currentIdType.name} format</div>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="kyc-note">
+              ✅ Your data is encrypted and stored securely<br/>
+              ✅ Compliant with Stellar SEP-12 KYC protocol<br/>
+              ✅ Never shared with third parties
+            </div>
+            <div className="btn-row">
+              <button className="auth-btn-outline" onClick={() => setStep(1)}>← Back</button>
+              <button className="auth-btn" onClick={() => { if (validateStep2()) setStep(3) }}>Continue →</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Wallet */}
+        {step === 3 && (
+          <div className="auth-form">
+            <div className="kyc-banner" style={{ background:'#e8f4fd', borderColor:'#2196f3', color:'#1565c0' }}>
+              🔗 Connect Stellar Wallet<br/>
+              <span>Your Stellar wallet is used to send and receive transfers on-chain.</span>
+            </div>
+            {form.walletAddress ? (
+              <div className="wallet-connected-box">
+                <div className="wcb-icon">✅</div>
+                <div>
+                  <div className="wcb-title">Wallet Connected</div>
+                  <div className="wcb-addr">{shortAddress(form.walletAddress)}</div>
+                </div>
+              </div>
+            ) : (
+              <button className="auth-btn wallet-connect-btn" onClick={connectWallet} disabled={connecting}>
+                {connecting ? <><Spinner size={16} color="#fff"/> Connecting…</> : '🚀 Connect Freighter Wallet'}
+              </button>
+            )}
+            <div className="kyc-note">
+              Don't have Freighter? <a href="https://freighter.app" target="_blank" rel="noreferrer" style={{ color:'var(--accent)' }}>Install here ↗</a><br/>
+              Need test XLM? <a href="https://laboratory.stellar.org/#account-creator?network=test" target="_blank" rel="noreferrer" style={{ color:'var(--accent)' }}>Use Friendbot ↗</a>
+            </div>
+            <div className="btn-row">
+              <button className="auth-btn-outline" onClick={() => setStep(2)}>← Back</button>
+              <button className="auth-btn" onClick={() => { if (!form.walletAddress) { setError('Please connect wallet first.'); return } sendOtp() }} disabled={!form.walletAddress}>
+                Send OTP →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: OTP */}
+        {step === 4 && (
+          <div className="auth-form">
+            <div className="otp-info">
+              📱 OTP sent to <strong>{countryCode}{form.phone}</strong><br/>
+              <span style={{ fontSize:'0.78rem', color:'var(--ink3)' }}>(Check the popup for testnet OTP)</span>
+            </div>
+            <div className="field-group">
+              <label>Enter 6-digit OTP *</label>
+              <input className="auth-input otp-input" placeholder="000000" maxLength={6}
+                value={otp} onChange={e => setOtp(e.target.value)} />
+            </div>
+            <button className="auth-btn" onClick={verifyAndSignup} disabled={otp.length !== 6}>
+              {otp.length === 6 ? 'Verify & Create Account ✓' : 'Enter 6-digit OTP'}
+            </button>
+            <div style={{ textAlign:'center', marginTop:10 }}>
+              <button className="link-btn" onClick={sendOtp}>Resend OTP</button>
+            </div>
+          </div>
+        )}
+
+        <div className="auth-footer">
+          Already have an account? <button className="link-btn" onClick={onGoLogin}>Login here</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── LOGIN PAGE ────────────────────────────────────────────────────────────────
+function LoginPage({ onLogin, onGoSignup }) {
+  const [phone, setPhone]       = useState('')
+  const [countryCode, setCC]    = useState('+91')
+  const [phoneError, setPhoneErr] = useState('')
+  const [otp, setOtp]           = useState('')
+  const [genOtp, setGenOtp]     = useState('')
+  const [step, setStep]         = useState(1) // 1=phone, 2=otp
+  const [error, setError]       = useState('')
+
+  function sendOtp() {
+    setError(''); setPhoneErr('')
+    if (!phone.trim()) { setPhoneErr('Please enter your phone number.'); return }
+    const required = COUNTRY_CODES.find(c => c.code === countryCode)?.digits || 10
+    if (phone.length < required) {
+      setPhoneErr(`Phone number must be exactly ${required} digits.`)
+      return
+    }
+    if (phone.length > required) {
+      setPhoneErr(`Too many digits. Must be ${required} digits.`)
+      return
+    }
+    const fullPhone = countryCode + phone
+    // Try with country code first, then without (backward compatibility)
+    let user = getUserByPhone(fullPhone)
+    if (!user) user = getUserByPhone(phone)
+    if (!user) { setError('Phone number not registered. Please sign up.'); return }
+    const code = generateOTP()
+    setGenOtp(code)
+    alert(`[TESTNET] Your OTP is: ${code}\n\nIn production this would be sent via SMS.`)
+    setStep(2)
+  }
+
+  function verify() {
+    if (otp !== genOtp) { setError('Incorrect OTP. Try again.'); return }
+    let user = getUserByPhone(countryCode + phone.trim())
+    if (!user) user = getUserByPhone(phone.trim())
+    saveSession(user)
+    onLogin(user)
+  }
+
+  return (
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-logo">💫 RemitChain</div>
+        <div className="auth-title">Welcome Back</div>
+        <div className="auth-subtitle">Login to send money home instantly</div>
+
+        {error && <div className="auth-error">{error}</div>}
+
+        {step === 1 && (
+          <div className="auth-form">
+            <div className="field-group">
+              <label>Phone Number</label>
+              <PhoneInput
+                countryCode={countryCode}
+                onCountryChange={c => { setCC(c); setPhoneErr(''); setPhone('') }}
+                phone={phone}
+                onPhoneChange={v => { setPhone(v.replace(/[^0-9]/g, '')); setPhoneErr('') }}
+                error={phoneError}
+              />
+            </div>
+            <button className="auth-btn" onClick={sendOtp} disabled={!phone.trim()}>
+              Send OTP →
+            </button>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="auth-form">
+            <div className="otp-info">
+              📱 OTP sent to <strong>{countryCode}{phone}</strong>
+            </div>
+            <div className="field-group">
+              <label>Enter 6-digit OTP</label>
+              <input className="auth-input otp-input" placeholder="000000" maxLength={6}
+                value={otp} onChange={e => { setOtp(e.target.value); setError('') }} />
+            </div>
+            <button className="auth-btn" onClick={verify} disabled={otp.length !== 6}>
+              Login ✓
+            </button>
+            <div style={{ textAlign:'center', marginTop:10 }}>
+              <button className="link-btn" onClick={() => setStep(1)}>← Change number</button>
+            </div>
+          </div>
+        )}
+
+        <div className="auth-footer">
+          New to RemitChain?
+        </div>
+        <button className="signup-big-btn" onClick={onGoSignup}>
+          ✏️ Create New Account
+        </button>
+        <button className="clear-data-btn" onClick={() => {
+          if (window.confirm('This will delete all saved accounts and data. Continue?')) {
+            localStorage.clear()
+            window.location.reload()
+          }
+        }}>
+          🗑️ Clear all data (for testing)
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── MAIN APP (after login) ────────────────────────────────────────────────────
+function MainApp({ user, onLogout }) {
+  const [page, setPage]           = useState('send')
+  const [balance, setBalance]     = useState('—')
+  const [balLoading, setBalLoading] = useState(false)
+  const [txns, setTxns]           = useState([])
+  const [txnsLoading, setTxnsLoading] = useState(false)
+
+  // Send form
+  const [receiver, setReceiver]   = useState('')
+  const [amount, setAmount]       = useState('')
+  const [fromCur, setFromCur]     = useState('AED')
+  const [toCur, setToCur]         = useState('INR')
+  const [memo, setMemo]           = useState('')
+  const [sending, setSending]     = useState(false)
+  const [txStatus, setTxStatus]   = useState(null)
+  const [txHash, setTxHash]       = useState(null)
+  const [txMsg, setTxMsg]         = useState('')
+
+  // QR
+  const [showQR, setShowQR]       = useState(false)
+  const [copied, setCopied]       = useState(false)
+
+  const addr = user.walletAddress
+
+  const loadBalance = useCallback(async () => {
+    if (!addr) return
+    setBalLoading(true)
+    try { setBalance(await fetchBalance(addr)) }
+    catch {} finally { setBalLoading(false) }
+  }, [addr])
+
+  const loadTxns = useCallback(async () => {
+    if (!addr) return
+    setTxnsLoading(true)
+    try { setTxns(await fetchTransactions(addr, 10)) }
+    catch {} finally { setTxnsLoading(false) }
+  }, [addr])
+
+  useEffect(() => { loadBalance() }, [loadBalance])
+  useEffect(() => { const t = setInterval(loadBalance, 15000); return () => clearInterval(t) }, [loadBalance])
+
+  async function handleSend() {
+    if (!addr)                         { setTxStatus('no_wallet'); return }
+    if (!isValidStellarAddress(receiver)) { setTxStatus('invalid_addr'); return }
+    if (!amount || parseFloat(amount) <= 0) return
+    const xlm = convertToXLM(amount, fromCur)
+    if (parseFloat(balance) < parseFloat(xlm) + 1) { setTxStatus('insufficient'); return }
+
+    setSending(true); setTxStatus('pending'); setTxHash(null); setTxMsg('')
+    try {
+      setTxStatus('confirming')
+      const hash = await sendRemittance(addr, receiver, xlm, memo || `RC:${fromCur}→${toCur}`)
+      setTxHash(hash); setTxStatus('success')
+      setAmount(''); setReceiver(''); setMemo('')
+      await loadBalance()
+    } catch (e) {
+      const m = (e.message || '').toLowerCase()
+      setTxMsg(e.message || 'Transfer failed.')
+      if (m.includes('rejected') || m.includes('denied') || m.includes('cancel')) setTxStatus('rejected')
+      else setTxStatus('error')
+    } finally { setSending(false) }
+  }
+
+  function copyAddress() {
+    navigator.clipboard.writeText(addr)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function handleFund() {
+    try {
+      await fundTestnetAccount(addr)
+      setTimeout(loadBalance, 3000)
+      alert('Account funded! Balance will update in a few seconds.')
+    } catch { alert('Funding failed. Try again.') }
+  }
+
+  const xlmAmount   = convertToXLM(amount || 0, fromCur)
+  const localAmount = convertFromXLM(xlmAmount, toCur)
+
+  return (
+    <div className="app">
+      <div className="app-bg" aria-hidden />
+
+      {/* Header */}
+      <header className="header">
+        <div className="header-left">
+          <div className="logo"><span className="logo-icon">💫</span><span className="logo-text">RemitChain</span></div>
+          <span className="logo-tag">Testnet</span>
+        </div>
+        <div className="header-right">
+          <div className="user-pill">
+            <span className="user-avatar">{user.name[0].toUpperCase()}</span>
+            <div className="user-info">
+              <span className="user-name">{user.name}</span>
+              <span className="user-kyc">✅ KYC Verified</span>
+            </div>
+            <div className="user-bal">
+              {balLoading ? <Spinner size={12}/> : `${balance} XLM`}
+            </div>
+            <button className="pill-btn" onClick={handleFund} title="Fund from Friendbot">💧</button>
+            <button className="pill-btn danger" onClick={onLogout} title="Logout">⏻</button>
+          </div>
+        </div>
+      </header>
+
+      {/* Nav */}
+      <nav className="nav">
+        {[
+          { id:'send',    icon:'💸', label:'Send' },
+          { id:'receive', icon:'📥', label:'Receive' },
+          { id:'history', icon:'📋', label:'History' },
+          { id:'profile', icon:'👤', label:'Profile' },
+        ].map(n => (
+          <button key={n.id} className={`nav-btn ${page===n.id?'nav-active':''}`}
+            onClick={() => { setPage(n.id); if (n.id==='history') loadTxns() }}>
+            <span className="nav-icon">{n.icon}</span>
+            <span className="nav-label">{n.label}</span>
+          </button>
+        ))}
+      </nav>
+
+      <main className="main">
+        <div className="content">
+
+          {/* ── SEND ── */}
+          {page === 'send' && (
+            <div className="page fade-up">
+              <div className="page-title"><h2>💸 Send Money</h2><p>Instant cross-border transfer</p></div>
+              <div className="card">
+
+                <div className="field-group">
+                  <label className="field-label">Receiver Wallet Address</label>
+                  <div style={{ position:'relative' }}>
+                    <input className="field-input" placeholder="GXXXX... (Stellar address)"
+                      value={receiver} onChange={e => setReceiver(e.target.value)} />
+                    {receiver && (
+                      <span style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', fontWeight:700, color: isValidStellarAddress(receiver) ? 'var(--green)' : 'var(--red)' }}>
+                        {isValidStellarAddress(receiver) ? '✓' : '✕'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="converter">
+                  <div className="conv-row">
+                    <div className="conv-side">
+                      <div className="conv-label">You Send</div>
+                      <div className="conv-inputs">
+                        <input className="conv-amount" type="number" placeholder="0.00" min="0"
+                          value={amount} onChange={e => setAmount(e.target.value)} />
+                        <select className="conv-cur" value={fromCur} onChange={e => setFromCur(e.target.value)}>
+                          {Object.entries(CURRENCIES).map(([c, v]) => <option key={c} value={c}>{v.flag} {c}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="conv-mid">
+                      <div className="conv-arrow">⇄</div>
+                      <div className="conv-fee">Fee: ₹8</div>
+                    </div>
+                    <div className="conv-side">
+                      <div className="conv-label">They Receive</div>
+                      <div className="conv-inputs">
+                        <div className="conv-result">{parseFloat(localAmount).toLocaleString()}</div>
+                        <select className="conv-cur" value={toCur} onChange={e => setToCur(e.target.value)}>
+                          {Object.entries(CURRENCIES).map(([c, v]) => <option key={c} value={c}>{v.flag} {c}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="conv-info">≈ {xlmAmount} XLM on Stellar · 1 XLM ≈ $0.11</div>
+                </div>
+
+                <div className="field-group">
+                  <label className="field-label">Note (optional)</label>
+                  <input className="field-input" placeholder="e.g. Monthly allowance"
+                    value={memo} onChange={e => setMemo(e.target.value)} maxLength={28} />
+                </div>
+
+                <div className="summary">
+                  {[
+                    ['You send', `${amount||'0'} ${fromCur}`],
+                    ['On Stellar', `${xlmAmount} XLM`],
+                    ['Fee', '0.1 XLM (≈ ₹8)'],
+                    ['They receive', `${parseFloat(localAmount).toLocaleString()} ${toCur}`],
+                  ].map(([k, v], i) => (
+                    <div key={i} className={`summary-row ${i===3?'summary-total':''}`}>
+                      <span>{k}</span><span>{v}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button className="btn-primary full" onClick={handleSend}
+                  disabled={!receiver || !amount || sending || !isValidStellarAddress(receiver)}>
+                  {sending ? <><Spinner size={16} color="#fff"/> Sending…</> : `Send ${amount||'0'} ${fromCur} →`}
+                </button>
+
+                <Banner status={txStatus} hash={txHash} msg={txMsg} onDismiss={() => setTxStatus(null)} />
+              </div>
+            </div>
+          )}
+
+          {/* ── RECEIVE ── */}
+          {page === 'receive' && (
+            <div className="page fade-up">
+              <div className="page-title"><h2>📥 Receive Money</h2><p>Share your QR code or address</p></div>
+              <div className="card">
+                <div className="qr-section">
+                  <div className="qr-wrapper">
+                    <QRCode value={addr} size={200}/>
+                  </div>
+                  <div className="qr-name">{user.name}</div>
+                  <div className="qr-addr-full">{addr}</div>
+                  <div className="qr-btns">
+                    <button className="btn-primary" onClick={copyAddress}>
+                      {copied ? '✓ Copied!' : '📋 Copy Address'}
+                    </button>
+                    <button className="btn-outline" onClick={() => setShowQR(!showQR)}>
+                      {showQR ? 'Hide Details' : 'Show QR Info'}
+                    </button>
+                  </div>
+                  {showQR && (
+                    <div className="qr-info-box fade-in">
+                      <div className="qr-info-row"><span>Name</span><span>{user.name}</span></div>
+                      <div className="qr-info-row"><span>Network</span><span>Stellar Testnet</span></div>
+                      <div className="qr-info-row"><span>Address</span><span style={{ fontSize:'0.7rem', wordBreak:'break-all' }}>{addr}</span></div>
+                      <div className="qr-info-row"><span>KYC</span><span style={{ color:'var(--green)' }}>✅ Verified</span></div>
+                    </div>
+                  )}
+                </div>
+                <div className="receive-steps">
+                  <div className="rs-title">How to receive money:</div>
+                  {['Share your QR code screenshot with the sender','Sender scans QR or pastes your address','Money arrives in 5–10 seconds','Balance updates automatically'].map((s,i) => (
+                    <div key={i} className="rs-row"><span className="rs-num">{i+1}</span><span>{s}</span></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── HISTORY ── */}
+          {page === 'history' && (
+            <div className="page fade-up">
+              <div className="page-title"><h2>📋 Transaction History</h2><p>Your transfers on Stellar</p></div>
+              {txnsLoading ? (
+                <div className="card">
+                  {[0,1,2,3].map(i => <div key={i} className="tx-skeleton" style={{ animationDelay:`${i*0.1}s` }}/>)}
+                </div>
+              ) : txns.length === 0 ? (
+                <div className="empty-state">
+                  <div style={{ fontSize:'2.5rem' }}>📭</div>
+                  <p>No transactions yet</p>
+                  <button className="btn-outline" onClick={loadTxns}>Refresh</button>
+                </div>
+              ) : (
+                <div className="card">
+                  {txns.map((tx, i) => (
+                    <div key={i} className="tx-row">
+                      <span className="tx-emoji">💸</span>
+                      <div className="tx-info">
+                        <div className="tx-hash">TX: {tx.hash?.slice(0,14)}…</div>
+                        <div className="tx-date">{tx.date} · {tx.time}</div>
+                        {tx.memo && <div className="tx-memo">"{tx.memo}"</div>}
+                      </div>
+                      <a className="tx-view" href={`https://stellar.expert/explorer/testnet/tx/${tx.hash}`} target="_blank" rel="noreferrer">View ↗</a>
+                    </div>
+                  ))}
+                  <button className="btn-outline small" onClick={loadTxns} style={{ marginTop:12 }}>Refresh</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── PROFILE ── */}
+          {page === 'profile' && (
+            <div className="page fade-up">
+              <div className="page-title"><h2>👤 My Profile</h2><p>Your RemitChain account</p></div>
+              <div className="card">
+                <div className="profile-header">
+                  <div className="profile-avatar">{user.name[0].toUpperCase()}</div>
+                  <div>
+                    <div className="profile-name">{user.name}</div>
+                    <div className="profile-badge">✅ KYC Verified</div>
+                  </div>
+                </div>
+                <div className="profile-fields">
+                  {[
+                    ['📱 Phone', user.phone],
+                    ['🌍 Country', user.country],
+                    ['🪪 ID Type', user.idType],
+                    ['🔢 ID Number', `${'*'.repeat(user.idNumber.length - 4)}${user.idNumber.slice(-4)}`],
+                    ['💼 Wallet', shortAddress(user.walletAddress)],
+                    ['📅 Joined', new Date(user.createdAt).toLocaleDateString()],
+                  ].map(([k, v]) => (
+                    <div key={k} className="pf-row">
+                      <span className="pf-key">{k}</span>
+                      <span className="pf-val">{v}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="profile-wallet-full">
+                  <div className="pf-key">Full Wallet Address</div>
+                  <div className="pf-addr">{user.walletAddress}</div>
+                </div>
+                <button className="btn-outline danger-btn" onClick={onLogout}>Logout ⏻</button>
+              </div>
+            </div>
+          )}
+
+        </div>
+
+        {/* Sidebar */}
+        <div className="sidebar">
+          <div className="card fade-up">
+            <div className="card-label">💰 Balance</div>
+            <div className="balance-big">{balLoading ? <Spinner/> : balance}<span className="balance-unit">XLM</span></div>
+            <div className="balance-usd">≈ ${(parseFloat(balance||0) * 0.11).toFixed(2)} USD</div>
+            <button className="btn-outline small" onClick={handleFund} style={{ marginTop:10 }}>💧 Fund Testnet</button>
+          </div>
+          <div className="card fade-up">
+            <div className="card-label">📊 Exchange Rates</div>
+            {Object.entries(CURRENCIES).map(([c, v]) => (
+              <div key={c} className="rate-row">
+                <span>{v.flag} {c}</span>
+                <span className="rate-val">1 USD = {(1/v.rate).toFixed(2)} {c}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      <footer className="footer">RemitChain · Stellar Testnet · Instant · Borderless · Fair</footer>
+    </div>
+  )
+}
+
+// ── ROOT APP ──────────────────────────────────────────────────────────────────
+export default function App() {
+  const [authPage, setAuthPage] = useState('login') // login | signup
+  const [user, setUser]         = useState(null)
+
+  // Check existing session on load
+  useEffect(() => {
+    const session = getSession()
+    if (session) setUser(session)
+  }, [])
+
+  function handleLogout() {
+    clearSession()
+    setUser(null)
+    setAuthPage('login')
+  }
+
+  if (user) return <MainApp user={user} onLogout={handleLogout} />
+  if (authPage === 'signup') return <SignupPage onSignup={setUser} onGoLogin={() => setAuthPage('login')} />
+  return <LoginPage onLogin={setUser} onGoSignup={() => setAuthPage('signup')} />
+}
