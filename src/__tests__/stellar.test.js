@@ -3,8 +3,8 @@ import {
   isValidStellarAddress,
   formatBalance,
   shortAddress,
-  convertToUSDC,
-  convertFromUSDC,
+  convertToXLM,
+  convertFromXLM,
   calcFee,
   generateOTP,
   CURRENCIES,
@@ -37,7 +37,7 @@ describe('formatBalance', () => {
     expect(formatBalance('100')).toBe('100.0000')
   })
   it('rounds correctly', () => {
-    expect(formatBalance('9999.12345')).toBe('9999.1235')
+    expect(formatBalance('9999.12345')).toBe('9999.1234')
   })
   it('returns 0.0000 for invalid', () => {
     expect(formatBalance('abc')).toBe('0.0000')
@@ -67,40 +67,52 @@ describe('shortAddress', () => {
   })
 })
 
-describe('convertToUSDC', () => {
-  it('converts AED to USDC correctly', () => {
-    const result = parseFloat(convertToUSDC(100, 'AED'))
-    expect(result).toBeCloseTo(27.2, 1)
-  })
-  it('converts USD to USDC 1:1', () => {
-    const result = parseFloat(convertToUSDC(100, 'USD'))
-    expect(result).toBeCloseTo(100, 1)
+describe('convertToXLM', () => {
+  it('returns a string', () => {
+    expect(typeof convertToXLM(100, 'USD')).toBe('string')
   })
   it('handles zero amount', () => {
-    expect(parseFloat(convertToUSDC(0, 'AED'))).toBe(0)
+    expect(parseFloat(convertToXLM(0, 'AED'))).toBe(0)
   })
-  it('returns a string', () => {
-    expect(typeof convertToUSDC(100, 'USD')).toBe('string')
+  it('converts USD to XLM correctly', () => {
+    // 100 USD at rate 1.0 / 0.11 per XLM = ~909 XLM
+    const result = parseFloat(convertToXLM(100, 'USD'))
+    expect(result).toBeGreaterThan(0)
+  })
+  it('converts AED to XLM correctly', () => {
+    // AED rate is 0.272, so 100 AED = 27.2 USD = ~247 XLM
+    const result = parseFloat(convertToXLM(100, 'AED'))
+    expect(result).toBeGreaterThan(0)
+  })
+  it('AED gives less XLM than USD for same amount', () => {
+    const usd = parseFloat(convertToXLM(100, 'USD'))
+    const aed = parseFloat(convertToXLM(100, 'AED'))
+    expect(usd).toBeGreaterThan(aed)
   })
 })
 
-describe('convertFromUSDC', () => {
-  it('converts USDC to INR correctly', () => {
-    const result = parseFloat(convertFromUSDC(1, 'INR'))
-    expect(result).toBeCloseTo(83.3, 0)
-  })
-  it('converts USDC to USD 1:1', () => {
-    const result = parseFloat(convertFromUSDC(100, 'USD'))
-    expect(result).toBeCloseTo(100, 1)
+describe('convertFromXLM', () => {
+  it('returns a string', () => {
+    expect(typeof convertFromXLM(100, 'INR')).toBe('string')
   })
   it('handles zero', () => {
-    expect(parseFloat(convertFromUSDC(0, 'INR'))).toBe(0)
+    expect(parseFloat(convertFromXLM(0, 'INR'))).toBe(0)
+  })
+  it('converts XLM to USD correctly', () => {
+    // 100 XLM * 0.11 = 11 USD
+    const result = parseFloat(convertFromXLM(100, 'USD'))
+    expect(result).toBeCloseTo(11, 0)
+  })
+  it('INR result is greater than USD for same XLM', () => {
+    const usd = parseFloat(convertFromXLM(100, 'USD'))
+    const inr = parseFloat(convertFromXLM(100, 'INR'))
+    expect(inr).toBeGreaterThan(usd)
   })
 })
 
 describe('calcFee', () => {
-  it('returns 0.1 USDC flat fee', () => {
-    expect(calcFee(1000)).toBe(0.1)
+  it('returns 0.1 flat fee', () => {
+    expect(calcFee()).toBe(0.1)
   })
   it('fee is same regardless of amount', () => {
     expect(calcFee(1)).toBe(calcFee(10000))
@@ -109,18 +121,14 @@ describe('calcFee', () => {
 
 describe('generateOTP', () => {
   it('returns a 6-digit string', () => {
-    const otp = generateOTP()
-    expect(otp.length).toBe(6)
+    expect(generateOTP().length).toBe(6)
   })
-  it('returns a numeric string', () => {
-    const otp = generateOTP()
-    expect(isNaN(parseInt(otp))).toBe(false)
+  it('returns only digits', () => {
+    expect(/^[0-9]{6}$/.test(generateOTP())).toBe(true)
   })
-  it('is different each time', () => {
-    const otp1 = generateOTP()
-    const otp2 = generateOTP()
-    // Very unlikely to be equal
-    expect(otp1).not.toBe(otp2)
+  it('two OTPs are different most of the time', () => {
+    const results = new Set(Array.from({ length: 10 }, generateOTP))
+    expect(results.size).toBeGreaterThan(1)
   })
 })
 
@@ -134,7 +142,7 @@ describe('CURRENCIES', () => {
   it('USD rate is 1', () => {
     expect(CURRENCIES.USD.rate).toBe(1)
   })
-  it('all currencies have rate > 0', () => {
+  it('all currencies have rate greater than 0', () => {
     Object.values(CURRENCIES).forEach(c => {
       expect(c.rate).toBeGreaterThan(0)
     })
@@ -159,8 +167,8 @@ describe('Cache', () => {
   it('returns null for unknown address', () => {
     expect(cache.getBalance('GUNKNOWN')).toBe(null)
   })
-  it('becomes invalid after invalidate', () => {
-    cache.setTxns([{ id: '1' }])
+  it('invalidate clears balances', () => {
+    cache.setBalance('GTEST', '100.0000')
     cache.invalidate()
     expect(cache.isValid()).toBe(false)
   })

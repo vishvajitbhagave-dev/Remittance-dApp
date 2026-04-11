@@ -332,7 +332,7 @@ function PANInput({ value, onChange, fullName }) {
   // Extend validatePAN to also check pos 5 against name
   const result        = validatePAN(pan)
   const nameError     = pan.length >= 5 && !pos5Valid
-    ? `Position 5 must be first letter of your name or surname. Expected: ${validPos5.join(' or ')}, Got: ${pos5Char}`
+    ? `Position 5 must be the first letter of your name or surname.`
     : null
   const finalValid    = result.valid && !nameError
   const finalError    = nameError || (result.errors[0] || null)
@@ -833,15 +833,53 @@ function MainApp({ user, onLogout }) {
   const [txnsLoading, setTxnsLoading] = useState(false)
 
   // Send form
-  const [receiver, setReceiver]   = useState('')
-  const [amount, setAmount]       = useState('')
-  const [fromCur, setFromCur]     = useState('AED')
-  const [toCur, setToCur]         = useState('INR')
-  const [memo, setMemo]           = useState('')
-  const [sending, setSending]     = useState(false)
-  const [txStatus, setTxStatus]   = useState(null)
-  const [txHash, setTxHash]       = useState(null)
-  const [txMsg, setTxMsg]         = useState('')
+  const [receiver, setReceiver]         = useState('')
+  const [receiverName, setReceiverName] = useState('')
+  const [amount, setAmount]             = useState('')
+  const [fromCur, setFromCur]           = useState('AED')
+  const [toCur, setToCur]               = useState('INR')
+  const [memo, setMemo]                 = useState('')
+  const [sending, setSending]           = useState(false)
+  const [txStatus, setTxStatus]         = useState(null)
+  const [txHash, setTxHash]             = useState(null)
+  const [txMsg, setTxMsg]               = useState('')
+  const [sendMode, setSendMode]         = useState('options') // 'options' | 'search' | 'manual'
+  const [searchQuery, setSearchQuery]   = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [searchLoading, setSearchLoading] = useState(false)
+
+  // Search user by name or phone
+  function handleSearch(q) {
+    setSearchQuery(q)
+    if (!q.trim()) { setSearchResults([]); return }
+    setSearchLoading(true)
+    try {
+      // Search from locally registered users (key = remitchain_users)
+      const allUsers = JSON.parse(localStorage.getItem('remitchain_users') || '{}')
+      const results = Object.values(allUsers).filter(u =>
+        u.walletAddress !== addr && (
+          u.name?.toLowerCase().includes(q.toLowerCase()) ||
+          u.phone?.includes(q)
+        )
+      )
+      setSearchResults(results)
+    } catch { setSearchResults([]) }
+    finally { setSearchLoading(false) }
+  }
+
+  function selectContact(u) {
+    setReceiver(u.walletAddress)
+    setReceiverName(u.name)
+    setSendMode('manual')
+    setSearchQuery('')
+    setSearchResults([])
+  }
+
+  function clearReceiver() {
+    setReceiver('')
+    setReceiverName('')
+    setSendMode('options')
+  }
 
   // QR
   const [showQR, setShowQR]       = useState(false)
@@ -956,73 +994,163 @@ function MainApp({ user, onLogout }) {
               <div className="page-title"><h2>💸 Send Money</h2><p>Instant cross-border transfer</p></div>
               <div className="card">
 
-                <div className="field-group">
-                  <label className="field-label">Receiver Wallet Address</label>
-                  <div style={{ position:'relative' }}>
-                    <input className="field-input" placeholder="GXXXX... (Stellar address)"
-                      value={receiver} onChange={e => setReceiver(e.target.value)} />
-                    {receiver && (
-                      <span style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', fontWeight:700, color: isValidStellarAddress(receiver) ? 'var(--green)' : 'var(--red)' }}>
-                        {isValidStellarAddress(receiver) ? '✓' : '✕'}
-                      </span>
+                {/* ── RECEIVER SELECTION ── */}
+                {sendMode === 'options' && (
+                  <div className="field-group">
+                    <label className="field-label">Send To</label>
+                    <div className="send-options">
+                      {/* Option 1 — Search by name or phone */}
+                      <button className="send-opt-btn" onClick={() => setSendMode('search')}>
+                        <span className="send-opt-icon">🔍</span>
+                        <div className="send-opt-text">
+                          <span className="send-opt-title">Search Contact</span>
+                          <span className="send-opt-sub">Find by name or phone number</span>
+                        </div>
+                        <span className="send-opt-arrow">→</span>
+                      </button>
+
+                      {/* Option 2 — Paste wallet address (advanced) */}
+                      <button className="send-opt-btn send-opt-secondary" onClick={() => setSendMode('manual')}>
+                        <span className="send-opt-icon">📋</span>
+                        <div className="send-opt-text">
+                          <span className="send-opt-title">Paste Wallet Address</span>
+                          <span className="send-opt-sub">For advanced users only</span>
+                        </div>
+                        <span className="send-opt-arrow">→</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── SEARCH MODE ── */}
+                {sendMode === 'search' && (
+                  <div className="field-group">
+                    <div className="search-header">
+                      <label className="field-label">Search Contact</label>
+                      <button className="back-btn" onClick={() => { setSendMode('options'); setSearchQuery(''); setSearchResults([]) }}>← Back</button>
+                    </div>
+                    <input
+                      className="field-input"
+                      placeholder="Type name or phone number..."
+                      value={searchQuery}
+                      onChange={e => handleSearch(e.target.value)}
+                      autoFocus
+                    />
+                    {searchLoading && <div className="search-loading"><Spinner size={14}/> Searching...</div>}
+                    {searchResults.length > 0 && (
+                      <div className="search-results">
+                        {searchResults.map((u, i) => (
+                          <button key={i} className="contact-row" onClick={() => selectContact(u)}>
+                            <div className="contact-avatar">{u.name[0].toUpperCase()}</div>
+                            <div className="contact-info">
+                              <span className="contact-name">{u.name}</span>
+                              <span className="contact-phone">{u.phone}</span>
+                            </div>
+                            <span className="contact-select">Select →</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {searchQuery && !searchLoading && searchResults.length === 0 && (
+                      <div className="search-empty">
+                        No user found. Ask them to join RemitChain first.
+                      </div>
                     )}
                   </div>
-                </div>
+                )}
 
-                <div className="converter">
-                  <div className="conv-row">
-                    <div className="conv-side">
-                      <div className="conv-label">You Send</div>
-                      <div className="conv-inputs">
-                        <input className="conv-amount" type="number" placeholder="0.00" min="0"
-                          value={amount} onChange={e => setAmount(e.target.value)} />
-                        <select className="conv-cur" value={fromCur} onChange={e => setFromCur(e.target.value)}>
-                          {Object.entries(CURRENCIES).map(([c, v]) => <option key={c} value={c}>{v.flag} {c}</option>)}
-                        </select>
+                {/* ── MANUAL / SELECTED ── */}
+                {sendMode === 'manual' && (
+                  <div className="field-group">
+                    <div className="search-header">
+                      <label className="field-label">
+                        {receiverName ? `Sending to: ${receiverName}` : 'Receiver Wallet Address'}
+                      </label>
+                      <button className="back-btn" onClick={clearReceiver}>← Change</button>
+                    </div>
+                    {receiverName ? (
+                      <div className="selected-contact">
+                        <div className="contact-avatar large">{receiverName[0].toUpperCase()}</div>
+                        <div className="contact-info">
+                          <span className="contact-name">{receiverName}</span>
+                          <span className="contact-addr">{receiver.slice(0,10)}...{receiver.slice(-8)}</span>
+                        </div>
+                        <span style={{ color:'var(--green)', fontWeight:700 }}>✓ Selected</span>
                       </div>
-                    </div>
-                    <div className="conv-mid">
-                      <div className="conv-arrow">⇄</div>
-                      <div className="conv-fee">Fee: ₹8</div>
-                    </div>
-                    <div className="conv-side">
-                      <div className="conv-label">They Receive</div>
-                      <div className="conv-inputs">
-                        <div className="conv-result">{parseFloat(localAmount).toLocaleString()}</div>
-                        <select className="conv-cur" value={toCur} onChange={e => setToCur(e.target.value)}>
-                          {Object.entries(CURRENCIES).map(([c, v]) => <option key={c} value={c}>{v.flag} {c}</option>)}
-                        </select>
+                    ) : (
+                      <div style={{ position:'relative' }}>
+                        <input className="field-input" placeholder="GXXXX... (Stellar address)"
+                          value={receiver} onChange={e => setReceiver(e.target.value)} />
+                        {receiver && (
+                          <span style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', fontWeight:700, color: isValidStellarAddress(receiver) ? 'var(--green)' : 'var(--red)' }}>
+                            {isValidStellarAddress(receiver) ? '✓' : '✕'}
+                          </span>
+                        )}
                       </div>
-                    </div>
+                    )}
                   </div>
-                  <div className="conv-info">≈ {xlmAmount} XLM on Stellar · 1 XLM ≈ $0.11</div>
-                </div>
+                )}
 
-                <div className="field-group">
-                  <label className="field-label">Note (optional)</label>
-                  <input className="field-input" placeholder="e.g. Monthly allowance"
-                    value={memo} onChange={e => setMemo(e.target.value)} maxLength={28} />
-                </div>
-
-                <div className="summary">
-                  {[
-                    ['You send', `${amount||'0'} ${fromCur}`],
-                    ['On Stellar', `${xlmAmount} XLM`],
-                    ['Fee', '0.1 XLM (≈ ₹8)'],
-                    ['They receive', `${parseFloat(localAmount).toLocaleString()} ${toCur}`],
-                  ].map(([k, v], i) => (
-                    <div key={i} className={`summary-row ${i===3?'summary-total':''}`}>
-                      <span>{k}</span><span>{v}</span>
+                {/* ── AMOUNT ── (always shown after receiver selected) */}
+                {(sendMode === 'manual' && (receiver || receiverName)) && (
+                  <>
+                    <div className="converter">
+                      <div className="conv-row">
+                        <div className="conv-side">
+                          <div className="conv-label">You Send</div>
+                          <div className="conv-inputs">
+                            <input className="conv-amount" type="number" placeholder="0.00" min="0"
+                              value={amount} onChange={e => setAmount(e.target.value)} />
+                            <select className="conv-cur" value={fromCur} onChange={e => setFromCur(e.target.value)}>
+                              {Object.entries(CURRENCIES).map(([c, v]) => <option key={c} value={c}>{v.flag} {c}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="conv-mid">
+                          <div className="conv-arrow">⇄</div>
+                          <div className="conv-fee">Fee: ₹8</div>
+                        </div>
+                        <div className="conv-side">
+                          <div className="conv-label">They Receive</div>
+                          <div className="conv-inputs">
+                            <div className="conv-result">{parseFloat(localAmount).toLocaleString()}</div>
+                            <select className="conv-cur" value={toCur} onChange={e => setToCur(e.target.value)}>
+                              {Object.entries(CURRENCIES).map(([c, v]) => <option key={c} value={c}>{v.flag} {c}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="conv-info">≈ {xlmAmount} XLM on Stellar · 1 XLM ≈ $0.11</div>
                     </div>
-                  ))}
-                </div>
 
-                <button className="btn-primary full" onClick={handleSend}
-                  disabled={!receiver || !amount || sending || !isValidStellarAddress(receiver)}>
-                  {sending ? <><Spinner size={16} color="#fff"/> Sending…</> : `Send ${amount||'0'} ${fromCur} →`}
-                </button>
+                    <div className="field-group">
+                      <label className="field-label">Note (optional)</label>
+                      <input className="field-input" placeholder="e.g. Monthly allowance"
+                        value={memo} onChange={e => setMemo(e.target.value)} maxLength={28} />
+                    </div>
 
-                <Banner status={txStatus} hash={txHash} msg={txMsg} onDismiss={() => setTxStatus(null)} />
+                    <div className="summary">
+                      {[
+                        ['You send', `${amount||'0'} ${fromCur}`],
+                        ['On Stellar', `${xlmAmount} XLM`],
+                        ['Fee', '0.1 XLM (≈ ₹8)'],
+                        ['They receive', `${parseFloat(localAmount).toLocaleString()} ${toCur}`],
+                      ].map(([k, v], i) => (
+                        <div key={i} className={`summary-row ${i===3?'summary-total':''}`}>
+                          <span>{k}</span><span>{v}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button className="btn-primary full" onClick={handleSend}
+                      disabled={!receiver || !amount || sending || !isValidStellarAddress(receiver)}>
+                      {sending ? <><Spinner size={16} color="#fff"/> Sending…</> : `Send ${amount||'0'} ${fromCur} →`}
+                    </button>
+
+                    <Banner status={txStatus} hash={txHash} msg={txMsg} onDismiss={() => setTxStatus(null)} />
+                  </>
+                )}
+
               </div>
             </div>
           )}

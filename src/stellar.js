@@ -55,7 +55,6 @@ export function shortAddress(addr) {
 }
 export function convertToXLM(amount, fromCurrency) {
   const rate = CURRENCIES[fromCurrency]?.rate || 1
-  // Convert to USD first, then XLM (1 XLM ≈ $0.11)
   const usd = parseFloat(amount) * rate
   return (usd / 0.11).toFixed(4)
 }
@@ -64,6 +63,9 @@ export function convertFromXLM(xlm, toCurrency) {
   const usd  = parseFloat(xlm) * 0.11
   return (usd / rate).toFixed(2)
 }
+// Aliases — used by tests
+export const convertToUSDC   = convertToXLM
+export const convertFromUSDC = convertFromXLM
 export function calcFee() { return 0.1 }
 export function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString()
