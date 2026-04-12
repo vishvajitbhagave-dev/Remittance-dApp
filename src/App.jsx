@@ -824,6 +824,148 @@ function LoginPage({ onLogin, onGoSignup }) {
   )
 }
 
+
+// ── Transfer Receipt Modal ────────────────────────────────────────────────────
+function ReceiptModal({ data, onClose }) {
+  const receiptRef = React.useRef(null)
+  const [saving, setSaving] = React.useState(false)
+  const [saved, setSaved]   = React.useState(false)
+
+  if (!data) return null
+
+  // Save receipt as image using html2canvas from CDN
+  async function handleSaveImage() {
+    setSaving(true)
+    try {
+      // Load html2canvas from CDN
+      await new Promise((resolve, reject) => {
+        if (window.html2canvas) { resolve(); return }
+        const script = document.createElement('script')
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
+        script.onload  = resolve
+        script.onerror = reject
+        document.head.appendChild(script)
+      })
+      const canvas = await window.html2canvas(receiptRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+      })
+      // Download the image
+      const link = document.createElement('a')
+      link.download = `RemitChain-Receipt-${data.date.replace(/\s/g,'-')}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      alert('Could not save image. Please take a screenshot using Windows + Shift + S.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Share on WhatsApp
+  function handleWhatsApp() {
+    const text = `💫 *RemitChain Transfer Receipt*
+
+✅ Transfer Successful!
+
+💸 *From:* ${data.from}
+👤 *To:* ${data.to}
+💰 *Amount:* ${data.amount} ${data.fromCur} → ${parseFloat(data.localAmount).toLocaleString()} ${data.toCur}
+🔗 *On Stellar:* ${data.xlmAmount} XLM
+💳 *Fee:* 0.1 XLM (≈ ₹8)
+📅 *Date:* ${data.date}
+⏰ *Time:* ${data.time}${data.memo ? `
+📝 *Memo:* ${data.memo}` : ''}
+
+🔍 *View Transaction:*
+https://stellar.expert/explorer/testnet/tx/${data.hash}
+
+_Sent via RemitChain · Stellar Testnet_`
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+  }
+
+  return (
+    <div className="overlay fade-in" onClick={onClose}>
+      <div className="receipt-modal pop-in" onClick={e => e.stopPropagation()}>
+
+        {/* ── Capture area starts here ── */}
+        <div ref={receiptRef} style={{ background: '#fff' }}>
+
+          {/* Header */}
+          <div className="receipt-header">
+            <div className="receipt-success-icon">✓</div>
+            <div className="receipt-title">Transfer Successful!</div>
+            <div className="receipt-subtitle">Your money is on its way</div>
+          </div>
+
+          {/* Amount */}
+          <div className="receipt-amount-box">
+            <div className="receipt-sent">
+              <span className="receipt-amt-label">You Sent</span>
+              <span className="receipt-amt-val">{data.amount} {data.fromCur}</span>
+            </div>
+            <div className="receipt-arrow-down">↓</div>
+            <div className="receipt-received">
+              <span className="receipt-amt-label">They Receive</span>
+              <span className="receipt-amt-val green">{parseFloat(data.localAmount).toLocaleString()} {data.toCur}</span>
+            </div>
+          </div>
+
+          {/* Details */}
+          <div className="receipt-details">
+            {[
+              ['From',        data.from],
+              ['To',          data.to],
+              ['On Stellar',  `${data.xlmAmount} XLM`],
+              ['Fee',         '0.1 XLM (≈ ₹8)'],
+              ['Date',        data.date],
+              ['Time',        data.time],
+              ['Memo',        data.memo || '—'],
+              ['Transaction', `${data.hash?.slice(0,20)}...`],
+            ].map(([label, value]) => (
+              <div key={label} className="receipt-row">
+                <span className="receipt-label">{label}</span>
+                <span className="receipt-value">{value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Powered by */}
+          <div className="receipt-powered" style={{ padding: '12px 24px', background: '#f7f3ee', borderTop: '1px dashed #ddd5c8', textAlign: 'center', fontSize: '0.68rem', color: '#9a8f82', fontFamily: 'monospace' }}>
+            💫 Powered by RemitChain · Stellar Testnet
+          </div>
+
+        </div>
+        {/* ── Capture area ends here ── */}
+
+        {/* Buttons — NOT captured in image */}
+        <div className="receipt-footer">
+          <div className="receipt-tip">
+            💡 Save image → Send as photo on WhatsApp
+          </div>
+          <div className="receipt-btns">
+            <button className="btn-outline r-btn" onClick={onClose}>
+              ✕ Close
+            </button>
+            <button className="btn-outline r-btn" onClick={handleSaveImage} disabled={saving}>
+              {saving ? '⏳ Saving...' : saved ? '✅ Saved!' : '📥 Save Image'}
+            </button>
+            <button className="btn-primary whatsapp-btn r-btn" onClick={handleWhatsApp}>
+              📱 WhatsApp
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
 // ── MAIN APP (after login) ────────────────────────────────────────────────────
 function MainApp({ user, onLogout }) {
   const [page, setPage]           = useState('send')
@@ -842,6 +984,8 @@ function MainApp({ user, onLogout }) {
   const [sending, setSending]           = useState(false)
   const [txStatus, setTxStatus]         = useState(null)
   const [txHash, setTxHash]             = useState(null)
+  const [showReceipt, setShowReceipt]   = useState(false)
+  const [receiptData, setReceiptData]   = useState(null)
   const [txMsg, setTxMsg]               = useState('')
   const [sendMode, setSendMode]         = useState('options') // 'options' | 'search' | 'manual'
   const [searchQuery, setSearchQuery]   = useState('')
@@ -916,7 +1060,24 @@ function MainApp({ user, onLogout }) {
       setTxStatus('confirming')
       const hash = await sendRemittance(addr, receiver, xlm, memo || `RC:${fromCur}→${toCur}`)
       setTxHash(hash); setTxStatus('success')
+      // Save receipt data before clearing form
+      setReceiptData({
+        from:        user.name,
+        to:          receiverName || shortAddress(receiver),
+        toAddress:   receiver,
+        amount:      amount,
+        fromCur:     fromCur,
+        toCur:       toCur,
+        localAmount: convertFromXLM(convertToXLM(amount, fromCur), toCur),
+        xlmAmount:   xlm,
+        date:        new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }),
+        time:        new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }),
+        hash:        hash,
+        memo:        memo,
+      })
+      setShowReceipt(true)
       setAmount(''); setReceiver(''); setMemo('')
+      setReceiverName(''); setSendMode('options')
       await loadBalance()
     } catch (e) {
       const m = (e.message || '').toLowerCase()
@@ -1285,6 +1446,14 @@ function MainApp({ user, onLogout }) {
       </main>
 
       <footer className="footer">RemitChain · Stellar Testnet · Instant · Borderless · Fair</footer>
+
+      {/* Transfer Receipt Modal */}
+      {showReceipt && receiptData && (
+        <ReceiptModal
+          data={receiptData}
+          onClose={() => setShowReceipt(false)}
+        />
+      )}
     </div>
   )
 }
