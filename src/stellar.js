@@ -158,19 +158,47 @@ export async function fetchTransactions(publicKey, limit = 10) {
 
 // ── Send XLM ──────────────────────────────────────────────────────────────────
 export async function sendRemittance(senderAddress, receiverAddress, amountXLM, memo) {
+  // Check if receiver account exists on Stellar
+  let receiverExists = true
+  try {
+    await horizon.loadAccount(receiverAddress)
+  } catch (e) {
+    // Account not found — needs createAccount operation instead
+    receiverExists = false
+  }
+
+  // Minimum XLM required to create a new account is 1 XLM
+  const amount = parseFloat(amountXLM)
+  if (!receiverExists && amount < 1) {
+    throw new Error('Minimum 1 XLM required to activate a new Stellar account.')
+  }
+
   const account = await horizon.loadAccount(senderAddress)
-  const tx = new StellarSdk.TransactionBuilder(account, {
+  const builder = new StellarSdk.TransactionBuilder(account, {
     fee: StellarSdk.BASE_FEE,
     networkPassphrase: NETWORK_PASSPHRASE,
   })
-    .addOperation(StellarSdk.Operation.payment({
+
+  if (receiverExists) {
+    // Normal payment to existing account
+    builder.addOperation(StellarSdk.Operation.payment({
       destination: receiverAddress,
       asset:       StellarSdk.Asset.native(),
       amount:      amountXLM.toString(),
     }))
+  } else {
+    // Create account operation for new/unfunded accounts
+    builder.addOperation(StellarSdk.Operation.createAccount({
+      destination:     receiverAddress,
+      startingBalance: amountXLM.toString(),
+    }))
+  }
+
+  const tx = builder
     .addMemo(memo ? StellarSdk.Memo.text(memo.slice(0, 28)) : StellarSdk.Memo.none())
     .setTimeout(180)
     .build()
+
   const signedXdr = await signWithFreighter(tx.toXDR())
   const signedTx  = StellarSdk.TransactionBuilder.fromXDR(signedXdr, NETWORK_PASSPHRASE)
   const result    = await horizon.submitTransaction(signedTx)
@@ -182,4 +210,37 @@ export async function fundTestnetAccount(publicKey) {
   const resp = await fetch(`https://friendbot.stellar.org?addr=${publicKey}`)
   if (!resp.ok) throw new Error('Friendbot funding failed.')
   return true
+}
+
+// Fetch ONLY incoming payments — checks both payments and transactions
+// This is called every 8 seconds to detect new money received
+export async function fetchLatestIncomingPayment(publicKey) {
+  try {
+    const url = `${HORIZON_URL}/accounts/${publicKey}/payments?limit=5&order=desc`
+    const resp = await fetch(url)
+    if (!resp.ok) return null
+
+    const data = await resp.json()
+    const records = data?._embedded?.records || []
+
+    // Find latest payment where THIS user is the receiver
+    const incoming = records.find(p =>
+      (p.type === 'payment' || p.type === 'create_account') &&
+      p.to === publicKey
+    )
+
+    if (!incoming) return null
+
+    const createdAt  = new Date(incoming.created_at)
+    const ageSeconds = (Date.now() - createdAt.getTime()) / 1000
+
+    return {
+      hash:      incoming.transaction_hash,
+      amount:    parseFloat(incoming.amount || '0').toFixed(4),
+      from:      incoming.from || incoming.funder || 'Unknown',
+      date:      createdAt.toLocaleDateString(),
+      time:      createdAt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }),
+      isRecent:  ageSeconds < 120, // true if payment happened within last 2 minutes
+    }
+  } catch { return null }
 }

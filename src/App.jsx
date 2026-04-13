@@ -7,6 +7,7 @@ import {
   isValidStellarAddress, shortAddress, convertToXLM, convertFromXLM,
   formatBalance, generateOTP,
   saveUser, getUserByPhone, saveSession, getSession, clearSession, cache,
+  fetchLatestIncomingPayment,
 } from './stellar.js'
 import './App.css'
 
@@ -971,8 +972,11 @@ function MainApp({ user, onLogout }) {
   const [page, setPage]           = useState('send')
   const [balance, setBalance]     = useState('—')
   const [balLoading, setBalLoading] = useState(false)
-  const [txns, setTxns]           = useState([])
-  const [txnsLoading, setTxnsLoading] = useState(false)
+  const [txns, setTxns]                 = useState([])
+  const [txnsLoading, setTxnsLoading]   = useState(false)
+  const [newTxCount, setNewTxCount]     = useState(0)
+  const [incomingPayment, setIncoming]  = useState(null)
+  const lastIncomingHashRef             = React.useRef(null)
 
   // Send form
   const [receiver, setReceiver]         = useState('')
@@ -1045,8 +1049,47 @@ function MainApp({ user, onLogout }) {
     catch {} finally { setTxnsLoading(false) }
   }, [addr])
 
+  // Check ONLY for incoming payments every 8 seconds
+  const checkIncomingPayments = useCallback(async () => {
+    if (!addr) return
+    try {
+      const payment = await fetchLatestIncomingPayment(addr)
+      if (!payment) return
+
+      // First run
+      if (lastIncomingHashRef.current === null) {
+        lastIncomingHashRef.current = payment.hash
+        // If payment happened within last 2 minutes — show notification
+        // This handles case: Vishvajit sent → Mom logs in → sees notification
+        if (payment.isRecent) {
+          setNewTxCount(1)
+          setIncoming(payment)
+        }
+        return
+      }
+
+      // Subsequent runs — new payment detected
+      if (payment.hash !== lastIncomingHashRef.current) {
+        lastIncomingHashRef.current = payment.hash
+        setNewTxCount(prev => prev + 1)
+        setIncoming(payment)
+      }
+    } catch {}
+  }, [addr])
+
   useEffect(() => { loadBalance() }, [loadBalance])
   useEffect(() => { const t = setInterval(loadBalance, 15000); return () => clearInterval(t) }, [loadBalance])
+
+  // Check for incoming payments every 8 seconds (near real-time)
+  useEffect(() => {
+    if (!addr) return
+    // Small delay on first run so Horizon has time to index the tx
+    const init = setTimeout(() => {
+      checkIncomingPayments()
+    }, 3000)
+    const t = setInterval(checkIncomingPayments, 8000)
+    return () => { clearTimeout(init); clearInterval(t) }
+  }, [addr, checkIncomingPayments])
 
   async function handleSend() {
     if (!addr)                         { setTxStatus('no_wallet'); return }
@@ -1081,7 +1124,14 @@ function MainApp({ user, onLogout }) {
       await loadBalance()
     } catch (e) {
       const m = (e.message || '').toLowerCase()
-      setTxMsg(e.message || 'Transfer failed.')
+      // Give friendly error messages
+      let friendlyMsg = e.message || 'Transfer failed.'
+      if (m.includes('400'))          friendlyMsg = 'Transaction rejected. Check receiver address and try again.'
+      if (m.includes('minimum'))      friendlyMsg = e.message
+      if (m.includes('underfunded'))  friendlyMsg = 'Insufficient XLM balance to complete this transfer.'
+      if (m.includes('not found'))    friendlyMsg = 'Receiver account not found. Make sure the address is correct.'
+      if (m.includes('low reserve'))  friendlyMsg = 'Your balance is too low. Keep at least 2 XLM in your wallet.'
+      setTxMsg(friendlyMsg)
       if (m.includes('rejected') || m.includes('denied') || m.includes('cancel')) setTxStatus('rejected')
       else setTxStatus('error')
     } finally { setSending(false) }
@@ -1139,8 +1189,21 @@ function MainApp({ user, onLogout }) {
           { id:'profile', icon:'👤', label:'Profile' },
         ].map(n => (
           <button key={n.id} className={`nav-btn ${page===n.id?'nav-active':''}`}
-            onClick={() => { setPage(n.id); if (n.id==='history') loadTxns() }}>
-            <span className="nav-icon">{n.icon}</span>
+            onClick={() => {
+              setPage(n.id)
+              if (n.id === 'history') {
+                loadTxns()
+                setNewTxCount(0)  // Clear badge
+                setIncoming(null) // Clear incoming payment details
+              }
+            }}>
+            <span className="nav-icon-wrap">
+              <span className="nav-icon">{n.icon}</span>
+              {/* Show red badge on History when new transactions */}
+              {n.id === 'history' && newTxCount > 0 && (
+                <span className="notif-badge">{newTxCount}</span>
+              )}
+            </span>
             <span className="nav-label">{n.label}</span>
           </button>
         ))}
@@ -1444,6 +1507,25 @@ function MainApp({ user, onLogout }) {
           </div>
         </div>
       </main>
+
+      {/* Incoming Payment Toast Notification */}
+      {incomingPayment && newTxCount > 0 && (
+        <div className="incoming-toast pop-in">
+          <div className="toast-icon">💰</div>
+          <div className="toast-body">
+            <div className="toast-title">Money Received!</div>
+            <div className="toast-msg">
+              You received <strong>{parseFloat(incomingPayment.amount).toFixed(2)} XLM</strong>
+              {' '}from {shortAddress(incomingPayment.from)}
+            </div>
+            <div className="toast-time">{incomingPayment.time}</div>
+          </div>
+          <button className="toast-close" onClick={() => {
+            setIncoming(null)
+            setNewTxCount(0)
+          }}>✕</button>
+        </div>
+      )}
 
       <footer className="footer">RemitChain · Stellar Testnet · Instant · Borderless · Fair</footer>
 
