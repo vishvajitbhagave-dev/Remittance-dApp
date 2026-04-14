@@ -143,16 +143,43 @@ export async function fetchBalance(publicKey) {
 }
 
 // ── Transactions ──────────────────────────────────────────────────────────────
-export async function fetchTransactions(publicKey, limit = 10) {
+export async function fetchTransactions(publicKey, limit = 20) {
   try {
-    const txns = await horizon.transactions().forAccount(publicKey).limit(limit).order('desc').call()
-    return txns.records.map(tx => ({
-      id:   tx.id,
-      hash: tx.hash,
-      date: new Date(tx.created_at).toLocaleDateString(),
-      time: new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      memo: tx.memo || '',
-    }))
+    // Fetch payments to know direction (sent vs received)
+    const [txns, payments] = await Promise.all([
+      horizon.transactions().forAccount(publicKey).limit(limit).order('desc').call(),
+      horizon.payments().forAccount(publicKey).limit(limit).order('desc').call(),
+    ])
+
+    // Build a map of hash → payment direction
+    const paymentMap = {}
+    for (const p of payments.records) {
+      const hash = p.transaction_hash
+      if (!paymentMap[hash]) {
+        paymentMap[hash] = {
+          type:   p.to === publicKey ? 'received' : 'sent',
+          amount: parseFloat(p.amount || '0').toFixed(2),
+          from:   p.from || '',
+          to:     p.to   || '',
+        }
+      }
+    }
+
+    return txns.records.map(tx => {
+      const pay = paymentMap[tx.hash] || {}
+      return {
+        id:     tx.id,
+        hash:   tx.hash,
+        date:   new Date(tx.created_at).toLocaleDateString(),
+        time:   new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date(tx.created_at).getTime(),
+        memo:   tx.memo || '',
+        type:   pay.type   || 'sent',
+        amount: pay.amount || '0',
+        from:   pay.from   || '',
+        to:     pay.to     || '',
+      }
+    })
   } catch { return [] }
 }
 

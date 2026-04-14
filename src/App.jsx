@@ -10,6 +10,7 @@ import {
   fetchLatestIncomingPayment,
 } from './stellar.js'
 import './App.css'
+import { LANGUAGES, getT } from './translations.js'
 
 
 // ── Country Phone Codes (All Countries — Alphabetical) ──────────────────────
@@ -970,10 +971,15 @@ _Sent via RemitChain · Stellar Testnet_`
 // ── MAIN APP (after login) ────────────────────────────────────────────────────
 function MainApp({ user, onLogout }) {
   const [page, setPage]           = useState('send')
+  const [lang, setLang]           = useState(() => localStorage.getItem('rc_lang') || 'en')
+  const t = getT(lang)
   const [balance, setBalance]     = useState('—')
   const [balLoading, setBalLoading] = useState(false)
   const [txns, setTxns]                 = useState([])
   const [txnsLoading, setTxnsLoading]   = useState(false)
+  const [txSearch, setTxSearch]         = useState('')
+  const [txFilter, setTxFilter]         = useState('all')   // all | sent | received
+  const [txSort, setTxSort]             = useState('latest') // latest | oldest
   const [newTxCount, setNewTxCount]     = useState(0)
   const [incomingPayment, setIncoming]  = useState(null)
   const lastIncomingHashRef             = React.useRef(null)
@@ -1163,6 +1169,23 @@ function MainApp({ user, onLogout }) {
         <div className="header-left">
           <div className="logo"><span className="logo-icon">💫</span><span className="logo-text">RemitChain</span></div>
           <span className="logo-tag">Testnet</span>
+          {/* Language Selector */}
+          <div className="lang-selector-wrap">
+            <select
+              className="lang-selector"
+              value={lang}
+              onChange={e => {
+                setLang(e.target.value)
+                localStorage.setItem('rc_lang', e.target.value)
+              }}
+            >
+              {LANGUAGES.map(l => (
+                <option key={l.code} value={l.code}>
+                  {l.flag} {l.native}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className="header-right">
           <div className="user-pill">
@@ -1183,10 +1206,10 @@ function MainApp({ user, onLogout }) {
       {/* Nav */}
       <nav className="nav">
         {[
-          { id:'send',    icon:'💸', label:'Send' },
-          { id:'receive', icon:'📥', label:'Receive' },
-          { id:'history', icon:'📋', label:'History' },
-          { id:'profile', icon:'👤', label:'Profile' },
+          { id:'send',    icon:'💸', label:t.send    },
+          { id:'receive', icon:'📥', label:t.receive },
+          { id:'history', icon:'📋', label:t.history },
+          { id:'profile', icon:'👤', label:t.profile },
         ].map(n => (
           <button key={n.id} className={`nav-btn ${page===n.id?'nav-active':''}`}
             onClick={() => {
@@ -1215,7 +1238,7 @@ function MainApp({ user, onLogout }) {
           {/* ── SEND ── */}
           {page === 'send' && (
             <div className="page fade-up">
-              <div className="page-title"><h2>💸 Send Money</h2><p>Instant cross-border transfer</p></div>
+              <div className="page-title"><h2>{t.send_money}</h2><p>{t.send_subtitle}</p></div>
               <div className="card">
 
                 {/* ── RECEIVER SELECTION ── */}
@@ -1382,7 +1405,7 @@ function MainApp({ user, onLogout }) {
           {/* ── RECEIVE ── */}
           {page === 'receive' && (
             <div className="page fade-up">
-              <div className="page-title"><h2>📥 Receive Money</h2><p>Share your QR code or address</p></div>
+              <div className="page-title"><h2>{t.receive_money}</h2><p>{t.receive_subtitle}</p></div>
               <div className="card">
                 <div className="qr-section">
                   <div className="qr-wrapper">
@@ -1392,7 +1415,7 @@ function MainApp({ user, onLogout }) {
                   <div className="qr-addr-full">{addr}</div>
                   <div className="qr-btns">
                     <button className="btn-primary" onClick={copyAddress}>
-                      {copied ? '✓ Copied!' : '📋 Copy Address'}
+                      {copied ? t.address_copied : t.copy_address}
                     </button>
                     <button className="btn-outline" onClick={() => setShowQR(!showQR)}>
                       {showQR ? 'Hide Details' : 'Show QR Info'}
@@ -1418,48 +1441,151 @@ function MainApp({ user, onLogout }) {
           )}
 
           {/* ── HISTORY ── */}
-          {page === 'history' && (
-            <div className="page fade-up">
-              <div className="page-title"><h2>📋 Transaction History</h2><p>Your transfers on Stellar</p></div>
-              {txnsLoading ? (
-                <div className="card">
-                  {[0,1,2,3].map(i => <div key={i} className="tx-skeleton" style={{ animationDelay:`${i*0.1}s` }}/>)}
-                </div>
-              ) : txns.length === 0 ? (
-                <div className="empty-state">
-                  <div style={{ fontSize:'2.5rem' }}>📭</div>
-                  <p>No transactions yet</p>
-                  <button className="btn-outline" onClick={loadTxns}>Refresh</button>
-                </div>
-              ) : (
-                <div className="card">
-                  {txns.map((tx, i) => (
-                    <div key={i} className="tx-row">
-                      <span className="tx-emoji">💸</span>
-                      <div className="tx-info">
-                        <div className="tx-hash">TX: {tx.hash?.slice(0,14)}…</div>
-                        <div className="tx-date">{tx.date} · {tx.time}</div>
-                        {tx.memo && <div className="tx-memo">"{tx.memo}"</div>}
-                      </div>
-                      <a className="tx-view" href={`https://stellar.expert/explorer/testnet/tx/${tx.hash}`} target="_blank" rel="noreferrer">View ↗</a>
+          {page === 'history' && (() => {
+            // Apply search + filter + sort
+            const filtered = txns
+              .filter(tx => {
+                const q = txSearch.toLowerCase()
+                const matchSearch = !q ||
+                  tx.hash?.toLowerCase().includes(q) ||
+                  tx.memo?.toLowerCase().includes(q) ||
+                  tx.date?.toLowerCase().includes(q) ||
+                  tx.amount?.toString().includes(q)
+                const matchFilter =
+                  txFilter === 'all' ? true :
+                  txFilter === 'sent' ? tx.type === 'sent' :
+                  tx.type === 'received'
+                return matchSearch && matchFilter
+              })
+              .sort((a, b) =>
+                txSort === 'latest'
+                  ? (b.timestamp || 0) - (a.timestamp || 0)
+                  : (a.timestamp || 0) - (b.timestamp || 0)
+              )
+
+            return (
+              <div className="page fade-up">
+                <div className="page-title"><h2>{t.tx_history}</h2><p>{t.tx_subtitle}</p></div>
+
+                {/* Search + Filter + Sort Controls */}
+                <div className="tx-controls">
+                  {/* Search box */}
+                  <div className="tx-search-wrap">
+                    <span className="tx-search-icon">🔍</span>
+                    <input
+                      className="tx-search-input"
+                      placeholder="Search by memo, date, amount..."
+                      value={txSearch}
+                      onChange={e => setTxSearch(e.target.value)}
+                    />
+                    {txSearch && (
+                      <button className="tx-search-clear" onClick={() => setTxSearch('')}>✕</button>
+                    )}
+                  </div>
+
+                  {/* Filter buttons */}
+                  <div className="tx-filter-row">
+                    <div className="tx-filter-group">
+                      {[
+                        { val:'all',      label:'All',      icon:'📋' },
+                        { val:'sent',     label:'Sent',     icon:'💸' },
+                        { val:'received', label:'Received', icon:'📥' },
+                      ].map(f => (
+                        <button
+                          key={f.val}
+                          className={`tx-filter-btn ${txFilter === f.val ? 'tx-filter-active' : ''}`}
+                          onClick={() => setTxFilter(f.val)}
+                        >
+                          {f.icon} {f.label}
+                        </button>
+                      ))}
                     </div>
-                  ))}
-                  <button className="btn-outline small" onClick={loadTxns} style={{ marginTop:12 }}>Refresh</button>
+                    <div className="tx-sort-group">
+                      {[
+                        { val:'latest', label:'Latest' },
+                        { val:'oldest', label:'Oldest' },
+                      ].map(s => (
+                        <button
+                          key={s.val}
+                          className={`tx-sort-btn ${txSort === s.val ? 'tx-sort-active' : ''}`}
+                          onClick={() => setTxSort(s.val)}
+                        >
+                          {s.val === 'latest' ? '↓' : '↑'} {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Results count */}
+                  {!txnsLoading && txns.length > 0 && (
+                    <div className="tx-count">
+                      Showing {filtered.length} of {txns.length} transactions
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          )}
+
+                {/* Transaction list */}
+                {txnsLoading ? (
+                  <div className="card">
+                    {[0,1,2,3].map(i => (
+                      <div key={i} className="tx-skeleton" style={{ animationDelay:`${i*0.1}s` }}/>
+                    ))}
+                  </div>
+                ) : filtered.length === 0 ? (
+                  <div className="empty-state">
+                    <div style={{ fontSize:'2.5rem' }}>{txSearch || txFilter !== 'all' ? '🔍' : '📭'}</div>
+                    <p>{txSearch || txFilter !== 'all' ? 'No transactions match your search' : 'No transactions yet'}</p>
+                    {txSearch && (
+                      <button className="btn-outline" onClick={() => { setTxSearch(''); setTxFilter('all') }}>
+                        Clear Search
+                      </button>
+                    )}
+                    {!txSearch && txns.length === 0 && (
+                      <button className="btn-outline" onClick={loadTxns}>{t.refresh}</button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="card">
+                    {filtered.map((tx, i) => (
+                      <div key={i} className={`tx-row ${tx.type === 'received' ? 'tx-received' : 'tx-sent'}`}>
+                        <div className="tx-type-icon">
+                          {tx.type === 'received' ? '📥' : '💸'}
+                        </div>
+                        <div className="tx-info">
+                          <div className="tx-top-row">
+                            <span className={`tx-type-label ${tx.type === 'received' ? 'type-received' : 'type-sent'}`}>
+                              {tx.type === 'received' ? 'Received' : 'Sent'}
+                            </span>
+                            {tx.amount && tx.amount !== '0' && (
+                              <span className={`tx-amount ${tx.type === 'received' ? 'amount-in' : 'amount-out'}`}>
+                                {tx.type === 'received' ? '+' : '-'}{tx.amount} XLM
+                              </span>
+                            )}
+                          </div>
+                          <div className="tx-hash">TX: {tx.hash?.slice(0,14)}…</div>
+                          <div className="tx-date">{tx.date} · {tx.time}</div>
+                          {tx.memo && <div className="tx-memo">"{tx.memo}"</div>}
+                        </div>
+                        <a className="tx-view" href={`https://stellar.expert/explorer/testnet/tx/${tx.hash}`} target="_blank" rel="noreferrer">View ↗</a>
+                      </div>
+                    ))}
+                    <button className="btn-outline small" onClick={loadTxns} style={{ marginTop:12 }}>{t.refresh}</button>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
 
           {/* ── PROFILE ── */}
           {page === 'profile' && (
             <div className="page fade-up">
-              <div className="page-title"><h2>👤 My Profile</h2><p>Your RemitChain account</p></div>
+              <div className="page-title"><h2>{t.my_profile}</h2><p>{t.profile_subtitle}</p></div>
               <div className="card">
                 <div className="profile-header">
                   <div className="profile-avatar">{user.name[0].toUpperCase()}</div>
                   <div>
                     <div className="profile-name">{user.name}</div>
-                    <div className="profile-badge">✅ KYC Verified</div>
+                    <div className="profile-badge">{t.kyc_verified}</div>
                   </div>
                 </div>
                 <div className="profile-fields">
@@ -1481,7 +1607,7 @@ function MainApp({ user, onLogout }) {
                   <div className="pf-key">Full Wallet Address</div>
                   <div className="pf-addr">{user.walletAddress}</div>
                 </div>
-                <button className="btn-outline danger-btn" onClick={onLogout}>Logout ⏻</button>
+                <button className="btn-outline danger-btn" onClick={onLogout}>{t.logout}</button>
               </div>
             </div>
           )}
@@ -1491,13 +1617,13 @@ function MainApp({ user, onLogout }) {
         {/* Sidebar */}
         <div className="sidebar">
           <div className="card fade-up">
-            <div className="card-label">💰 Balance</div>
+            <div className="card-label">{t.balance}</div>
             <div className="balance-big">{balLoading ? <Spinner/> : balance}<span className="balance-unit">XLM</span></div>
             <div className="balance-usd">≈ ${(parseFloat(balance||0) * 0.11).toFixed(2)} USD</div>
             <button className="btn-outline small" onClick={handleFund} style={{ marginTop:10 }}>💧 Fund Testnet</button>
           </div>
           <div className="card fade-up">
-            <div className="card-label">📊 Exchange Rates</div>
+            <div className="card-label">{t.exchange_rates}</div>
             {Object.entries(CURRENCIES).map(([c, v]) => (
               <div key={c} className="rate-row">
                 <span>{v.flag} {c}</span>
@@ -1513,7 +1639,7 @@ function MainApp({ user, onLogout }) {
         <div className="incoming-toast pop-in">
           <div className="toast-icon">💰</div>
           <div className="toast-body">
-            <div className="toast-title">Money Received!</div>
+            <div className="toast-title">{t.money_received}</div>
             <div className="toast-msg">
               You received <strong>{parseFloat(incomingPayment.amount).toFixed(2)} XLM</strong>
               {' '}from {shortAddress(incomingPayment.from)}
