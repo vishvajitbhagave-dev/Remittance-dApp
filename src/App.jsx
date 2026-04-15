@@ -968,6 +968,142 @@ _Sent via RemitChain · Stellar Testnet_`
   )
 }
 
+
+// ── QR Scanner using device camera ───────────────────────────────────────────
+function QRScanner({ onScan, onClose }) {
+  const videoRef  = React.useRef(null)
+  const streamRef = React.useRef(null)
+  const [error, setError]     = React.useState('')
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    startCamera()
+    return () => stopCamera()
+  }, [])
+
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' } // Use back camera on phone
+      })
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        videoRef.current.play()
+        setLoading(false)
+        scanQR()
+      }
+    } catch (err) {
+      setError('Camera access denied. Please allow camera permission and try again.')
+      setLoading(false)
+    }
+  }
+
+  function stopCamera() {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop())
+      streamRef.current = null
+    }
+  }
+
+  async function scanQR() {
+    // Load jsQR library from CDN
+    if (!window.jsQR) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'
+        script.onload  = resolve
+        script.onerror = reject
+        document.head.appendChild(script)
+      })
+    }
+
+    const canvas  = document.createElement('canvas')
+    const ctx     = canvas.getContext('2d')
+    let running   = true
+
+    const scan = () => {
+      if (!running || !videoRef.current || videoRef.current.readyState !== 4) {
+        if (running) requestAnimationFrame(scan)
+        return
+      }
+      canvas.width  = videoRef.current.videoWidth
+      canvas.height = videoRef.current.videoHeight
+      ctx.drawImage(videoRef.current, 0, 0)
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const code = window.jsQR(imageData.data, imageData.width, imageData.height)
+      if (code) {
+        running = false
+        stopCamera()
+        // Parse QR code — could be RemitChain QR or plain Stellar address
+        try {
+          const parsed = JSON.parse(code.data)
+          if (parsed.address) { onScan(parsed.address, parsed.name || ''); return }
+        } catch {}
+        // Plain Stellar address
+        if (code.data.startsWith('G') && code.data.length === 56) {
+          onScan(code.data, '')
+          return
+        }
+        setError('Invalid QR code. Please scan a RemitChain or Stellar QR code.')
+        running = true
+        startCamera()
+        return
+      }
+      if (running) requestAnimationFrame(scan)
+    }
+    requestAnimationFrame(scan)
+
+    return () => { running = false }
+  }
+
+  return (
+    <div className="scanner-overlay fade-in">
+      <div className="scanner-modal pop-in">
+        <div className="scanner-header">
+          <span className="scanner-title">📷 Scan QR Code</span>
+          <button className="icon-btn" onClick={onClose}>✕</button>
+        </div>
+        <div className="scanner-body">
+          {loading && (
+            <div className="scanner-loading">
+              <Spinner size={32} />
+              <p>Starting camera…</p>
+            </div>
+          )}
+          {error ? (
+            <div className="scanner-error">
+              <div style={{ fontSize:'2rem' }}>📷</div>
+              <p>{error}</p>
+              <button className="btn-outline" onClick={onClose}>Go Back</button>
+            </div>
+          ) : (
+            <>
+              <video
+                ref={videoRef}
+                className="scanner-video"
+                playsInline
+                muted
+                style={{ display: loading ? 'none' : 'block' }}
+              />
+              <div className="scanner-frame">
+                <div className="sf-corner sf-tl" />
+                <div className="sf-corner sf-tr" />
+                <div className="sf-corner sf-bl" />
+                <div className="sf-corner sf-br" />
+                <div className="sf-line" />
+              </div>
+              {!loading && !error && (
+                <p className="scanner-hint">Point camera at receiver's QR code</p>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── MAIN APP (after login) ────────────────────────────────────────────────────
 function MainApp({ user, onLogout }) {
   const [page, setPage]           = useState('home')
@@ -997,7 +1133,11 @@ function MainApp({ user, onLogout }) {
   const [showReceipt, setShowReceipt]   = useState(false)
   const [receiptData, setReceiptData]   = useState(null)
   const [txMsg, setTxMsg]               = useState('')
-  const [sendMode, setSendMode]         = useState('options') // 'options' | 'search' | 'manual'
+  const [sendMode, setSendMode]         = useState('options') // 'options' | 'search' | 'scanner' | 'manual'
+  const [scanError, setScanError]       = useState('')
+  const [scanning, setScanning]         = useState(false)
+  const videoRef                        = React.useRef(null)
+  const streamRef                       = React.useRef(null)
   const [searchQuery, setSearchQuery]   = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
@@ -1315,7 +1455,17 @@ function MainApp({ user, onLogout }) {
                         <span className="send-opt-arrow">→</span>
                       </button>
 
-                      {/* Option 2 — Paste wallet address (advanced) */}
+                      {/* Option 2 — Scan QR Code */}
+                      <button className="send-opt-btn send-opt-scanner" onClick={() => setSendMode('scanner')}>
+                        <span className="send-opt-icon">📷</span>
+                        <div className="send-opt-text">
+                          <span className="send-opt-title">Scan QR Code</span>
+                          <span className="send-opt-sub">Point camera at receiver's QR</span>
+                        </div>
+                        <span className="send-opt-arrow">→</span>
+                      </button>
+
+                      {/* Option 3 — Paste wallet address (advanced) */}
                       <button className="send-opt-btn send-opt-secondary" onClick={() => setSendMode('manual')}>
                         <span className="send-opt-icon">📋</span>
                         <div className="send-opt-text">
@@ -1326,6 +1476,19 @@ function MainApp({ user, onLogout }) {
                       </button>
                     </div>
                   </div>
+                )}
+
+                {/* ── SCANNER MODE ── */}
+                {sendMode === 'scanner' && (
+                  <QRScanner
+                    onScan={(address, name) => {
+                      setReceiver(address)
+                      setReceiverName(name || shortAddress(address))
+                      setSendMode('manual')
+                      setScanError('')
+                    }}
+                    onClose={() => setSendMode('options')}
+                  />
                 )}
 
                 {/* ── SEARCH MODE ── */}
