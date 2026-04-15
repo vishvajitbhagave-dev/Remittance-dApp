@@ -970,7 +970,7 @@ _Sent via RemitChain · Stellar Testnet_`
 
 // ── MAIN APP (after login) ────────────────────────────────────────────────────
 function MainApp({ user, onLogout }) {
-  const [page, setPage]           = useState('send')
+  const [page, setPage]           = useState('home')
   const [lang, setLang]           = useState(() => localStorage.getItem('rc_lang') || 'en')
   const t = getT(lang)
   const [balance, setBalance]     = useState('—')
@@ -1206,6 +1206,7 @@ function MainApp({ user, onLogout }) {
       {/* Nav */}
       <nav className="nav">
         {[
+          { id:'home',    icon:'🏠', label:'Home'     },
           { id:'send',    icon:'💸', label:t.send    },
           { id:'receive', icon:'📥', label:t.receive },
           { id:'history', icon:'📋', label:t.history },
@@ -1234,6 +1235,64 @@ function MainApp({ user, onLogout }) {
 
       <main className="main">
         <div className="content">
+
+          {/* ── HOME / DASHBOARD ── */}
+          {page === 'home' && (
+            <div className="page fade-up">
+              <div className="page-title">
+                <h2>👋 Welcome, {user.name.split(' ')[0]}!</h2>
+                <p>Your RemitChain Dashboard</p>
+              </div>
+
+              {/* Balance Card */}
+              <div className="card home-balance-card">
+                <div className="home-bal-label">💰 {t.balance}</div>
+                <div className="home-bal-big">
+                  {balLoading ? <Spinner size={28}/> : balance}
+                  <span className="home-bal-unit">XLM</span>
+                </div>
+                <div className="home-bal-usd">≈ ${(parseFloat(balance||0) * 0.11).toFixed(2)} USD</div>
+                <button className="btn-outline small" onClick={handleFund} style={{ marginTop:12 }}>
+                  💧 Fund Testnet
+                </button>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="home-actions">
+                <button className="home-action-btn" onClick={() => setPage('send')}>
+                  <span className="ha-icon">💸</span>
+                  <span className="ha-label">{t.send}</span>
+                </button>
+                <button className="home-action-btn" onClick={() => setPage('receive')}>
+                  <span className="ha-icon">📥</span>
+                  <span className="ha-label">{t.receive}</span>
+                </button>
+                <button className="home-action-btn" onClick={() => { setPage('history'); loadTxns() }}>
+                  <span className="ha-icon">📋</span>
+                  <span className="ha-label">{t.history}</span>
+                </button>
+                <button className="home-action-btn" onClick={() => setPage('profile')}>
+                  <span className="ha-icon">👤</span>
+                  <span className="ha-label">{t.profile}</span>
+                </button>
+              </div>
+
+              {/* Exchange Rates */}
+              <div className="card fade-up">
+                <div className="card-label">{t.exchange_rates}</div>
+                <div className="rates-grid">
+                  {Object.entries(CURRENCIES).map(([c, v]) => (
+                    <div key={c} className="rate-card">
+                      <span className="rate-flag">{v.flag}</span>
+                      <span className="rate-code">{c}</span>
+                      <span className="rate-val-home">1 USD = {(1/v.rate).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          )}
 
           {/* ── SEND ── */}
           {page === 'send' && (
@@ -1614,24 +1673,7 @@ function MainApp({ user, onLogout }) {
 
         </div>
 
-        {/* Sidebar */}
-        <div className="sidebar">
-          <div className="card fade-up">
-            <div className="card-label">{t.balance}</div>
-            <div className="balance-big">{balLoading ? <Spinner/> : balance}<span className="balance-unit">XLM</span></div>
-            <div className="balance-usd">≈ ${(parseFloat(balance||0) * 0.11).toFixed(2)} USD</div>
-            <button className="btn-outline small" onClick={handleFund} style={{ marginTop:10 }}>💧 Fund Testnet</button>
-          </div>
-          <div className="card fade-up">
-            <div className="card-label">{t.exchange_rates}</div>
-            {Object.entries(CURRENCIES).map(([c, v]) => (
-              <div key={c} className="rate-row">
-                <span>{v.flag} {c}</span>
-                <span className="rate-val">1 USD = {(1/v.rate).toFixed(2)} {c}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Sidebar hidden — content moved to Home Dashboard */}
       </main>
 
       {/* Incoming Payment Toast Notification */}
