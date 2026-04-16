@@ -1027,3 +1027,39 @@
   background: rgba(0,212,255,0.12) !important;
   border-color: var(--accent) !important;
 }
+
+/* ── QR Action Buttons ───────────────────────────────────────────────────── */
+.qr-action-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.qr-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 18px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all .2s;
+  min-width: 90px;
+  flex: 1;
+}
+.qr-action-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.qab-icon  { font-size: 1.4rem; }
+.qab-label { font-size: 0.75rem; font-weight: 700; color: var(--ink2); white-space: nowrap; }
+
+@media (max-width: 480px) {
+  .qr-action-btn  { padding: 10px 12px; min-width: 70px; }
+  .qab-label      { font-size: 0.68rem; }
+}

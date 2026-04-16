@@ -1693,14 +1693,68 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
                   </div>
                   <div className="qr-name">{user.name}</div>
                   <div className="qr-addr-full">{addr}</div>
-                  <div className="qr-btns">
-                    <button className="btn-primary" onClick={copyAddress}>
-                      {copied ? t.address_copied : t.copy_address}
+                  {/* 4 action buttons */}
+                  <div className="qr-action-btns">
+
+                    {/* 1. Download QR */}
+                    <button className="qr-action-btn" onClick={async () => {
+                      try {
+                        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(addr)}&margin=20&ecc=M&format=png`
+                        const resp  = await fetch(qrUrl)
+                        const blob  = await resp.blob()
+                        const link  = document.createElement('a')
+                        link.href   = URL.createObjectURL(blob)
+                        link.download = `RemitChain-QR-${user.name.replace(/\s/g,'-')}.png`
+                        link.click()
+                        URL.revokeObjectURL(link.href)
+                      } catch {
+                        alert('Download failed. Please take a screenshot instead.')
+                      }
+                    }}>
+                      <span className="qab-icon">📥</span>
+                      <span className="qab-label">Download QR</span>
                     </button>
-                    <button className="btn-outline" onClick={() => setShowQR(!showQR)}>
-                      {showQR ? 'Hide Details' : 'Show QR Info'}
+
+                    {/* 2. Share QR */}
+                    <button className="qr-action-btn" onClick={async () => {
+                      const shareText = `💫 Send me money on RemitChain!
+
+Name: ${user.name}
+Wallet: ${addr}
+
+Open RemitChain → Send → Paste wallet address`
+                      if (navigator.share) {
+                        try {
+                          // Try sharing QR image
+                          const qrUrl  = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(addr)}&margin=20&format=png`
+                          const resp   = await fetch(qrUrl)
+                          const blob   = await resp.blob()
+                          const file   = new File([blob], 'RemitChain-QR.png', { type: 'image/png' })
+                          await navigator.share({ title: 'My RemitChain QR Code', text: shareText, files: [file] })
+                        } catch {
+                          // Fallback to text share if image fails
+                          try { await navigator.share({ title: 'My RemitChain QR', text: shareText }) }
+                          catch {}
+                        }
+                      } else {
+                        // Desktop: copy share text to clipboard
+                        navigator.clipboard.writeText(shareText)
+                        alert('Share text copied! Paste it on WhatsApp or any app.')
+                      }
+                    }}>
+                      <span className="qab-icon">📤</span>
+                      <span className="qab-label">Share QR</span>
                     </button>
+
+                    {/* 3. Show QR Info */}
+                    <button className="qr-action-btn" onClick={() => setShowQR(!showQR)}>
+                      <span className="qab-icon">{showQR ? '🔼' : '🔽'}</span>
+                      <span className="qab-label">{showQR ? 'Hide Info' : 'QR Info'}</span>
+                    </button>
+
                   </div>
+
+                  {/* QR Info expanded */}
                   {showQR && (
                     <div className="qr-info-box fade-in">
                       <div className="qr-info-row"><span>Name</span><span>{user.name}</span></div>
