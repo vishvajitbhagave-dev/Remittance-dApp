@@ -212,37 +212,52 @@ function Spinner({ size = 18, color = 'var(--accent)' }) {
 }
 
 // ── QR Code SVG Generator ─────────────────────────────────────────────────────
-function QRCode({ value, size = 180 }) {
+function QRCode({ value, name, size = 240 }) {
+  const [loaded, setLoaded] = React.useState(false)
+  const [failed, setFailed] = React.useState(false)
+
   if (!value) return null
-  // Generate a deterministic grid from the address
-  const grid = Array.from({ length: 21 }, (_, row) =>
-    Array.from({ length: 21 }, (_, col) => {
-      const idx = row * 21 + col
-      const ch  = value.charCodeAt(idx % value.length)
-      // Always fill corners (finder patterns)
-      if ((row < 3 && col < 3) || (row < 3 && col > 17) || (row > 17 && col < 3)) return true
-      return (ch + row + col) % 3 === 0
-    })
-  )
-  const cell = size / 21
+
+  // QR encodes plain Stellar address — works with any QR scanner and RemitChain app scanner
+  const qrData = value
+  const qrUrl  = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrData)}&margin=15&ecc=M&format=png`
+
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ borderRadius: 8, background: '#fff' }}>
-      {grid.map((row, r) =>
-        row.map((filled, c) =>
-          filled ? (
-            <rect key={`${r}-${c}`} x={c * cell + 1} y={r * cell + 1}
-              width={cell - 1} height={cell - 1}
-              fill="#1a1410" rx={1}
-            />
-          ) : null
-        )
+    <div style={{ display:'inline-block', background:'#fff', borderRadius:14, padding:10, boxShadow:'0 4px 24px rgba(0,0,0,0.12)' }}>
+      {/* Loading */}
+      {!loaded && !failed && (
+        <div style={{ width:size, height:size, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:10 }}>
+          <Spinner size={32} />
+          <span style={{ fontSize:'0.75rem', color:'#999' }}>Generating QR...</span>
+        </div>
       )}
-      {/* Center logo */}
-      <rect x={size/2 - 16} y={size/2 - 16} width={32} height={32} rx={6} fill="#fff"/>
-      <text x={size/2} y={size/2 + 8} textAnchor="middle" fontSize={20}>💫</text>
-    </svg>
+
+      {/* Error */}
+      {failed && (
+        <div style={{ width:size, height:size, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:8, padding:'0 16px' }}>
+          <span style={{ fontSize:'2rem' }}>⚠️</span>
+          <span style={{ fontSize:'0.75rem', color:'#999', textAlign:'center' }}>No internet. Check connection.</span>
+          <button style={{ fontSize:'0.72rem', color:'var(--accent)', background:'none', border:'none', cursor:'pointer', fontWeight:700 }}
+            onClick={() => { setFailed(false); setLoaded(false) }}>
+            🔄 Retry
+          </button>
+        </div>
+      )}
+
+      {/* QR Image — NO logo overlay so camera can scan it properly */}
+      <img
+        src={qrUrl}
+        width={size}
+        height={size}
+        alt="Scan to send money"
+        style={{ display: loaded ? 'block' : 'none', borderRadius:8 }}
+        onLoad={() => setLoaded(true)}
+        onError={() => setFailed(true)}
+      />
+    </div>
   )
 }
+
 
 // ── Status Banner ─────────────────────────────────────────────────────────────
 function Banner({ status, hash, msg, onDismiss }) {
@@ -1035,17 +1050,49 @@ function QRScanner({ onScan, onClose }) {
       if (code) {
         running = false
         stopCamera()
-        // Parse QR code — could be RemitChain QR or plain Stellar address
-        try {
-          const parsed = JSON.parse(code.data)
-          if (parsed.address) { onScan(parsed.address, parsed.name || ''); return }
-        } catch {}
-        // Plain Stellar address
-        if (code.data.startsWith('G') && code.data.length === 56) {
-          onScan(code.data, '')
+
+        const raw = code.data.trim()
+
+        // Try 1 — Plain Stellar address (starts with G, 56 chars)
+        if (raw.startsWith('G') && raw.length === 56) {
+          onScan(raw, '')
           return
         }
-        setError('Invalid QR code. Please scan a RemitChain or Stellar QR code.')
+
+        // Try 2 — JSON format {"address":"G...","name":"..."}
+        try {
+          const parsed = JSON.parse(raw)
+          if (parsed.address && parsed.address.startsWith('G')) {
+            onScan(parsed.address, parsed.name || '')
+            return
+          }
+        } catch {}
+
+        // Try 3 — URL format like localhost:5173/?to=G...&name=...
+        try {
+          // Handle both http:// and localhost: formats
+          let urlStr = raw
+          if (!urlStr.startsWith('http')) urlStr = 'http://' + urlStr
+          const url    = new URL(urlStr)
+          const toAddr = url.searchParams.get('to')
+          const toName = url.searchParams.get('name')
+          if (toAddr && toAddr.startsWith('G') && toAddr.length === 56) {
+            onScan(toAddr, toName || '')
+            return
+          }
+        } catch {}
+
+        // Try 4 — web+stellar: or stellar: scheme
+        if (raw.startsWith('web+stellar:') || raw.startsWith('stellar:')) {
+          const addr = raw.split(':').pop().split('?')[0]
+          if (addr.startsWith('G') && addr.length === 56) {
+            onScan(addr, '')
+            return
+          }
+        }
+
+        // Nothing matched — show error and retry
+        setError('Invalid QR code. Please scan the QR code from RemitChain Receive page.')
         running = true
         startCamera()
         return
@@ -1105,7 +1152,7 @@ function QRScanner({ onScan, onClose }) {
 }
 
 // ── MAIN APP (after login) ────────────────────────────────────────────────────
-function MainApp({ user, onLogout }) {
+function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
   const [page, setPage]           = useState('home')
   const [lang, setLang]           = useState(() => localStorage.getItem('rc_lang') || 'en')
   const t = getT(lang)
@@ -1224,6 +1271,17 @@ function MainApp({ user, onLogout }) {
   }, [addr])
 
   useEffect(() => { loadBalance() }, [loadBalance])
+
+  // Auto-fill send form when user scanned a QR code
+  useEffect(() => {
+    if (qrPayload && user) {
+      setReceiver(qrPayload.address)
+      setReceiverName(qrPayload.name || shortAddress(qrPayload.address))
+      setSendMode('manual')
+      setPage('send')
+      setQrPayload(null)
+    }
+  }, [qrPayload, user])
   useEffect(() => { const t = setInterval(loadBalance, 15000); return () => clearInterval(t) }, [loadBalance])
 
   // Check for incoming payments every 8 seconds (near real-time)
@@ -1631,7 +1689,7 @@ function MainApp({ user, onLogout }) {
               <div className="card">
                 <div className="qr-section">
                   <div className="qr-wrapper">
-                    <QRCode value={addr} size={200}/>
+                    <QRCode value={addr} name={user.name} size={240}/>
                   </div>
                   <div className="qr-name">{user.name}</div>
                   <div className="qr-addr-full">{addr}</div>
@@ -1875,11 +1933,22 @@ function MainApp({ user, onLogout }) {
 export default function App() {
   const [authPage, setAuthPage] = useState('login') // login | signup
   const [user, setUser]         = useState(null)
+  const [qrPayload, setQrPayload] = useState(null) // from scanned QR URL
 
-  // Check existing session on load
+  // Check existing session on load + read QR URL params
   useEffect(() => {
     const session = getSession()
     if (session) setUser(session)
+
+    // Read URL params — set when someone scans a RemitChain QR code
+    const params = new URLSearchParams(window.location.search)
+    const toAddr = params.get('to')
+    const toName = params.get('name')
+    if (toAddr && toAddr.startsWith('G') && toAddr.length === 56) {
+      setQrPayload({ address: toAddr, name: toName || '' })
+      // Clean URL without reloading
+      window.history.replaceState({}, '', window.location.pathname)
+    }
   }, [])
 
   function handleLogout() {
@@ -1888,7 +1957,7 @@ export default function App() {
     setAuthPage('login')
   }
 
-  if (user) return <MainApp user={user} onLogout={handleLogout} />
+  if (user) return <MainApp user={user} onLogout={handleLogout} qrPayload={qrPayload} setQrPayload={setQrPayload} />
   if (authPage === 'signup') return <SignupPage onSignup={setUser} onGoLogin={() => setAuthPage('login')} />
   return <LoginPage onLogin={setUser} onGoSignup={() => setAuthPage('signup')} />
 }
