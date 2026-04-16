@@ -1163,6 +1163,11 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
   const [txSearch, setTxSearch]         = useState('')
   const [txFilter, setTxFilter]         = useState('all')   // all | sent | received
   const [txSort, setTxSort]             = useState('latest') // latest | oldest
+  const [viewMore, setViewMore]         = useState(false)
+  const [showDownload, setShowDownload] = useState(false)
+  const [dlYear, setDlYear]             = useState(new Date().getFullYear().toString())
+  const [dlFormat, setDlFormat]         = useState('pdf')
+  const [dlLoading, setDlLoading]       = useState(false)
   const [newTxCount, setNewTxCount]     = useState(0)
   const [incomingPayment, setIncoming]  = useState(null)
   const lastIncomingHashRef             = React.useRef(null)
@@ -1797,12 +1802,25 @@ Open RemitChain → Send → Paste wallet address`
                   : (a.timestamp || 0) - (b.timestamp || 0)
               )
 
+            const displayed = viewMore ? filtered : filtered.slice(0, 5)
+
             return (
               <div className="page fade-up">
-                <div className="page-title"><h2>{t.tx_history}</h2><p>{t.tx_subtitle}</p></div>
 
-                {/* Search + Filter + Sort Controls */}
+                {/* Title row with Download History button */}
+                <div className="tx-title-row">
+                  <div>
+                    <h2 style={{ fontSize:'1.3rem', fontWeight:800, color:'var(--ink)' }}>{t.tx_history}</h2>
+                    <p style={{ fontSize:'0.82rem', color:'var(--ink3)', marginTop:2 }}>{t.tx_subtitle}</p>
+                  </div>
+                  <button className="dl-history-btn" onClick={() => setShowDownload(true)}>
+                    📥 Download History
+                  </button>
+                </div>
+
+                {/* Search + Filter + Refresh Controls */}
                 <div className="tx-controls">
+
                   {/* Search box */}
                   <div className="tx-search-wrap">
                     <span className="tx-search-icon">🔍</span>
@@ -1817,7 +1835,7 @@ Open RemitChain → Send → Paste wallet address`
                     )}
                   </div>
 
-                  {/* Filter buttons */}
+                  {/* Filter + Refresh row */}
                   <div className="tx-filter-row">
                     <div className="tx-filter-group">
                       {[
@@ -1828,32 +1846,22 @@ Open RemitChain → Send → Paste wallet address`
                         <button
                           key={f.val}
                           className={`tx-filter-btn ${txFilter === f.val ? 'tx-filter-active' : ''}`}
-                          onClick={() => setTxFilter(f.val)}
+                          onClick={() => { setTxFilter(f.val); setViewMore(false) }}
                         >
                           {f.icon} {f.label}
                         </button>
                       ))}
                     </div>
-                    <div className="tx-sort-group">
-                      {[
-                        { val:'latest', label:'Latest' },
-                        { val:'oldest', label:'Oldest' },
-                      ].map(s => (
-                        <button
-                          key={s.val}
-                          className={`tx-sort-btn ${txSort === s.val ? 'tx-sort-active' : ''}`}
-                          onClick={() => setTxSort(s.val)}
-                        >
-                          {s.val === 'latest' ? '↓' : '↑'} {s.label}
-                        </button>
-                      ))}
-                    </div>
+                    {/* Refresh button */}
+                    <button className="tx-refresh-btn" onClick={loadTxns} disabled={txnsLoading}>
+                      {txnsLoading ? <Spinner size={14}/> : '🔄'} Refresh
+                    </button>
                   </div>
 
                   {/* Results count */}
                   {!txnsLoading && txns.length > 0 && (
                     <div className="tx-count">
-                      Showing {filtered.length} of {txns.length} transactions
+                      Showing {Math.min(displayed.length, filtered.length)} of {filtered.length} transactions
                     </div>
                   )}
                 </div>
@@ -1880,7 +1888,7 @@ Open RemitChain → Send → Paste wallet address`
                   </div>
                 ) : (
                   <div className="card">
-                    {filtered.map((tx, i) => (
+                    {displayed.map((tx, i) => (
                       <div key={i} className={`tx-row ${tx.type === 'received' ? 'tx-received' : 'tx-sent'}`}>
                         <div className="tx-type-icon">
                           {tx.type === 'received' ? '📥' : '💸'}
@@ -1903,9 +1911,149 @@ Open RemitChain → Send → Paste wallet address`
                         <a className="tx-view" href={`https://stellar.expert/explorer/testnet/tx/${tx.hash}`} target="_blank" rel="noreferrer">View ↗</a>
                       </div>
                     ))}
-                    <button className="btn-outline small" onClick={loadTxns} style={{ marginTop:12 }}>{t.refresh}</button>
+
+                    {/* View More / View Less button */}
+                    {filtered.length > 5 && (
+                      <button
+                        className="view-more-btn"
+                        onClick={() => setViewMore(!viewMore)}
+                      >
+                        {viewMore
+                          ? '🔼 View Less'
+                          : `🔽 View More (${filtered.length - 5} more transactions)`
+                        }
+                      </button>
+                    )}
                   </div>
                 )}
+
+                {/* Download History Modal */}
+                {showDownload && (
+                  <div className="overlay fade-in" onClick={() => setShowDownload(false)}>
+                    <div className="dl-modal pop-in" onClick={e => e.stopPropagation()}>
+
+                      {/* Header */}
+                      <div className="dl-modal-head">
+                        <button className="icon-btn dl-close" onClick={() => setShowDownload(false)}>✕</button>
+                      </div>
+
+                      <div className="dl-modal-icon">📄</div>
+                      <h3 className="dl-modal-title">Download your transfer history</h3>
+                      <p className="dl-modal-subtitle">Get transfer dates, recipient names, and how much you sent.</p>
+
+                      {/* Year selector */}
+                      <div className="dl-field">
+                        <label className="dl-label">Select year</label>
+                        <select className="dl-select" value={dlYear} onChange={e => setDlYear(e.target.value)}>
+                          {[2026, 2025, 2024].map(y => (
+                            <option key={y} value={y}>{y}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Format selector */}
+                      <div className="dl-field">
+                        <label className="dl-label">File format</label>
+                        <div className="dl-formats">
+                          {[
+                            { val:'pdf', label:'PDF', desc:'Portable Document Format' },
+                            { val:'csv', label:'CSV', desc:'Comma-Separated Values' },
+                          ].map(f => (
+                            <div
+                              key={f.val}
+                              className={`dl-format-opt ${dlFormat === f.val ? 'dl-format-active' : ''}`}
+                              onClick={() => setDlFormat(f.val)}
+                            >
+                              <div className={`dl-radio ${dlFormat === f.val ? 'dl-radio-active' : ''}`}/>
+                              <div>
+                                <div className="dl-format-name">{f.label}</div>
+                                <div className="dl-format-desc">{f.desc}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Download button */}
+                      <button
+                        className="dl-download-btn"
+                        disabled={dlLoading}
+                        onClick={() => {
+                          setDlLoading(true)
+                          const yearTxns = txns.filter(tx => tx.date?.includes(dlYear))
+
+                          if (dlFormat === 'csv') {
+                            // CSV download
+                            const rows = [
+                              ['Date', 'Time', 'Type', 'Amount (XLM)', 'Memo', 'Transaction Hash'],
+                              ...yearTxns.map(tx => [
+                                tx.date, tx.time,
+                                tx.type === 'received' ? 'Received' : 'Sent',
+                                (tx.type === 'received' ? '+' : '-') + tx.amount,
+                                tx.memo || '',
+                                tx.hash,
+                              ])
+                            ]
+                            const csv  = rows.map(r => r.join(',')).join('')
+                            const blob = new Blob([csv], { type: 'text/csv' })
+                            const link = document.createElement('a')
+                            link.href     = URL.createObjectURL(blob)
+                            link.download = `RemitChain-History-${dlYear}.csv`
+                            link.click()
+                            setDlLoading(false)
+                            setShowDownload(false)
+                          } else {
+                            // PDF — build HTML and print
+                            const rows = yearTxns.map(tx => `
+                              <tr>
+                                <td>${tx.date}</td>
+                                <td>${tx.time}</td>
+                                <td style="color:${tx.type==='received'?'#2d6a4f':'#e85d04'}">${tx.type==='received'?'Received':'Sent'}</td>
+                                <td style="font-weight:700">${tx.type==='received'?'+':'-'}${tx.amount} XLM</td>
+                                <td>${tx.memo||'—'}</td>
+                                <td style="font-size:10px">${tx.hash?.slice(0,20)}...</td>
+                              </tr>`).join('')
+                            const html = `
+                              <html><head><title>RemitChain History ${dlYear}</title>
+                              <style>
+                                body { font-family: Arial, sans-serif; padding: 30px; }
+                                h1 { color: #e85d04; }
+                                h3 { color: #555; font-weight:normal; margin-top:4px; }
+                                table { width:100%; border-collapse:collapse; margin-top:20px; }
+                                th { background:#e85d04; color:#fff; padding:10px 8px; text-align:left; font-size:12px; }
+                                td { padding:8px; border-bottom:1px solid #eee; font-size:12px; }
+                                tr:nth-child(even) { background:#f9f9f9; }
+                                .footer { margin-top:30px; font-size:11px; color:#999; text-align:center; }
+                              </style></head>
+                              <body>
+                                <h1>💫 RemitChain</h1>
+                                <h3>Transfer History — ${dlYear}</h3>
+                                <p style="font-size:12px;color:#888">Account: ${user.name} &nbsp;|&nbsp; Generated: ${new Date().toLocaleDateString()}</p>
+                                <table>
+                                  <thead><tr><th>Date</th><th>Time</th><th>Type</th><th>Amount</th><th>Memo</th><th>Transaction</th></tr></thead>
+                                  <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:#999">No transactions in '+dlYear+'</td></tr>'}</tbody>
+                                </table>
+                                <div class="footer">Powered by RemitChain · Stellar Testnet · ${new Date().toLocaleDateString()}</div>
+                              </body></html>`
+                            const win = window.open('', '_blank')
+                            win.document.write(html)
+                            win.document.close()
+                            win.print()
+                            setDlLoading(false)
+                            setShowDownload(false)
+                          }
+                        }}
+                      >
+                        {dlLoading ? <><Spinner size={16} color="#fff"/> Preparing…</> : 'Download'}
+                      </button>
+
+                      <button className="dl-cancel-btn" onClick={() => setShowDownload(false)}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
               </div>
             )
           })()}
