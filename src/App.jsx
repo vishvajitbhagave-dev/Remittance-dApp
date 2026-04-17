@@ -5,7 +5,7 @@ import {
   isFreighterInstalled, connectFreighter,
   fetchBalance, fetchTransactions, sendRemittance, fundTestnetAccount,
   isValidStellarAddress, shortAddress, convertToXLM, convertFromXLM,
-  formatBalance, generateOTP,
+  formatBalance, generateOTP, fetchLiveRates,
   saveUser, getUserByPhone, saveSession, getSession, clearSession, cache,
   fetchLatestIncomingPayment,
 } from './stellar.js'
@@ -1158,6 +1158,10 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
   const t = getT(lang)
   const [balance, setBalance]     = useState('—')
   const [balLoading, setBalLoading] = useState(false)
+  const [liveRates, setLiveRates]   = useState(null)
+  const [ratesLoading, setRatesLoading] = useState(false)
+  const [viewMoreRates, setViewMoreRates] = useState(false)
+  const [rateSearch, setRateSearch]       = useState('')
   const [txns, setTxns]                 = useState([])
   const [txnsLoading, setTxnsLoading]   = useState(false)
   const [txSearch, setTxSearch]         = useState('')
@@ -1279,6 +1283,15 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
   }, [addr])
 
   useEffect(() => { loadBalance() }, [loadBalance])
+
+  // Fetch live exchange rates on mount
+  useEffect(() => {
+    setRatesLoading(true)
+    fetchLiveRates().then(rates => {
+      if (rates) setLiveRates(rates)
+      setRatesLoading(false)
+    })
+  }, [])
 
   // Auto-fill send form when user scanned a QR code
   useEffect(() => {
@@ -1485,18 +1498,71 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
               </div>
 
               {/* Exchange Rates */}
-              <div className="card fade-up">
-                <div className="card-label">{t.exchange_rates}</div>
-                <div className="rates-grid">
-                  {Object.entries(CURRENCIES).map(([c, v]) => (
-                    <div key={c} className="rate-card">
-                      <span className="rate-flag">{v.flag}</span>
-                      <span className="rate-code">{c}</span>
-                      <span className="rate-val-home">1 USD = {(1/v.rate).toFixed(2)}</span>
+              {/* Exchange Rates card with search + view more */}
+              {(() => {
+                const allCurrencies = Object.entries(CURRENCIES)
+                  .sort((a,b) => a[1].name.localeCompare(b[1].name))
+                const filtered = rateSearch.trim()
+                  ? allCurrencies.filter(([c, v]) =>
+                      c.toLowerCase().includes(rateSearch.toLowerCase()) ||
+                      v.name.toLowerCase().includes(rateSearch.toLowerCase())
+                    )
+                  : allCurrencies
+                const displayed = viewMoreRates ? filtered : filtered.slice(0, 5)
+                return (
+                  <div className="card fade-up">
+                    <div className="card-label">
+                      {t.exchange_rates}
+                      {ratesLoading && <span style={{marginLeft:6,fontSize:'0.62rem',color:'var(--accent)'}}>🔄 Live...</span>}
+                      {!ratesLoading && liveRates && <span style={{marginLeft:6,fontSize:'0.62rem',color:'var(--green)'}}>● Live rates</span>}
                     </div>
-                  ))}
-                </div>
-              </div>
+
+                    {/* Search box */}
+                    <div className="rates-search-wrap">
+                      <span>🔍</span>
+                      <input
+                        className="rates-search-input"
+                        placeholder="Search currency..."
+                        value={rateSearch}
+                        onChange={e => { setRateSearch(e.target.value); setViewMoreRates(true) }}
+                      />
+                      {rateSearch && (
+                        <button className="tx-search-clear" onClick={() => { setRateSearch(''); setViewMoreRates(false) }}>✕</button>
+                      )}
+                    </div>
+
+                    {/* Rates list */}
+                    <div className="rates-list">
+                      {displayed.length === 0 ? (
+                        <div style={{fontSize:'0.8rem',color:'var(--ink3)',textAlign:'center',padding:'12px'}}>No currency found</div>
+                      ) : displayed.map(([c, v]) => {
+                        const rate = liveRates ? (liveRates[c] ?? (1/v.rate)) : (1/v.rate)
+                        return (
+                          <div key={c} className="rate-list-row">
+                            <span className="rate-flag">{v.flag}</span>
+                            <div className="rate-list-info">
+                              <span className="rate-code">{c}</span>
+                              <span className="rate-list-name">{v.name}</span>
+                            </div>
+                            <span className="rate-list-val">
+                              1 USD = {typeof rate === 'number' ? rate.toFixed(4) : rate}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* View More / Less */}
+                    {!rateSearch && filtered.length > 5 && (
+                      <button className="view-more-btn" onClick={() => setViewMoreRates(!viewMoreRates)}>
+                        {viewMoreRates
+                          ? '🔼 View Less'
+                          : '🔽 View More (' + (filtered.length - 5) + ' more currencies)'}
+                      </button>
+                    )}
+                  </div>
+                )
+              })()}
 
             </div>
           )}
@@ -1637,9 +1703,14 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
                           <div className="conv-inputs">
                             <input className="conv-amount" type="number" placeholder="0.00" min="0"
                               value={amount} onChange={e => setAmount(e.target.value)} />
-                            <select className="conv-cur" value={fromCur} onChange={e => setFromCur(e.target.value)}>
-                              {Object.entries(CURRENCIES).map(([c, v]) => <option key={c} value={c}>{v.flag} {c}</option>)}
+                            <div className="conv-cur-wrap">
+                              <span className="conv-flag">{CURRENCIES[fromCur]?.flag}</span>
+                            <select className="conv-cur conv-cur-inner" value={fromCur} onChange={e => setFromCur(e.target.value)}>
+                              {Object.entries(CURRENCIES)
+                                .sort((a,b) => a[1].name.localeCompare(b[1].name))
+                                .map(([c, v]) => <option key={c} value={c}>{v.flag} {c}</option>)}
                             </select>
+                            </div>
                           </div>
                         </div>
                         <div className="conv-mid">
@@ -1650,9 +1721,14 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
                           <div className="conv-label">They Receive</div>
                           <div className="conv-inputs">
                             <div className="conv-result">{parseFloat(localAmount).toLocaleString()}</div>
-                            <select className="conv-cur" value={toCur} onChange={e => setToCur(e.target.value)}>
-                              {Object.entries(CURRENCIES).map(([c, v]) => <option key={c} value={c}>{v.flag} {c}</option>)}
+                            <div className="conv-cur-wrap">
+                              <span className="conv-flag">{CURRENCIES[toCur]?.flag}</span>
+                            <select className="conv-cur conv-cur-inner" value={toCur} onChange={e => setToCur(e.target.value)}>
+                              {Object.entries(CURRENCIES)
+                                .sort((a,b) => a[1].name.localeCompare(b[1].name))
+                                .map(([c, v]) => <option key={c} value={c}>{v.flag} {c}</option>)}
                             </select>
+                            </div>
                           </div>
                         </div>
                       </div>
