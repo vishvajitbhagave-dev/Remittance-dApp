@@ -856,7 +856,7 @@
 .tx-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
 .tx-row:last-of-type { border-bottom:none; }
 .tx-received { background: rgba(45,106,79,0.03); border-radius: var(--r2); padding: 10px 8px; margin: 0 -8px; }
-.tx-sent     { }
+.tx-sent     { opacity: 1; }
 
 .tx-type-icon { font-size:1.3rem; flex-shrink:0; }
 .tx-info      { flex:1; display:flex; flex-direction:column; gap:2px; }
@@ -1087,20 +1087,10 @@
   flex-wrap: wrap;
 }
 .dl-history-btn {
-  padding: 9px 16px;
-  background: var(--ink);
-  color: #fff;
-  border: none;
-  border-radius: var(--r);
-  font-family: var(--font);
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .2s;
   white-space: nowrap;
   flex-shrink: 0;
+  font-size: 0.82rem;
 }
-.dl-history-btn:hover { background: #333; transform: translateY(-1px); box-shadow: var(--shadow2); }
 
 /* Refresh button */
 .tx-refresh-btn {
@@ -1139,16 +1129,27 @@
 }
 .view-more-btn:hover { background: var(--accent-dim); border-color: var(--accent); }
 
-/* Download Modal */
+/* Download Modal — positioned as dropdown near button */
+.dl-btn-wrap { position: relative; }
+.dl-backdrop {
+  position: fixed; inset: 0; z-index: 49;
+  background: transparent;
+}
 .dl-modal {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 24px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: var(--shadow2);
-  position: relative;
+  border-radius: 16px;
+  padding: 22px;
+  width: 340px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+@media (max-width: 480px) {
+  .dl-modal { width: calc(100vw - 32px); right: -8px; }
 }
 .dl-modal-head { display: flex; justify-content: flex-end; margin-bottom: 8px; }
 .dl-close      { margin-left: auto; }
@@ -1290,4 +1291,102 @@
   .invite-rewards      { grid-template-columns: 1fr 1fr; }
   .invite-share-btns   { grid-template-columns: 1fr 1fr; }
   .invite-hero-card    { flex-direction: column; text-align: center; }
+}
+
+/* ── Profile Picture ─────────────────────────────────────────────────────── */
+.profile-pic-wrap {
+  position: relative;
+  width: 58px; height: 58px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.profile-pic-img {
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+}
+.profile-pic-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.profile-pic-wrap:hover .profile-pic-overlay { opacity: 1; }
+.profile-pic-hint { font-size: 0.68rem; color: var(--ink3); margin-top: 4px; }
+
+/* ── Copy wallet button ──────────────────────────────────────────────────── */
+.pf-wallet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.pf-copy-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+  transition: all .15s;
+  font-family: var(--font);
+}
+.pf-copy-btn:hover { background: var(--accent-dim); border-color: var(--accent); }
+
+/* ── Download popup (small dropdown) ────────────────────────────────────── */
+.dl-modal-popup {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 200;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  width: 300px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.dl-popup-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.dl-popup-title { font-weight: 800; font-size: 0.92rem; color: var(--ink); }
+
+@media (max-width: 480px) {
+  .dl-modal-popup { width: calc(100vw - 32px); right: -8px; }
+}
+
+/* ── Copy icon button ────────────────────────────────────────────────────── */
+.addr-copy-icon {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--ink3);
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.addr-copy-icon:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* QR address row */
+.qr-addr-row {
+  display: flex; align-items: center; gap: 8px;
+  justify-content: center; flex-wrap: wrap;
+  max-width: 340px;
+}
+.qr-addr-full {
+  font-family: var(--mono); font-size: 0.68rem;
+  color: var(--ink3); word-break: break-all; text-align: center;
 }

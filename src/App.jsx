@@ -1165,6 +1165,9 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
   const [txSort, setTxSort]             = useState('latest') // latest | oldest
   const [viewMore, setViewMore]         = useState(false)
   const [showDownload, setShowDownload] = useState(false)
+  const [profilePic, setProfilePic]     = useState(() => { try { return localStorage.getItem('rc_pic_' + (user?.phone || '')) || null } catch { return null } })
+  const [addrCopied, setAddrCopied]     = useState(false)
+  const profilePicRef                   = React.useRef(null)
   const [dlYear, setDlYear]             = useState(new Date().getFullYear().toString())
   const [dlFormat, setDlFormat]         = useState('pdf')
   const [dlLoading, setDlLoading]       = useState(false)
@@ -1698,7 +1701,16 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
                     <QRCode value={addr} name={user.name} size={240}/>
                   </div>
                   <div className="qr-name">{user.name}</div>
-                  <div className="qr-addr-full">{addr}</div>
+                  <div className="qr-addr-row">
+                    <div className="qr-addr-full">{addr}</div>
+                    <button className="addr-copy-icon" title="Copy address" onClick={() => {
+                      navigator.clipboard.writeText(addr)
+                      setCopied(true)
+                      setTimeout(() => setCopied(false), 2000)
+                    }}>
+                      {copied ? '✅' : '⧉'}
+                    </button>
+                  </div>
                   {/* 4 action buttons */}
                   <div className="qr-action-btns">
 
@@ -1814,9 +1826,106 @@ Open RemitChain → Send → Paste wallet address`
                     <h2 style={{ fontSize:'1.3rem', fontWeight:800, color:'var(--ink)' }}>{t.tx_history}</h2>
                     <p style={{ fontSize:'0.82rem', color:'var(--ink3)', marginTop:2 }}>{t.tx_subtitle}</p>
                   </div>
-                  <button className="dl-history-btn" onClick={() => setShowDownload(true)}>
-                    📥 Download History
-                  </button>
+                  <div className="dl-btn-wrap" style={{ position:'relative' }}>
+                    <button className="btn-outline dl-history-btn" onClick={() => setShowDownload(!showDownload)}>
+                      📥 Download History
+                    </button>
+                    {showDownload && (
+                      <>
+                        <div className="dl-backdrop" onClick={() => setShowDownload(false)} />
+                        <div className="dl-modal-popup pop-in">
+
+                          <div className="dl-popup-head">
+                            <span className="dl-popup-title">⬇️ Download History</span>
+                            <button className="icon-btn" onClick={() => setShowDownload(false)}>✕</button>
+                          </div>
+                          <p className="dl-modal-subtitle">Get transfer dates and amounts.</p>
+
+                          <div className="dl-field">
+                            <label className="dl-label">Select year</label>
+                            <select className="dl-select" value={dlYear} onChange={e => setDlYear(e.target.value)}>
+                              {[2026, 2025, 2024].map(y => (
+                                <option key={y} value={y}>{y}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="dl-field">
+                            <label className="dl-label">File format</label>
+                            <div className="dl-formats">
+                              {[
+                                { val:'pdf', label:'PDF', desc:'Portable Document Format' },
+                                { val:'csv', label:'CSV', desc:'Comma-Separated Values' },
+                              ].map(f => (
+                                <div key={f.val}
+                                  className={"dl-format-opt " + (dlFormat === f.val ? 'dl-format-active' : '')}
+                                  onClick={() => setDlFormat(f.val)}
+                                >
+                                  <div className={"dl-radio " + (dlFormat === f.val ? 'dl-radio-active' : '')}/>
+                                  <div>
+                                    <div className="dl-format-name">{f.label}</div>
+                                    <div className="dl-format-desc">{f.desc}</div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <button className="dl-download-btn" disabled={dlLoading}
+                            onClick={() => {
+                              setDlLoading(true)
+                              const yearTxns = txns.filter(tx => tx.date?.includes(dlYear))
+                              if (dlFormat === 'csv') {
+                                const rows = [
+                                  ['Date','Time','Type','Amount (XLM)','Memo','Transaction Hash'],
+                                  ...yearTxns.map(tx => [
+                                    tx.date, tx.time,
+                                    tx.type === 'received' ? 'Received' : 'Sent',
+                                    (tx.type === 'received' ? '+' : '-') + tx.amount,
+                                    tx.memo || '',
+                                    tx.hash,
+                                  ])
+                                ]
+                                const csv  = rows.map(r => r.join(',')).join('\n')
+                                const blob = new Blob([csv], { type: 'text/csv' })
+                                const link = document.createElement('a')
+                                link.href     = URL.createObjectURL(blob)
+                                link.download = 'RemitChain-History-' + dlYear + '.csv'
+                                link.click()
+                                setDlLoading(false)
+                                setShowDownload(false)
+                              } else {
+                                const rows = yearTxns.map(tx =>
+                                  '<tr><td>' + tx.date + '</td><td>' + tx.time + '</td>' +
+                                  '<td style="color:' + (tx.type==='received'?'#2d6a4f':'#e85d04') + '">' + (tx.type==='received'?'Received':'Sent') + '</td>' +
+                                  '<td style="font-weight:700">' + (tx.type==='received'?'+':'-') + tx.amount + ' XLM</td>' +
+                                  '<td>' + (tx.memo||'—') + '</td>' +
+                                  '<td style="font-size:10px">' + (tx.hash?.slice(0,20)||'') + '...</td></tr>'
+                                ).join('')
+                                const html = '<html><head><title>RemitChain History ' + dlYear + '</title>' +
+                                  '<style>body{font-family:Arial,sans-serif;padding:30px}h1{color:#e85d04}table{width:100%;border-collapse:collapse;margin-top:20px}th{background:#e85d04;color:#fff;padding:10px 8px;text-align:left;font-size:12px}td{padding:8px;border-bottom:1px solid #eee;font-size:12px}tr:nth-child(even){background:#f9f9f9}.footer{margin-top:30px;font-size:11px;color:#999;text-align:center}</style></head>' +
+                                  '<body><h1>RemitChain</h1><h3>Transfer History — ' + dlYear + '</h3>' +
+                                  '<p style="font-size:12px;color:#888">Account: ' + user.name + ' | Generated: ' + new Date().toLocaleDateString() + '</p>' +
+                                  '<table><thead><tr><th>Date</th><th>Time</th><th>Type</th><th>Amount</th><th>Memo</th><th>Transaction</th></tr></thead>' +
+                                  '<tbody>' + (rows || '<tr><td colspan="6" style="text-align:center;color:#999">No transactions in ' + dlYear + '</td></tr>') + '</tbody></table>' +
+                                  '<div class="footer">Powered by RemitChain Stellar Testnet ' + new Date().toLocaleDateString() + '</div>' +
+                                  '</body></html>'
+                                const win = window.open('', '_blank')
+                                win.document.write(html)
+                                win.document.close()
+                                win.print()
+                                setDlLoading(false)
+                                setShowDownload(false)
+                              }
+                            }}
+                          >
+                            {dlLoading ? 'Preparing...' : 'Download'}
+                          </button>
+                          <button className="dl-cancel-btn" onClick={() => setShowDownload(false)}>Cancel</button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {/* Search + Filter + Refresh Controls */}
@@ -1929,131 +2038,7 @@ Open RemitChain → Send → Paste wallet address`
                 )}
 
                 {/* Download History Modal */}
-                {showDownload && (
-                  <div className="overlay fade-in" onClick={() => setShowDownload(false)}>
-                    <div className="dl-modal pop-in" onClick={e => e.stopPropagation()}>
 
-                      {/* Header */}
-                      <div className="dl-modal-head">
-                        <button className="icon-btn dl-close" onClick={() => setShowDownload(false)}>✕</button>
-                      </div>
-
-                      <div className="dl-modal-icon">📄</div>
-                      <h3 className="dl-modal-title">Download your transfer history</h3>
-                      <p className="dl-modal-subtitle">Get transfer dates, recipient names, and how much you sent.</p>
-
-                      {/* Year selector */}
-                      <div className="dl-field">
-                        <label className="dl-label">Select year</label>
-                        <select className="dl-select" value={dlYear} onChange={e => setDlYear(e.target.value)}>
-                          {[2026, 2025, 2024].map(y => (
-                            <option key={y} value={y}>{y}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Format selector */}
-                      <div className="dl-field">
-                        <label className="dl-label">File format</label>
-                        <div className="dl-formats">
-                          {[
-                            { val:'pdf', label:'PDF', desc:'Portable Document Format' },
-                            { val:'csv', label:'CSV', desc:'Comma-Separated Values' },
-                          ].map(f => (
-                            <div
-                              key={f.val}
-                              className={`dl-format-opt ${dlFormat === f.val ? 'dl-format-active' : ''}`}
-                              onClick={() => setDlFormat(f.val)}
-                            >
-                              <div className={`dl-radio ${dlFormat === f.val ? 'dl-radio-active' : ''}`}/>
-                              <div>
-                                <div className="dl-format-name">{f.label}</div>
-                                <div className="dl-format-desc">{f.desc}</div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Download button */}
-                      <button
-                        className="dl-download-btn"
-                        disabled={dlLoading}
-                        onClick={() => {
-                          setDlLoading(true)
-                          const yearTxns = txns.filter(tx => tx.date?.includes(dlYear))
-
-                          if (dlFormat === 'csv') {
-                            // CSV download
-                            const rows = [
-                              ['Date', 'Time', 'Type', 'Amount (XLM)', 'Memo', 'Transaction Hash'],
-                              ...yearTxns.map(tx => [
-                                tx.date, tx.time,
-                                tx.type === 'received' ? 'Received' : 'Sent',
-                                (tx.type === 'received' ? '+' : '-') + tx.amount,
-                                tx.memo || '',
-                                tx.hash,
-                              ])
-                            ]
-                            const csv  = rows.map(r => r.join(',')).join('')
-                            const blob = new Blob([csv], { type: 'text/csv' })
-                            const link = document.createElement('a')
-                            link.href     = URL.createObjectURL(blob)
-                            link.download = `RemitChain-History-${dlYear}.csv`
-                            link.click()
-                            setDlLoading(false)
-                            setShowDownload(false)
-                          } else {
-                            // PDF — build HTML and print
-                            const rows = yearTxns.map(tx => `
-                              <tr>
-                                <td>${tx.date}</td>
-                                <td>${tx.time}</td>
-                                <td style="color:${tx.type==='received'?'#2d6a4f':'#e85d04'}">${tx.type==='received'?'Received':'Sent'}</td>
-                                <td style="font-weight:700">${tx.type==='received'?'+':'-'}${tx.amount} XLM</td>
-                                <td>${tx.memo||'—'}</td>
-                                <td style="font-size:10px">${tx.hash?.slice(0,20)}...</td>
-                              </tr>`).join('')
-                            const html = `
-                              <html><head><title>RemitChain History ${dlYear}</title>
-                              <style>
-                                body { font-family: Arial, sans-serif; padding: 30px; }
-                                h1 { color: #e85d04; }
-                                h3 { color: #555; font-weight:normal; margin-top:4px; }
-                                table { width:100%; border-collapse:collapse; margin-top:20px; }
-                                th { background:#e85d04; color:#fff; padding:10px 8px; text-align:left; font-size:12px; }
-                                td { padding:8px; border-bottom:1px solid #eee; font-size:12px; }
-                                tr:nth-child(even) { background:#f9f9f9; }
-                                .footer { margin-top:30px; font-size:11px; color:#999; text-align:center; }
-                              </style></head>
-                              <body>
-                                <h1>💫 RemitChain</h1>
-                                <h3>Transfer History — ${dlYear}</h3>
-                                <p style="font-size:12px;color:#888">Account: ${user.name} &nbsp;|&nbsp; Generated: ${new Date().toLocaleDateString()}</p>
-                                <table>
-                                  <thead><tr><th>Date</th><th>Time</th><th>Type</th><th>Amount</th><th>Memo</th><th>Transaction</th></tr></thead>
-                                  <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:#999">No transactions in '+dlYear+'</td></tr>'}</tbody>
-                                </table>
-                                <div class="footer">Powered by RemitChain · Stellar Testnet · ${new Date().toLocaleDateString()}</div>
-                              </body></html>`
-                            const win = window.open('', '_blank')
-                            win.document.write(html)
-                            win.document.close()
-                            win.print()
-                            setDlLoading(false)
-                            setShowDownload(false)
-                          }
-                        }}
-                      >
-                        {dlLoading ? <><Spinner size={16} color="#fff"/> Preparing…</> : 'Download'}
-                      </button>
-
-                      <button className="dl-cancel-btn" onClick={() => setShowDownload(false)}>
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
 
               </div>
             )
@@ -2196,10 +2181,35 @@ ${link}`)
               <div className="page-title"><h2>{t.my_profile}</h2><p>{t.profile_subtitle}</p></div>
               <div className="card">
                 <div className="profile-header">
-                  <div className="profile-avatar">{user.name[0].toUpperCase()}</div>
+                  {/* Profile picture */}
+                  <div className="profile-pic-wrap" onClick={() => profilePicRef.current?.click()}>
+                    {profilePic
+                      ? <img src={profilePic} className="profile-pic-img" alt="Profile"/>
+                      : <div className="profile-avatar">{user.name[0].toUpperCase()}</div>
+                    }
+                    <div className="profile-pic-overlay">📷</div>
+                    <input
+                      ref={profilePicRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display:'none' }}
+                      onChange={e => {
+                        const file = e.target.files[0]
+                        if (!file) return
+                        const reader = new FileReader()
+                        reader.onload = ev => {
+                          const pic = ev.target.result
+                          setProfilePic(pic)
+                          localStorage.setItem('rc_pic_' + user.phone, pic)
+                        }
+                        reader.readAsDataURL(file)
+                      }}
+                    />
+                  </div>
                   <div>
                     <div className="profile-name">{user.name}</div>
                     <div className="profile-badge">{t.kyc_verified}</div>
+                    <div className="profile-pic-hint">Tap photo to change</div>
                   </div>
                 </div>
                 <div className="profile-fields">
@@ -2218,7 +2228,16 @@ ${link}`)
                   ))}
                 </div>
                 <div className="profile-wallet-full">
-                  <div className="pf-key">Full Wallet Address</div>
+                  <div className="pf-wallet-header">
+                    <span className="pf-key">Full Wallet Address</span>
+                    <button className="addr-copy-icon" title="Copy address" onClick={() => {
+                      navigator.clipboard.writeText(user.walletAddress)
+                      setAddrCopied(true)
+                      setTimeout(() => setAddrCopied(false), 2000)
+                    }}>
+                      {addrCopied ? '✅' : '⧉'}
+                    </button>
+                  </div>
                   <div className="pf-addr">{user.walletAddress}</div>
                 </div>
                 <button className="btn-outline danger-btn" onClick={onLogout}>{t.logout}</button>
