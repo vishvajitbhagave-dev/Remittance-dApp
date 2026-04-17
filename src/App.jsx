@@ -1413,6 +1413,7 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
           { id:'send',    icon:'💸', label:t.send    },
           { id:'receive', icon:'📥', label:t.receive },
           { id:'history', icon:'📋', label:t.history },
+          { id:'invite',  icon:'🎁', label:'Invite'  },
           { id:'profile', icon:'👤', label:t.profile },
         ].map(n => (
           <button key={n.id} className={`nav-btn ${page===n.id?'nav-active':''}`}
@@ -2057,6 +2058,137 @@ Open RemitChain → Send → Paste wallet address`
               </div>
             )
           })()}
+
+          {/* ── INVITE FRIENDS ── */}
+          {page === 'invite' && (
+            <div className="page fade-up">
+              <div className="page-title">
+                <h2>🎁 Invite Friends</h2>
+                <p>Earn rewards when your friends join RemitChain</p>
+              </div>
+
+              {/* Hero card */}
+              <div className="invite-hero-card">
+                <div className="invite-hero-icon">🚀</div>
+                <div className="invite-hero-text">
+                  <div className="invite-hero-title">Invite friends, earn rewards</div>
+                  <div className="invite-hero-sub">
+                    Share your referral link. When your friend signs up and sends their first transfer, you both benefit!
+                  </div>
+                </div>
+              </div>
+
+              {/* Rewards */}
+              <div className="invite-rewards">
+                <div className="invite-reward-card">
+                  <span className="ir-icon">💰</span>
+                  <div className="ir-text">
+                    <div className="ir-title">You earn</div>
+                    <div className="ir-val">0.5 XLM</div>
+                    <div className="ir-sub">per successful referral</div>
+                  </div>
+                </div>
+                <div className="invite-reward-card">
+                  <span className="ir-icon">🎉</span>
+                  <div className="ir-text">
+                    <div className="ir-title">Friend gets</div>
+                    <div className="ir-val">Free transfer</div>
+                    <div className="ir-sub">zero fee on first send</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Referral link */}
+              <div className="card">
+                <div className="card-label">🔗 Your Referral Link</div>
+                <div className="invite-link-box">
+                  <span className="invite-link-text">
+                    {`${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`}
+                  </span>
+                  <button className="invite-copy-btn" onClick={() => {
+                    const link = `${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`
+                    navigator.clipboard.writeText(link)
+                    alert('Referral link copied!')
+                  }}>
+                    📋 Copy
+                  </button>
+                </div>
+
+                {/* Share buttons */}
+                <div className="invite-share-btns">
+
+                  {/* WhatsApp */}
+                  <button className="invite-share-btn whatsapp-share" onClick={() => {
+                    const link = `${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`
+                    const text = `💫 Hey! I've been using RemitChain to send money home instantly for less than ₹2 fee!
+
+Join using my link and get your first transfer FREE:
+${link}
+
+_Powered by Stellar Blockchain_`
+                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+                  }}>
+                    <span>📱</span> WhatsApp
+                  </button>
+
+                  {/* Telegram */}
+                  <button className="invite-share-btn telegram-share" onClick={() => {
+                    const link = `${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`
+                    const text = `💫 Send money home instantly for less than ₹2 fee! Join RemitChain:`
+                    window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank')
+                  }}>
+                    <span>✈️</span> Telegram
+                  </button>
+
+                  {/* Twitter/X */}
+                  <button className="invite-share-btn twitter-share" onClick={() => {
+                    const link = `${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`
+                    const text = `Sending money home for less than ₹2 fee with @RemitChain on @StellarOrg blockchain! Join here:`
+                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`, '_blank')
+                  }}>
+                    <span>🐦</span> Twitter
+                  </button>
+
+                  {/* Native share */}
+                  <button className="invite-share-btn native-share" onClick={async () => {
+                    const link = `${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`
+                    const text = `Join RemitChain — Send money home for less than ₹2 fee!`
+                    if (navigator.share) {
+                      await navigator.share({ title: 'RemitChain', text, url: link })
+                    } else {
+                      navigator.clipboard.writeText(`${text}
+${link}`)
+                      alert('Link copied! Share it anywhere.')
+                    }
+                  }}>
+                    <span>📤</span> More
+                  </button>
+
+                </div>
+              </div>
+
+              {/* How it works */}
+              <div className="card">
+                <div className="card-label">📋 How It Works</div>
+                {[
+                  { step:'1', icon:'📤', title:'Share your link', desc:'Send your referral link to friends via WhatsApp, Telegram, or any app' },
+                  { step:'2', icon:'👤', title:'Friend signs up', desc:'Your friend creates a RemitChain account using your link' },
+                  { step:'3', icon:'💸', title:'Friend sends money', desc:'Your friend completes their first transfer on Stellar Testnet' },
+                  { step:'4', icon:'🎁', title:'Both get rewarded', desc:'You earn 0.5 XLM, your friend gets zero fee on first transfer' },
+                ].map(s => (
+                  <div key={s.step} className="invite-step">
+                    <div className="invite-step-num">{s.step}</div>
+                    <span className="invite-step-icon">{s.icon}</span>
+                    <div className="invite-step-text">
+                      <div className="invite-step-title">{s.title}</div>
+                      <div className="invite-step-desc">{s.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+          )}
 
           {/* ── PROFILE ── */}
           {page === 'profile' && (

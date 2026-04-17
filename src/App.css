@@ -529,6 +529,20 @@
   border-radius:10px; padding:12px 14px;
 }
 
+/* ── Overlay (shared by all modals) ─────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(26,20,16,0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
 /* ── Transfer Receipt Modal ──────────────────────────────────────────────── */
 .receipt-modal {
   background: var(--bg2);
@@ -842,7 +856,7 @@
 .tx-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
 .tx-row:last-of-type { border-bottom:none; }
 .tx-received { background: rgba(45,106,79,0.03); border-radius: var(--r2); padding: 10px 8px; margin: 0 -8px; }
-/*.tx-sent    { } */
+.tx-sent     { }
 
 .tx-type-icon { font-size:1.3rem; flex-shrink:0; }
 .tx-info      { flex:1; display:flex; flex-direction:column; gap:2px; }
@@ -1188,4 +1202,92 @@
 @media (max-width: 480px) {
   .tx-title-row   { flex-direction: column; align-items: flex-start; }
   .dl-history-btn { width: 100%; justify-content: center; }
+}
+
+/* ── Invite Friends Page ─────────────────────────────────────────────────── */
+.invite-hero-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #e85d04, #f48c06);
+  border-radius: var(--r);
+  padding: 20px;
+  color: #fff;
+}
+.invite-hero-icon { font-size: 2.2rem; flex-shrink: 0; animation: float 2s ease-in-out infinite; }
+.invite-hero-title { font-weight: 800; font-size: 1.05rem; margin-bottom: 5px; }
+.invite-hero-sub   { font-size: 0.82rem; opacity: 0.88; line-height: 1.5; }
+
+/* Reward cards */
+.invite-rewards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.invite-reward-card {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 14px;
+  box-shadow: var(--shadow);
+}
+.ir-icon  { font-size: 1.8rem; flex-shrink: 0; }
+.ir-title { font-size: 0.7rem; color: var(--ink3); text-transform: uppercase; letter-spacing: .06em; font-family: var(--mono); }
+.ir-val   { font-size: 1rem; font-weight: 800; color: var(--accent); margin: 2px 0; }
+.ir-sub   { font-size: 0.7rem; color: var(--ink3); }
+
+/* Referral link box */
+.invite-link-box {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--r2); padding: 10px 14px;
+  margin-bottom: 14px;
+}
+.invite-link-text {
+  flex: 1; font-family: var(--mono); font-size: 0.75rem;
+  color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.invite-copy-btn {
+  background: var(--accent); color: #fff; border: none;
+  border-radius: var(--r2); padding: 6px 12px;
+  font-family: var(--font); font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; flex-shrink: 0; transition: all .15s;
+}
+.invite-copy-btn:hover { background: #cc4d00; }
+
+/* Share buttons */
+.invite-share-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.invite-share-btn {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 11px; border: 1.5px solid var(--border);
+  border-radius: var(--r); font-family: var(--font);
+  font-size: 0.85rem; font-weight: 700; cursor: pointer;
+  transition: all .2s; background: var(--bg2);
+}
+.invite-share-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.whatsapp-share { color: #25d366; border-color: #25d366; }
+.whatsapp-share:hover { background: rgba(37,211,102,0.08); }
+.telegram-share { color: #229ed9; border-color: #229ed9; }
+.telegram-share:hover { background: rgba(34,158,217,0.08); }
+.twitter-share  { color: #1da1f2; border-color: #1da1f2; }
+.twitter-share:hover  { background: rgba(29,161,242,0.08); }
+.native-share   { color: var(--ink2); }
+.native-share:hover   { border-color: var(--border2); }
+
+/* How it works steps */
+.invite-step {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px dashed var(--border);
+}
+.invite-step:last-child { border-bottom: none; }
+.invite-step-num  {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.78rem; flex-shrink: 0;
+}
+.invite-step-icon  { font-size: 1.2rem; flex-shrink: 0; }
+.invite-step-title { font-weight: 700; font-size: 0.85rem; color: var(--ink); }
+.invite-step-desc  { font-size: 0.76rem; color: var(--ink3); margin-top: 2px; line-height: 1.4; }
+
+/* Mobile */
+@media (max-width: 480px) {
+  .invite-rewards      { grid-template-columns: 1fr 1fr; }
+  .invite-share-btns   { grid-template-columns: 1fr 1fr; }
+  .invite-hero-card    { flex-direction: column; text-align: center; }
 }
