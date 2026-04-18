@@ -1,4 +1,4 @@
-// translations.js — RemitChain Multi-language Support
+// translations.js — Horizon Multi-language Support
 
 export const LANGUAGES = [
   { code: 'en',    name: 'English',    flag: '🇬🇧', native: 'English'       },
@@ -74,7 +74,7 @@ export const T = {
     refresh: 'Refresh',
     // Profile
     my_profile: '👤 My Profile',
-    profile_subtitle: 'Your RemitChain account',
+    profile_subtitle: 'Your Horizon account',
     kyc_verified: '✅ KYC Verified',
     logout: 'Logout ⏻',
     // Sidebar
@@ -96,7 +96,7 @@ export const T = {
     login_btn: 'Login ✓',
     already_have: 'Already have an account?',
     login_here: 'Login here',
-    new_to: 'New to RemitChain?',
+    new_to: 'New to Horizon?',
     create_new: '✏️ Create New Account',
     // Toast
     money_received: 'Money Received!',
@@ -108,7 +108,7 @@ export const T = {
     you_sent: 'You Sent', they_received: 'They Received',
     transaction: 'Transaction', memo: 'Memo', date: 'Date', time: 'Time',
     close: 'Close', save_image: '📥 Save Image', share_whatsapp: '📱 WhatsApp',
-    powered_by: '💫 Powered by RemitChain · Stellar Testnet',
+    powered_by: '💫 Powered by Horizon · Stellar Testnet',
   },
 
   hi: {
@@ -145,7 +145,7 @@ export const T = {
     no_txns_sub: 'शुरू करने के लिए पहला ट्रांसफर करें',
     refresh: 'रीफ्रेश',
     my_profile: '👤 मेरी प्रोफ़ाइल',
-    profile_subtitle: 'आपका RemitChain अकाउंट',
+    profile_subtitle: 'आपका Horizon अकाउंट',
     kyc_verified: '✅ KYC सत्यापित',
     logout: 'लॉग आउट ⏻',
     balance: '💰 बैलेंस',
@@ -165,7 +165,7 @@ export const T = {
     login_btn: 'लॉगिन ✓',
     already_have: 'पहले से अकाउंट है?',
     login_here: 'यहाँ लॉगिन करें',
-    new_to: 'RemitChain में नए हैं?',
+    new_to: 'Horizon में नए हैं?',
     create_new: '✏️ नया अकाउंट बनाएं',
     money_received: 'पैसे मिले!',
     you_received: 'आपको मिला',
@@ -175,7 +175,7 @@ export const T = {
     you_sent: 'आपने भेजा', they_received: 'उन्हें मिला',
     transaction: 'लेन-देन', memo: 'नोट', date: 'तारीख', time: 'समय',
     close: 'बंद करें', save_image: '📥 छवि सेव करें', share_whatsapp: '📱 WhatsApp',
-    powered_by: '💫 RemitChain द्वारा संचालित · Stellar Testnet',
+    powered_by: '💫 Horizon द्वारा संचालित · Stellar Testnet',
   },
 
   mr: {
@@ -212,7 +212,7 @@ export const T = {
     no_txns_sub: 'सुरू करण्यासाठी पहिले हस्तांतरण करा',
     refresh: 'रिफ्रेश',
     my_profile: '👤 माझी प्रोफाइल',
-    profile_subtitle: 'तुमचे RemitChain खाते',
+    profile_subtitle: 'तुमचे Horizon खाते',
     kyc_verified: '✅ KYC सत्यापित',
     logout: 'लॉग आउट ⏻',
     balance: '💰 शिल्लक',
@@ -232,7 +232,7 @@ export const T = {
     login_btn: 'लॉगिन ✓',
     already_have: 'आधीच खाते आहे?',
     login_here: 'येथे लॉगिन करा',
-    new_to: 'RemitChain वर नवीन आहात?',
+    new_to: 'Horizon वर नवीन आहात?',
     create_new: '✏️ नवीन खाते तयार करा',
     money_received: 'पैसे मिळाले!',
     you_received: 'तुम्हाला मिळाले',
@@ -242,7 +242,7 @@ export const T = {
     you_sent: 'तुम्ही पाठवले', they_received: 'त्यांना मिळाले',
     transaction: 'व्यवहार', memo: 'नोट', date: 'तारीख', time: 'वेळ',
     close: 'बंद करा', save_image: '📥 प्रतिमा सेव्ह करा', share_whatsapp: '📱 WhatsApp',
-    powered_by: '💫 RemitChain द्वारे संचालित · Stellar Testnet',
+    powered_by: '💫 Horizon द्वारे संचालित · Stellar Testnet',
   },
 
   ar: {
@@ -279,7 +279,7 @@ export const T = {
     no_txns_sub: 'أرسل أول تحويل للبدء',
     refresh: 'تحديث',
     my_profile: '👤 ملفي الشخصي',
-    profile_subtitle: 'حساب RemitChain الخاص بك',
+    profile_subtitle: 'حساب Horizon الخاص بك',
     kyc_verified: '✅ تم التحقق من KYC',
     logout: 'تسجيل الخروج ⏻',
     balance: '💰 الرصيد',
@@ -299,7 +299,7 @@ export const T = {
     login_btn: 'تسجيل الدخول ✓',
     already_have: 'لديك حساب بالفعل؟',
     login_here: 'سجل الدخول هنا',
-    new_to: 'جديد على RemitChain؟',
+    new_to: 'جديد على Horizon؟',
     create_new: '✏️ إنشاء حساب جديد',
     money_received: 'استلمت أموالاً!',
     you_received: 'استلمت',
@@ -309,7 +309,7 @@ export const T = {
     you_sent: 'أرسلت', they_received: 'استلموا',
     transaction: 'المعاملة', memo: 'ملاحظة', date: 'التاريخ', time: 'الوقت',
     close: 'إغلاق', save_image: '📥 حفظ الصورة', share_whatsapp: '📱 واتساب',
-    powered_by: '💫 مدعوم من RemitChain · Stellar Testnet',
+    powered_by: '💫 مدعوم من Horizon · Stellar Testnet',
   },
 
   es: {
@@ -346,7 +346,7 @@ export const T = {
     no_txns_sub: 'Envía tu primera transferencia',
     refresh: 'Actualizar',
     my_profile: '👤 Mi Perfil',
-    profile_subtitle: 'Tu cuenta RemitChain',
+    profile_subtitle: 'Tu cuenta Horizon',
     kyc_verified: '✅ KYC Verificado',
     logout: 'Cerrar sesión ⏻',
     balance: '💰 Saldo',
@@ -366,7 +366,7 @@ export const T = {
     login_btn: 'Iniciar sesión ✓',
     already_have: '¿Ya tienes una cuenta?',
     login_here: 'Inicia sesión aquí',
-    new_to: '¿Nuevo en RemitChain?',
+    new_to: '¿Nuevo en Horizon?',
     create_new: '✏️ Crear Nueva Cuenta',
     money_received: '¡Dinero Recibido!',
     you_received: 'Recibiste',
@@ -376,7 +376,7 @@ export const T = {
     you_sent: 'Enviaste', they_received: 'Recibieron',
     transaction: 'Transacción', memo: 'Nota', date: 'Fecha', time: 'Hora',
     close: 'Cerrar', save_image: '📥 Guardar Imagen', share_whatsapp: '📱 WhatsApp',
-    powered_by: '💫 Desarrollado por RemitChain · Stellar Testnet',
+    powered_by: '💫 Desarrollado por Horizon · Stellar Testnet',
   },
 
   fr: {
@@ -413,7 +413,7 @@ export const T = {
     no_txns_sub: 'Effectuez votre premier transfert',
     refresh: 'Actualiser',
     my_profile: '👤 Mon Profil',
-    profile_subtitle: 'Votre compte RemitChain',
+    profile_subtitle: 'Votre compte Horizon',
     kyc_verified: '✅ KYC Vérifié',
     logout: 'Se déconnecter ⏻',
     balance: '💰 Solde',
@@ -433,7 +433,7 @@ export const T = {
     login_btn: 'Se connecter ✓',
     already_have: 'Vous avez déjà un compte?',
     login_here: 'Connectez-vous ici',
-    new_to: 'Nouveau sur RemitChain?',
+    new_to: 'Nouveau sur Horizon?',
     create_new: '✏️ Créer un Nouveau Compte',
     money_received: 'Argent Reçu!',
     you_received: 'Vous avez reçu',
@@ -443,7 +443,7 @@ export const T = {
     you_sent: 'Vous avez envoyé', they_received: 'Ils ont reçu',
     transaction: 'Transaction', memo: 'Note', date: 'Date', time: 'Heure',
     close: 'Fermer', save_image: '📥 Sauvegarder Image', share_whatsapp: '📱 WhatsApp',
-    powered_by: '💫 Propulsé par RemitChain · Stellar Testnet',
+    powered_by: '💫 Propulsé par Horizon · Stellar Testnet',
   },
 
   tl: {
@@ -480,7 +480,7 @@ export const T = {
     no_txns_sub: 'Magsimula sa unang transfer',
     refresh: 'I-refresh',
     my_profile: '👤 Aking Profile',
-    profile_subtitle: 'Ang iyong RemitChain account',
+    profile_subtitle: 'Ang iyong Horizon account',
     kyc_verified: '✅ Na-verify ang KYC',
     logout: 'Mag-logout ⏻',
     balance: '💰 Balanse',
@@ -500,7 +500,7 @@ export const T = {
     login_btn: 'Mag-login ✓',
     already_have: 'Mayroon na bang account?',
     login_here: 'Mag-login dito',
-    new_to: 'Bago sa RemitChain?',
+    new_to: 'Bago sa Horizon?',
     create_new: '✏️ Gumawa ng Bagong Account',
     money_received: 'Natanggap ang Pera!',
     you_received: 'Natanggap mo',
@@ -510,7 +510,7 @@ export const T = {
     you_sent: 'Ipinadala mo', they_received: 'Natanggap nila',
     transaction: 'Transaksyon', memo: 'Tala', date: 'Petsa', time: 'Oras',
     close: 'Isara', save_image: '📥 I-save ang Larawan', share_whatsapp: '📱 WhatsApp',
-    powered_by: '💫 Pinapatakbo ng RemitChain · Stellar Testnet',
+    powered_by: '💫 Pinapatakbo ng Horizon · Stellar Testnet',
   },
 }
 

@@ -1,4 +1,4 @@
-// App.jsx — RemitChain with Login, Signup, KYC, QR Code
+// App.jsx — Horizon with Login, Signup, KYC, QR Code
 import React, { useState, useEffect, useCallback } from 'react'
 import {
   CURRENCIES,
@@ -11,6 +11,7 @@ import {
 } from './stellar.js'
 import './App.css'
 import { LANGUAGES, getT } from './translations.js'
+import Icon from './icons.jsx'
 
 
 // ── Country Phone Codes (All Countries — Alphabetical) ──────────────────────
@@ -173,7 +174,7 @@ function PhoneInput({ countryCode, onCountryChange, phone, onPhoneChange, error 
           <div className="cc-search-wrap">
             <input
               className="cc-search"
-              placeholder="🔍 Search country or code..."
+              placeholder="Search country or code..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               autoFocus
@@ -218,7 +219,7 @@ function QRCode({ value, name, size = 240 }) {
 
   if (!value) return null
 
-  // QR encodes plain Stellar address — works with any QR scanner and RemitChain app scanner
+  // QR encodes plain Stellar address — works with any QR scanner and Horizon app scanner
   const qrData = value
   const qrUrl  = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrData)}&margin=15&ecc=M&format=png`
 
@@ -235,11 +236,11 @@ function QRCode({ value, name, size = 240 }) {
       {/* Error */}
       {failed && (
         <div style={{ width:size, height:size, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:8, padding:'0 16px' }}>
-          <span style={{ fontSize:'2rem' }}>⚠️</span>
+          <Icon name='alert' size={32} color='#f59e0b'/>
           <span style={{ fontSize:'0.75rem', color:'#999', textAlign:'center' }}>No internet. Check connection.</span>
           <button style={{ fontSize:'0.72rem', color:'var(--accent)', background:'none', border:'none', cursor:'pointer', fontWeight:700 }}
             onClick={() => { setFailed(false); setLoaded(false) }}>
-            🔄 Retry
+            Retry
           </button>
         </div>
       )}
@@ -384,7 +385,7 @@ function PANInput({ value, onChange, fullName }) {
       {pan.length === 10 && (
         <div className={`pan-result ${finalValid ? 'pan-valid' : 'pan-invalid'}`}>
           {finalValid
-            ? `✅ Valid PAN — Holder: ${result.holderType}`
+            ? `Valid PAN — Holder: ${result.holderType}`
             : `❌ ${finalError}`
           }
         </div>
@@ -513,7 +514,14 @@ function SignupPage({ onSignup, onGoLogin }) {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="auth-logo">💫 RemitChain</div>
+        <div className="auth-logo">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#1a56db"/>
+            <path d="M8 16l6 6 10-12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="24" cy="10" r="3" fill="#38bdf8"/>
+          </svg>
+          Horizon
+        </div>
         <div className="auth-title">Create Account</div>
         <div className="auth-subtitle">Join millions sending money home instantly</div>
 
@@ -662,9 +670,7 @@ function SignupPage({ onSignup, onGoLogin }) {
               )}
             </div>
             <div className="kyc-note">
-              ✅ Your data is encrypted and stored securely<br/>
-              ✅ Compliant with Stellar SEP-12 KYC protocol<br/>
-              ✅ Never shared with third parties
+Your data is encrypted and stored securely<br/>Compliant with Stellar SEP-12 KYC protocol<br/>Never shared with third parties
             </div>
             <div className="btn-row">
               <button className="auth-btn-outline" onClick={() => setStep(1)}>← Back</button>
@@ -677,12 +683,12 @@ function SignupPage({ onSignup, onGoLogin }) {
         {step === 3 && (
           <div className="auth-form">
             <div className="kyc-banner" style={{ background:'#e8f4fd', borderColor:'#2196f3', color:'#1565c0' }}>
-              🔗 Connect Stellar Wallet<br/>
+              Connect Stellar Wallet
               <span>Your Stellar wallet is used to send and receive transfers on-chain.</span>
             </div>
             {form.walletAddress ? (
               <div className="wallet-connected-box">
-                <div className="wcb-icon">✅</div>
+                <div className="wcb-icon"><Icon name="check" size={16} color="var(--green)"/></div>
                 <div>
                   <div className="wcb-title">Wallet Connected</div>
                   <div className="wcb-addr">{shortAddress(form.walletAddress)}</div>
@@ -690,7 +696,7 @@ function SignupPage({ onSignup, onGoLogin }) {
               </div>
             ) : (
               <button className="auth-btn wallet-connect-btn" onClick={connectWallet} disabled={connecting}>
-                {connecting ? <><Spinner size={16} color="#fff"/> Connecting…</> : '🚀 Connect Freighter Wallet'}
+{connecting ? <><Spinner size={16} color="#fff"/> Connecting…</> : 'Connect Freighter Wallet'}
               </button>
             )}
             <div className="kyc-note">
@@ -710,7 +716,7 @@ function SignupPage({ onSignup, onGoLogin }) {
         {step === 4 && (
           <div className="auth-form">
             <div className="otp-info">
-              📱 OTP sent to <strong>{countryCode}{form.phone}</strong><br/>
+              OTP sent to <strong>{countryCode}{form.phone}</strong><br/>
               <span style={{ fontSize:'0.78rem', color:'var(--ink3)' }}>(Check the popup for testnet OTP)</span>
             </div>
             <div className="field-group">
@@ -779,7 +785,14 @@ function LoginPage({ onLogin, onGoSignup }) {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="auth-logo">💫 RemitChain</div>
+        <div className="auth-logo">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#1a56db"/>
+            <path d="M8 16l6 6 10-12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="24" cy="10" r="3" fill="#38bdf8"/>
+          </svg>
+          Horizon
+        </div>
         <div className="auth-title">Welcome Back</div>
         <div className="auth-subtitle">Login to send money home instantly</div>
 
@@ -806,7 +819,7 @@ function LoginPage({ onLogin, onGoSignup }) {
         {step === 2 && (
           <div className="auth-form">
             <div className="otp-info">
-              📱 OTP sent to <strong>{countryCode}{phone}</strong>
+              OTP sent to <strong>{countryCode}{phone}</strong>
             </div>
             <div className="field-group">
               <label>Enter 6-digit OTP</label>
@@ -823,7 +836,7 @@ function LoginPage({ onLogin, onGoSignup }) {
         )}
 
         <div className="auth-footer">
-          New to RemitChain?
+          New to Horizon?
         </div>
         <button className="signup-big-btn" onClick={onGoSignup}>
           ✏️ Create New Account
@@ -872,7 +885,7 @@ function ReceiptModal({ data, onClose }) {
       })
       // Download the image
       const link = document.createElement('a')
-      link.download = `RemitChain-Receipt-${data.date.replace(/\s/g,'-')}.png`
+      link.download = `Horizon-Receipt-${data.date.replace(/\s/g,'-')}.png`
       link.href = canvas.toDataURL('image/png')
       link.click()
       setSaved(true)
@@ -886,23 +899,23 @@ function ReceiptModal({ data, onClose }) {
 
   // Share on WhatsApp
   function handleWhatsApp() {
-    const text = `💫 *RemitChain Transfer Receipt*
+    const text = `Horizon Transfer Receipt
 
-✅ Transfer Successful!
+Transfer Successful!
 
-💸 *From:* ${data.from}
-👤 *To:* ${data.to}
-💰 *Amount:* ${data.amount} ${data.fromCur} → ${parseFloat(data.localAmount).toLocaleString()} ${data.toCur}
-🔗 *On Stellar:* ${data.xlmAmount} XLM
+From: ${data.from}
+To: ${data.to}
+Amount: ${data.amount} ${data.fromCur} → ${parseFloat(data.localAmount).toLocaleString()} ${data.toCur}
+On Stellar: ${data.xlmAmount} XLM
 💳 *Fee:* 0.1 XLM (≈ ₹8)
 📅 *Date:* ${data.date}
 ⏰ *Time:* ${data.time}${data.memo ? `
 📝 *Memo:* ${data.memo}` : ''}
 
-🔍 *View Transaction:*
+View Transaction:
 https://stellar.expert/explorer/testnet/tx/${data.hash}
 
-_Sent via RemitChain · Stellar Testnet_`
+_Sent via Horizon · Stellar Testnet_`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
 
@@ -915,7 +928,7 @@ _Sent via RemitChain · Stellar Testnet_`
 
           {/* Header */}
           <div className="receipt-header">
-            <div className="receipt-success-icon">✓</div>
+            <div className="receipt-success-icon"><Icon name="check" size={24} color="white"/></div>
             <div className="receipt-title">Transfer Successful!</div>
             <div className="receipt-subtitle">Your money is on its way</div>
           </div>
@@ -954,7 +967,7 @@ _Sent via RemitChain · Stellar Testnet_`
 
           {/* Powered by */}
           <div className="receipt-powered" style={{ padding: '12px 24px', background: '#f7f3ee', borderTop: '1px dashed #ddd5c8', textAlign: 'center', fontSize: '0.68rem', color: '#9a8f82', fontFamily: 'monospace' }}>
-            💫 Powered by RemitChain · Stellar Testnet
+            Powered by Horizon · Stellar Testnet
           </div>
 
         </div>
@@ -970,10 +983,10 @@ _Sent via RemitChain · Stellar Testnet_`
               ✕ Close
             </button>
             <button className="btn-outline r-btn" onClick={handleSaveImage} disabled={saving}>
-              {saving ? '⏳ Saving...' : saved ? '✅ Saved!' : '📥 Save Image'}
+              {saving ? 'Saving...' : saved ? 'Saved!' : <><Icon name='download' size={14}/> Save Image</>}
             </button>
             <button className="btn-primary whatsapp-btn r-btn" onClick={handleWhatsApp}>
-              📱 WhatsApp
+              <Icon name='share' size={14}/> WhatsApp
             </button>
           </div>
         </div>
@@ -1092,7 +1105,7 @@ function QRScanner({ onScan, onClose }) {
         }
 
         // Nothing matched — show error and retry
-        setError('Invalid QR code. Please scan the QR code from RemitChain Receive page.')
+        setError('Invalid QR code. Please scan the QR code from Horizon Receive page.')
         running = true
         startCamera()
         return
@@ -1108,7 +1121,7 @@ function QRScanner({ onScan, onClose }) {
     <div className="scanner-overlay fade-in">
       <div className="scanner-modal pop-in">
         <div className="scanner-header">
-          <span className="scanner-title">📷 Scan QR Code</span>
+          <span className="scanner-title">Scan QR Code</span>
           <button className="icon-btn" onClick={onClose}>✕</button>
         </div>
         <div className="scanner-body">
@@ -1120,7 +1133,7 @@ function QRScanner({ onScan, onClose }) {
           )}
           {error ? (
             <div className="scanner-error">
-              <div style={{ fontSize:'2rem' }}>📷</div>
+              <Icon name="camera" size={32} color="rgba(255,255,255,0.6)"/>
               <p>{error}</p>
               <button className="btn-outline" onClick={onClose}>Go Back</button>
             </div>
@@ -1207,8 +1220,8 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
     if (!q.trim()) { setSearchResults([]); return }
     setSearchLoading(true)
     try {
-      // Search from locally registered users (key = remitchain_users)
-      const allUsers = JSON.parse(localStorage.getItem('remitchain_users') || '{}')
+      // Search from locally registered users (key = horizon_users)
+      const allUsers = JSON.parse(localStorage.getItem('horizon_users') || '{}')
       const results = Object.values(allUsers).filter(u =>
         u.walletAddress !== addr && (
           u.name?.toLowerCase().includes(q.toLowerCase()) ||
@@ -1386,7 +1399,14 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
       {/* Header */}
       <header className="header">
         <div className="header-left">
-          <div className="logo"><span className="logo-icon">💫</span><span className="logo-text">RemitChain</span></div>
+          <div className="logo">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="8" fill="#1a56db"/>
+              <path d="M8 16l6 6 10-12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="24" cy="10" r="3" fill="#38bdf8"/>
+            </svg>
+            <span className="logo-text">Horizon</span>
+          </div>
           <span className="logo-tag">Testnet</span>
           {/* Language Selector */}
           <div className="lang-selector-wrap">
@@ -1411,13 +1431,13 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
             <span className="user-avatar">{user.name[0].toUpperCase()}</span>
             <div className="user-info">
               <span className="user-name">{user.name}</span>
-              <span className="user-kyc">✅ KYC Verified</span>
+              <span className="user-kyc"><Icon name="shield" size={11} color="var(--green)"/> KYC Verified</span>
             </div>
             <div className="user-bal">
               {balLoading ? <Spinner size={12}/> : `${balance} XLM`}
             </div>
-            <button className="pill-btn" onClick={handleFund} title="Fund from Friendbot">💧</button>
-            <button className="pill-btn danger" onClick={onLogout} title="Logout">⏻</button>
+            <button className="pill-btn" onClick={handleFund} title="Fund Testnet"><Icon name="fund" size={14}/></button>
+            <button className="pill-btn danger" onClick={onLogout} title="Logout"><Icon name="logout" size={14}/></button>
           </div>
         </div>
       </header>
@@ -1425,12 +1445,12 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
       {/* Nav */}
       <nav className="nav">
         {[
-          { id:'home',    icon:'🏠', label:'Home'     },
-          { id:'send',    icon:'💸', label:t.send    },
-          { id:'receive', icon:'📥', label:t.receive },
-          { id:'history', icon:'📋', label:t.history },
-          { id:'invite',  icon:'🎁', label:'Invite'  },
-          { id:'profile', icon:'👤', label:t.profile },
+          { id:'home',    icon:'home',    label:'Home'     },
+          { id:'send',    icon:'send',    label:t.send    },
+          { id:'receive', icon:'receive', label:t.receive },
+          { id:'history', icon:'history', label:t.history },
+          { id:'invite',  icon:'invite',  label:'Invite'  },
+          { id:'profile', icon:'profile', label:t.profile },
         ].map(n => (
           <button key={n.id} className={`nav-btn ${page===n.id?'nav-active':''}`}
             onClick={() => {
@@ -1442,7 +1462,7 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
               }
             }}>
             <span className="nav-icon-wrap">
-              <span className="nav-icon">{n.icon}</span>
+              <span className="nav-icon"><Icon name={n.icon} size={20}/></span>
               {/* Show red badge on History when new transactions */}
               {n.id === 'history' && newTxCount > 0 && (
                 <span className="notif-badge">{newTxCount}</span>
@@ -1460,39 +1480,37 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
           {page === 'home' && (
             <div className="page fade-up">
               <div className="page-title">
-                <h2>👋 Welcome, {user.name.split(' ')[0]}!</h2>
-                <p>Your RemitChain Dashboard</p>
+                <h2>Welcome, {user.name.split(' ')[0]}</h2>
+                <p>Your Horizon Dashboard</p>
               </div>
 
               {/* Balance Card */}
               <div className="card home-balance-card">
-                <div className="home-bal-label">💰 {t.balance}</div>
+                <div className="home-bal-label">{t.balance}</div>
                 <div className="home-bal-big">
                   {balLoading ? <Spinner size={28}/> : balance}
                   <span className="home-bal-unit">XLM</span>
                 </div>
                 <div className="home-bal-usd">≈ ${(parseFloat(balance||0) * 0.11).toFixed(2)} USD</div>
-                <button className="btn-outline small" onClick={handleFund} style={{ marginTop:12 }}>
-                  💧 Fund Testnet
-                </button>
+                <button className="btn-outline small" onClick={handleFund} style={{ marginTop:12 }}><Icon name="fund" size={14}/> Fund Testnet</button>
               </div>
 
               {/* Quick Actions */}
               <div className="home-actions">
                 <button className="home-action-btn" onClick={() => setPage('send')}>
-                  <span className="ha-icon">💸</span>
+                  <span className="ha-icon"><Icon name="send" size={22} color="var(--accent)"/></span>
                   <span className="ha-label">{t.send}</span>
                 </button>
                 <button className="home-action-btn" onClick={() => setPage('receive')}>
-                  <span className="ha-icon">📥</span>
+                  <span className="ha-icon"><Icon name="receive" size={22} color="#0ea5e9"/></span>
                   <span className="ha-label">{t.receive}</span>
                 </button>
                 <button className="home-action-btn" onClick={() => { setPage('history'); loadTxns() }}>
-                  <span className="ha-icon">📋</span>
+                  <span className="ha-icon"><Icon name="history" size={22} color="#8b5cf6"/></span>
                   <span className="ha-label">{t.history}</span>
                 </button>
                 <button className="home-action-btn" onClick={() => setPage('profile')}>
-                  <span className="ha-icon">👤</span>
+                  <span className="ha-icon"><Icon name="profile" size={22} color="#10b981"/></span>
                   <span className="ha-label">{t.profile}</span>
                 </button>
               </div>
@@ -1513,13 +1531,13 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
                   <div className="card fade-up">
                     <div className="card-label">
                       {t.exchange_rates}
-                      {ratesLoading && <span style={{marginLeft:6,fontSize:'0.62rem',color:'var(--accent)'}}>🔄 Live...</span>}
+                      {ratesLoading && <span style={{marginLeft:6,fontSize:'0.62rem',color:'var(--accent)'}}>Live</span>}
                       {!ratesLoading && liveRates && <span style={{marginLeft:6,fontSize:'0.62rem',color:'var(--green)'}}>● Live rates</span>}
                     </div>
 
                     {/* Search box */}
                     <div className="rates-search-wrap">
-                      <span>🔍</span>
+                      <Icon name='search' size={16} color='var(--ink3)'/>
                       <input
                         className="rates-search-input"
                         placeholder="Search currency..."
@@ -1556,8 +1574,8 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
                     {!rateSearch && filtered.length > 5 && (
                       <button className="view-more-btn" onClick={() => setViewMoreRates(!viewMoreRates)}>
                         {viewMoreRates
-                          ? '🔼 View Less'
-                          : '🔽 View More (' + (filtered.length - 5) + ' more currencies)'}
+                          ? 'View Less'
+                          : 'View More (' + (filtered.length - 5) + ' currencies)'}
                       </button>
                     )}
                   </div>
@@ -1580,7 +1598,7 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
                     <div className="send-options">
                       {/* Option 1 — Search by name or phone */}
                       <button className="send-opt-btn" onClick={() => setSendMode('search')}>
-                        <span className="send-opt-icon">🔍</span>
+                        <span className="send-opt-icon"><Icon name="contacts" size={20} color="var(--accent)"/></span>
                         <div className="send-opt-text">
                           <span className="send-opt-title">Search Contact</span>
                           <span className="send-opt-sub">Find by name or phone number</span>
@@ -1590,7 +1608,7 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
 
                       {/* Option 2 — Scan QR Code */}
                       <button className="send-opt-btn send-opt-scanner" onClick={() => setSendMode('scanner')}>
-                        <span className="send-opt-icon">📷</span>
+                        <span className="send-opt-icon"><Icon name="scan" size={20} color="#0ea5e9"/></span>
                         <div className="send-opt-text">
                           <span className="send-opt-title">Scan QR Code</span>
                           <span className="send-opt-sub">Point camera at receiver's QR</span>
@@ -1600,7 +1618,7 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
 
                       {/* Option 3 — Paste wallet address (advanced) */}
                       <button className="send-opt-btn send-opt-secondary" onClick={() => setSendMode('manual')}>
-                        <span className="send-opt-icon">📋</span>
+                        <span className="send-opt-icon"><Icon name="paste" size={20} color="#8b5cf6"/></span>
                         <div className="send-opt-text">
                           <span className="send-opt-title">Paste Wallet Address</span>
                           <span className="send-opt-sub">For advanced users only</span>
@@ -1655,7 +1673,7 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
                     )}
                     {searchQuery && !searchLoading && searchResults.length === 0 && (
                       <div className="search-empty">
-                        No user found. Ask them to join RemitChain first.
+                        No user found. Ask them to join Horizon first.
                       </div>
                     )}
                   </div>
@@ -1784,7 +1802,7 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
                       setCopied(true)
                       setTimeout(() => setCopied(false), 2000)
                     }}>
-                      {copied ? '✅' : '⧉'}
+                      {copied ? <Icon name='check' size={14} color='var(--green)'/> : <Icon name='copy' size={14}/>}
                     </button>
                   </div>
                   {/* 4 action buttons */}
@@ -1798,36 +1816,36 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
                         const blob  = await resp.blob()
                         const link  = document.createElement('a')
                         link.href   = URL.createObjectURL(blob)
-                        link.download = `RemitChain-QR-${user.name.replace(/\s/g,'-')}.png`
+                        link.download = `Horizon-QR-${user.name.replace(/\s/g,'-')}.png`
                         link.click()
                         URL.revokeObjectURL(link.href)
                       } catch {
                         alert('Download failed. Please take a screenshot instead.')
                       }
                     }}>
-                      <span className="qab-icon">📥</span>
+                      <span className="qab-icon"><Icon name="download" size={20} color="var(--accent)"/></span>
                       <span className="qab-label">Download QR</span>
                     </button>
 
                     {/* 2. Share QR */}
                     <button className="qr-action-btn" onClick={async () => {
-                      const shareText = `💫 Send me money on RemitChain!
+                      const shareText = `Send me money on Horizon!
 
 Name: ${user.name}
 Wallet: ${addr}
 
-Open RemitChain → Send → Paste wallet address`
+Open Horizon → Send → Paste wallet address`
                       if (navigator.share) {
                         try {
                           // Try sharing QR image
                           const qrUrl  = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(addr)}&margin=20&format=png`
                           const resp   = await fetch(qrUrl)
                           const blob   = await resp.blob()
-                          const file   = new File([blob], 'RemitChain-QR.png', { type: 'image/png' })
-                          await navigator.share({ title: 'My RemitChain QR Code', text: shareText, files: [file] })
+                          const file   = new File([blob], 'Horizon-QR.png', { type: 'image/png' })
+                          await navigator.share({ title: 'My Horizon QR Code', text: shareText, files: [file] })
                         } catch {
                           // Fallback to text share if image fails
-                          try { await navigator.share({ title: 'My RemitChain QR', text: shareText }) }
+                          try { await navigator.share({ title: 'My Horizon QR', text: shareText }) }
                           catch {}
                         }
                       } else {
@@ -1836,13 +1854,13 @@ Open RemitChain → Send → Paste wallet address`
                         alert('Share text copied! Paste it on WhatsApp or any app.')
                       }
                     }}>
-                      <span className="qab-icon">📤</span>
+                      <span className="qab-icon"><Icon name="share" size={20} color="#0ea5e9"/></span>
                       <span className="qab-label">Share QR</span>
                     </button>
 
                     {/* 3. Show QR Info */}
                     <button className="qr-action-btn" onClick={() => setShowQR(!showQR)}>
-                      <span className="qab-icon">{showQR ? '🔼' : '🔽'}</span>
+                      <span className="qab-icon"><Icon name={showQR ? "chevronUp" : "chevronDown"} size={20} color="#8b5cf6"/></span>
                       <span className="qab-label">{showQR ? 'Hide Info' : 'QR Info'}</span>
                     </button>
 
@@ -1854,7 +1872,7 @@ Open RemitChain → Send → Paste wallet address`
                       <div className="qr-info-row"><span>Name</span><span>{user.name}</span></div>
                       <div className="qr-info-row"><span>Network</span><span>Stellar Testnet</span></div>
                       <div className="qr-info-row"><span>Address</span><span style={{ fontSize:'0.7rem', wordBreak:'break-all' }}>{addr}</span></div>
-                      <div className="qr-info-row"><span>KYC</span><span style={{ color:'var(--green)' }}>✅ Verified</span></div>
+                      <div className="qr-info-row"><span>KYC</span><span style={{ color:'var(--green)',display:'flex',alignItems:'center',gap:4 }}><Icon name="verified" size={13} color="var(--green)"/> Verified</span></div>
                     </div>
                   )}
                 </div>
@@ -1904,7 +1922,7 @@ Open RemitChain → Send → Paste wallet address`
                   </div>
                   <div className="dl-btn-wrap" style={{ position:'relative' }}>
                     <button className="btn-outline dl-history-btn" onClick={() => setShowDownload(!showDownload)}>
-                      📥 Download History
+                      Download History
                     </button>
                     {showDownload && (
                       <>
@@ -1966,7 +1984,7 @@ Open RemitChain → Send → Paste wallet address`
                                 const blob = new Blob([csv], { type: 'text/csv' })
                                 const link = document.createElement('a')
                                 link.href     = URL.createObjectURL(blob)
-                                link.download = 'RemitChain-History-' + dlYear + '.csv'
+                                link.download = 'Horizon-History-' + dlYear + '.csv'
                                 link.click()
                                 setDlLoading(false)
                                 setShowDownload(false)
@@ -1978,13 +1996,13 @@ Open RemitChain → Send → Paste wallet address`
                                   '<td>' + (tx.memo||'—') + '</td>' +
                                   '<td style="font-size:10px">' + (tx.hash?.slice(0,20)||'') + '...</td></tr>'
                                 ).join('')
-                                const html = '<html><head><title>RemitChain History ' + dlYear + '</title>' +
+                                const html = '<html><head><title>Horizon History ' + dlYear + '</title>' +
                                   '<style>body{font-family:Arial,sans-serif;padding:30px}h1{color:#e85d04}table{width:100%;border-collapse:collapse;margin-top:20px}th{background:#e85d04;color:#fff;padding:10px 8px;text-align:left;font-size:12px}td{padding:8px;border-bottom:1px solid #eee;font-size:12px}tr:nth-child(even){background:#f9f9f9}.footer{margin-top:30px;font-size:11px;color:#999;text-align:center}</style></head>' +
-                                  '<body><h1>RemitChain</h1><h3>Transfer History — ' + dlYear + '</h3>' +
+                                  '<body><h1>Horizon</h1><h3>Transfer History — ' + dlYear + '</h3>' +
                                   '<p style="font-size:12px;color:#888">Account: ' + user.name + ' | Generated: ' + new Date().toLocaleDateString() + '</p>' +
                                   '<table><thead><tr><th>Date</th><th>Time</th><th>Type</th><th>Amount</th><th>Memo</th><th>Transaction</th></tr></thead>' +
                                   '<tbody>' + (rows || '<tr><td colspan="6" style="text-align:center;color:#999">No transactions in ' + dlYear + '</td></tr>') + '</tbody></table>' +
-                                  '<div class="footer">Powered by RemitChain Stellar Testnet ' + new Date().toLocaleDateString() + '</div>' +
+                                  '<div class="footer">Powered by Horizon Stellar Testnet ' + new Date().toLocaleDateString() + '</div>' +
                                   '</body></html>'
                                 const win = window.open('', '_blank')
                                 win.document.write(html)
@@ -2009,7 +2027,7 @@ Open RemitChain → Send → Paste wallet address`
 
                   {/* Search box */}
                   <div className="tx-search-wrap">
-                    <span className="tx-search-icon">🔍</span>
+                    <span className="tx-search-icon"><Icon name="search" size={16} color="var(--ink3)"/></span>
                     <input
                       className="tx-search-input"
                       placeholder="Search by memo, date, amount..."
@@ -2025,22 +2043,22 @@ Open RemitChain → Send → Paste wallet address`
                   <div className="tx-filter-row">
                     <div className="tx-filter-group">
                       {[
-                        { val:'all',      label:'All',      icon:'📋' },
-                        { val:'sent',     label:'Sent',     icon:'💸' },
-                        { val:'received', label:'Received', icon:'📥' },
+                        { val:'all',      label:'All',      icon:'history' },
+                        { val:'sent',     label:'Sent',     icon:'send' },
+                        { val:'received', label:'Received', icon:'receive' },
                       ].map(f => (
                         <button
                           key={f.val}
                           className={`tx-filter-btn ${txFilter === f.val ? 'tx-filter-active' : ''}`}
                           onClick={() => { setTxFilter(f.val); setViewMore(false) }}
                         >
-                          {f.icon} {f.label}
+                          <Icon name={f.icon} size={13}/> {f.label}
                         </button>
                       ))}
                     </div>
                     {/* Refresh button */}
                     <button className="tx-refresh-btn" onClick={loadTxns} disabled={txnsLoading}>
-                      {txnsLoading ? <Spinner size={14}/> : '🔄'} Refresh
+                      {txnsLoading ? <Spinner size={14}/> : <Icon name="refresh" size={14}/>} Refresh
                     </button>
                   </div>
 
@@ -2061,7 +2079,7 @@ Open RemitChain → Send → Paste wallet address`
                   </div>
                 ) : filtered.length === 0 ? (
                   <div className="empty-state">
-                    <div style={{ fontSize:'2.5rem' }}>{txSearch || txFilter !== 'all' ? '🔍' : '📭'}</div>
+                    <div style={{ marginBottom:8 }}>{txSearch || txFilter !== 'all' ? <Icon name='search' size={32} color='var(--ink3)'/> : <Icon name='history' size={32} color='var(--ink3)'/>}</div>
                     <p>{txSearch || txFilter !== 'all' ? 'No transactions match your search' : 'No transactions yet'}</p>
                     {txSearch && (
                       <button className="btn-outline" onClick={() => { setTxSearch(''); setTxFilter('all') }}>
@@ -2077,7 +2095,7 @@ Open RemitChain → Send → Paste wallet address`
                     {displayed.map((tx, i) => (
                       <div key={i} className={`tx-row ${tx.type === 'received' ? 'tx-received' : 'tx-sent'}`}>
                         <div className="tx-type-icon">
-                          {tx.type === 'received' ? '📥' : '💸'}
+                          {tx.type === 'received' ? <Icon name="receive" size={18} color="#10b981"/> : <Icon name="send" size={18} color="var(--accent)"/>}
                         </div>
                         <div className="tx-info">
                           <div className="tx-top-row">
@@ -2105,8 +2123,8 @@ Open RemitChain → Send → Paste wallet address`
                         onClick={() => setViewMore(!viewMore)}
                       >
                         {viewMore
-                          ? '🔼 View Less'
-                          : `🔽 View More (${filtered.length - 5} more transactions)`
+                          ? 'View Less'
+                          : `View More (${filtered.length - 5} more transactions)`
                         }
                       </button>
                     )}
@@ -2124,13 +2142,13 @@ Open RemitChain → Send → Paste wallet address`
           {page === 'invite' && (
             <div className="page fade-up">
               <div className="page-title">
-                <h2>🎁 Invite Friends</h2>
-                <p>Earn rewards when your friends join RemitChain</p>
+                <h2>Invite Friends</h2>
+                <p>Earn rewards when your friends join Horizon</p>
               </div>
 
               {/* Hero card */}
               <div className="invite-hero-card">
-                <div className="invite-hero-icon">🚀</div>
+                <div className="invite-hero-icon"><Icon name="gift" size={36} color="white"/></div>
                 <div className="invite-hero-text">
                   <div className="invite-hero-title">Invite friends, earn rewards</div>
                   <div className="invite-hero-sub">
@@ -2142,7 +2160,7 @@ Open RemitChain → Send → Paste wallet address`
               {/* Rewards */}
               <div className="invite-rewards">
                 <div className="invite-reward-card">
-                  <span className="ir-icon">💰</span>
+                  <span className="ir-icon"><Icon name="wallet" size={28} color="var(--accent)"/></span>
                   <div className="ir-text">
                     <div className="ir-title">You earn</div>
                     <div className="ir-val">0.5 XLM</div>
@@ -2150,7 +2168,7 @@ Open RemitChain → Send → Paste wallet address`
                   </div>
                 </div>
                 <div className="invite-reward-card">
-                  <span className="ir-icon">🎉</span>
+                  <span className="ir-icon"><Icon name="gift" size={28} color="#10b981"/></span>
                   <div className="ir-text">
                     <div className="ir-title">Friend gets</div>
                     <div className="ir-val">Free transfer</div>
@@ -2161,7 +2179,7 @@ Open RemitChain → Send → Paste wallet address`
 
               {/* Referral link */}
               <div className="card">
-                <div className="card-label">🔗 Your Referral Link</div>
+                <div className="card-label" style={{display:"flex",alignItems:"center",gap:6}}><Icon name="share" size={14}/>  Your Referral Link</div>
                 <div className="invite-link-box">
                   <span className="invite-link-text">
                     {`${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`}
@@ -2171,7 +2189,7 @@ Open RemitChain → Send → Paste wallet address`
                     navigator.clipboard.writeText(link)
                     alert('Referral link copied!')
                   }}>
-                    📋 Copy
+                    <Icon name="copy" size={14}/> Copy
                   </button>
                 </div>
 
@@ -2181,7 +2199,7 @@ Open RemitChain → Send → Paste wallet address`
                   {/* WhatsApp */}
                   <button className="invite-share-btn whatsapp-share" onClick={() => {
                     const link = `${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`
-                    const text = `💫 Hey! I've been using RemitChain to send money home instantly for less than ₹2 fee!
+                    const text = `Hey! I've been using Horizon to send money home instantly for less than ₹2 fee!
 
 Join using my link and get your first transfer FREE:
 ${link}
@@ -2189,40 +2207,40 @@ ${link}
 _Powered by Stellar Blockchain_`
                     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
                   }}>
-                    <span>📱</span> WhatsApp
+WhatsApp
                   </button>
 
                   {/* Telegram */}
                   <button className="invite-share-btn telegram-share" onClick={() => {
                     const link = `${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`
-                    const text = `💫 Send money home instantly for less than ₹2 fee! Join RemitChain:`
+                    const text = `Send money home for less than Rs.2 fee! Join Horizon:`
                     window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank')
                   }}>
-                    <span>✈️</span> Telegram
+Telegram
                   </button>
 
                   {/* Twitter/X */}
                   <button className="invite-share-btn twitter-share" onClick={() => {
                     const link = `${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`
-                    const text = `Sending money home for less than ₹2 fee with @RemitChain on @StellarOrg blockchain! Join here:`
+                    const text = `Sending money home for less than ₹2 fee with @Horizon on @StellarOrg blockchain! Join here:`
                     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`, '_blank')
                   }}>
-                    <span>🐦</span> Twitter
+Twitter / X
                   </button>
 
                   {/* Native share */}
                   <button className="invite-share-btn native-share" onClick={async () => {
                     const link = `${window.location.origin}?ref=${user.walletAddress?.slice(0,8)}`
-                    const text = `Join RemitChain — Send money home for less than ₹2 fee!`
+                    const text = `Join Horizon — Send money home for less than ₹2 fee!`
                     if (navigator.share) {
-                      await navigator.share({ title: 'RemitChain', text, url: link })
+                      await navigator.share({ title: 'Horizon', text, url: link })
                     } else {
                       navigator.clipboard.writeText(`${text}
 ${link}`)
                       alert('Link copied! Share it anywhere.')
                     }
                   }}>
-                    <span>📤</span> More
+More
                   </button>
 
                 </div>
@@ -2230,16 +2248,16 @@ ${link}`)
 
               {/* How it works */}
               <div className="card">
-                <div className="card-label">📋 How It Works</div>
+<div className="card-label" style={{display:"flex",alignItems:"center",gap:6}}><Icon name="info" size={14}/> How It Works</div>
                 {[
-                  { step:'1', icon:'📤', title:'Share your link', desc:'Send your referral link to friends via WhatsApp, Telegram, or any app' },
-                  { step:'2', icon:'👤', title:'Friend signs up', desc:'Your friend creates a RemitChain account using your link' },
-                  { step:'3', icon:'💸', title:'Friend sends money', desc:'Your friend completes their first transfer on Stellar Testnet' },
-                  { step:'4', icon:'🎁', title:'Both get rewarded', desc:'You earn 0.5 XLM, your friend gets zero fee on first transfer' },
+                  { step:'1', icon:'share',   title:'Share your link', desc:'Send your referral link to friends via WhatsApp, Telegram, or any app' },
+                  { step:'2', icon:'profile', title:'Friend signs up', desc:'Your friend creates a Horizon account using your link' },
+                  { step:'3', icon:'send',    title:'Friend sends money', desc:'Your friend completes their first transfer on Stellar Testnet' },
+                  { step:'4', icon:'gift', title:'Both get rewarded', desc:'You earn 0.5 XLM, your friend gets zero fee on first transfer' },
                 ].map(s => (
                   <div key={s.step} className="invite-step">
                     <div className="invite-step-num">{s.step}</div>
-                    <span className="invite-step-icon">{s.icon}</span>
+                    <span className="invite-step-icon"><Icon name={s.icon} size={18} color="var(--accent)"/></span>
                     <div className="invite-step-text">
                       <div className="invite-step-title">{s.title}</div>
                       <div className="invite-step-desc">{s.desc}</div>
@@ -2263,7 +2281,7 @@ ${link}`)
                       ? <img src={profilePic} className="profile-pic-img" alt="Profile"/>
                       : <div className="profile-avatar">{user.name[0].toUpperCase()}</div>
                     }
-                    <div className="profile-pic-overlay">📷</div>
+                    <div className="profile-pic-overlay"><Icon name="camera" size={18} color="white"/></div>
                     <input
                       ref={profilePicRef}
                       type="file"
@@ -2284,13 +2302,13 @@ ${link}`)
                   </div>
                   <div>
                     <div className="profile-name">{user.name}</div>
-                    <div className="profile-badge">{t.kyc_verified}</div>
+                    <div className="profile-badge"><Icon name="verified" size={13} color="var(--green)"/> {t.kyc_verified}</div>
                     <div className="profile-pic-hint">Tap photo to change</div>
                   </div>
                 </div>
                 <div className="profile-fields">
                   {[
-                    ['📱 Phone', user.phone],
+                    ['Phone', user.phone],
                     ['🌍 Country', user.country],
                     ['🪪 ID Type', user.idType],
                     ['🔢 ID Number', `${'*'.repeat(user.idNumber.length - 4)}${user.idNumber.slice(-4)}`],
@@ -2311,12 +2329,12 @@ ${link}`)
                       setAddrCopied(true)
                       setTimeout(() => setAddrCopied(false), 2000)
                     }}>
-                      {addrCopied ? '✅' : '⧉'}
+                      {addrCopied ? <Icon name='check' size={14} color='var(--green)'/> : <Icon name='copy' size={14}/>}
                     </button>
                   </div>
                   <div className="pf-addr">{user.walletAddress}</div>
                 </div>
-                <button className="btn-outline danger-btn" onClick={onLogout}>{t.logout}</button>
+                <button className="btn-outline danger-btn" onClick={onLogout}><Icon name="logout" size={16}/> {t.logout}</button>
               </div>
             </div>
           )}
@@ -2329,7 +2347,7 @@ ${link}`)
       {/* Incoming Payment Toast Notification */}
       {incomingPayment && newTxCount > 0 && (
         <div className="incoming-toast pop-in">
-          <div className="toast-icon">💰</div>
+          <div className="toast-icon"><Icon name="receive" size={24} color="#059669"/></div>
           <div className="toast-body">
             <div className="toast-title">{t.money_received}</div>
             <div className="toast-msg">
@@ -2345,7 +2363,7 @@ ${link}`)
         </div>
       )}
 
-      <footer className="footer">RemitChain · Stellar Testnet · Instant · Borderless · Fair</footer>
+      <footer className="footer">Horizon &bull; Stellar Testnet &bull; Instant &bull; Borderless &bull; Fair</footer>
 
       {/* Transfer Receipt Modal */}
       {showReceipt && receiptData && (
@@ -2369,7 +2387,7 @@ export default function App() {
     const session = getSession()
     if (session) setUser(session)
 
-    // Read URL params — set when someone scans a RemitChain QR code
+    // Read URL params — set when someone scans a Horizon QR code
     const params = new URLSearchParams(window.location.search)
     const toAddr = params.get('to')
     const toName = params.get('name')

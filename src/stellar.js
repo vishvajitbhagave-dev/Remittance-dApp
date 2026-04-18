@@ -1,4 +1,4 @@
-// stellar.js — RemitChain Core
+// stellar.js — Horizon Core
 import * as StellarSdk from '@stellar/stellar-sdk'
 
 export const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET
@@ -227,8 +227,8 @@ export function generateOTP() {
 }
 
 // ── LOCAL USER STORE (simulates KYC/registration) ────────────────────────────
-const USERS_KEY = 'remitchain_users'
-const SESSION_KEY = 'remitchain_session'
+const USERS_KEY = 'horizon_users'
+const SESSION_KEY = 'horizon_session'
 
 export function saveUser(user) {
   const users = getAllUsers()
