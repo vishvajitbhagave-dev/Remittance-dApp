@@ -79,6 +79,7 @@ https://drive.google.com/file/d/1Kiv2wedAoCbWgTu8k3fvKrs3VANoJa7V/view?usp=shari
 
 ### CI/CD Pipeline
 
+<img width="959" height="434" alt="image" src="https://github.com/user-attachments/assets/0d37a419-726e-4237-873d-4e9592d7c5cd" />
 
 
 ### Mobile View
