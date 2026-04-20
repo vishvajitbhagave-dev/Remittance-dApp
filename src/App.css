@@ -1437,3 +1437,124 @@
 .rate-list-info { display: flex; flex-direction: column; flex: 1; }
 .rate-list-name { font-size: 0.68rem; color: var(--ink3); }
 .rate-list-val  { font-family: var(--mono); font-size: 0.78rem; color: var(--ink2); white-space: nowrap; }
+
+/* ── Metrics Dashboard ───────────────────────────────────────────────────── */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.metric-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow);
+}
+.metric-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.metric-val   { font-size: 1.2rem; font-weight: 800; color: var(--ink); font-family: var(--mono); }
+.metric-label { font-size: 0.7rem; color: var(--ink3); font-weight: 600; }
+
+/* Activity Chart */
+.activity-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 100px;
+  padding-top: 8px;
+}
+.activity-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+.activity-count  { font-size: 0.62rem; font-family: var(--mono); color: var(--ink3); }
+.activity-bar-bg {
+  flex: 1; width: 100%;
+  background: var(--bg3);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.activity-bar-fill {
+  width: 100%;
+  background: linear-gradient(180deg, #1a56db, #3b82f6);
+  border-radius: 4px;
+  transition: height .3s ease;
+  min-height: 4px;
+}
+.activity-day { font-size: 0.6rem; color: var(--ink3); font-family: var(--mono); white-space: nowrap; }
+
+/* Security checklist */
+.security-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.security-row:last-child { border-bottom: none; }
+.sec-badge {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: var(--mono);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.sec-pass { background: rgba(5,150,105,0.1); color: #059669; }
+.sec-warn { background: rgba(217,119,6,0.1); color: #d97706; }
+
+/* ── Gasless Toggle ──────────────────────────────────────────────────────── */
+.gasless-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(26,86,219,0.05);
+  border: 1.5px solid rgba(26,86,219,0.2);
+  border-radius: var(--r);
+  padding: 12px 16px;
+  margin-bottom: 4px;
+}
+.gasless-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--ink2);
+  flex: 1;
+}
+.toggle-switch { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background: var(--border2); border-radius: 24px;
+  cursor: pointer; transition: .2s;
+}
+.toggle-slider:before {
+  content: ''; position: absolute;
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background: white; border-radius: 50%;
+  transition: .2s;
+}
+input:checked + .toggle-slider { background: var(--accent); }
+input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+@media (max-width: 480px) {
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .activity-day { font-size: 0.55rem; }
+}

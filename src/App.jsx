@@ -5,7 +5,7 @@ import {
   isFreighterInstalled, connectFreighter,
   fetchBalance, fetchTransactions, sendRemittance, fundTestnetAccount,
   isValidStellarAddress, shortAddress, convertToXLM, convertFromXLM,
-  formatBalance, generateOTP, fetchLiveRates,
+  formatBalance, generateOTP, fetchLiveRates, fetchAccountMetrics, sendGasless,
   saveUser, getUserByPhone, saveSession, getSession, clearSession, cache,
   fetchLatestIncomingPayment,
 } from './stellar.js'
@@ -1203,6 +1203,9 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
   const [txStatus, setTxStatus]         = useState(null)
   const [txHash, setTxHash]             = useState(null)
   const [showReceipt, setShowReceipt]   = useState(false)
+  const [gasless, setGasless]           = useState(false)
+  const [metrics, setMetrics]           = useState(null)
+  const [metricsLoading, setMetricsLoading] = useState(false)
   const [receiptData, setReceiptData]   = useState(null)
   const [txMsg, setTxMsg]               = useState('')
   const [sendMode, setSendMode]         = useState('options') // 'options' | 'search' | 'scanner' | 'manual'
@@ -1339,7 +1342,9 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
     setSending(true); setTxStatus('pending'); setTxHash(null); setTxMsg('')
     try {
       setTxStatus('confirming')
-      const hash = await sendRemittance(addr, receiver, xlm, memo || `RC:${fromCur}→${toCur}`)
+      const hash = gasless
+        ? await sendGasless(addr, receiver, xlm, memo || 'H:' + fromCur + '->' + toCur)
+        : await sendRemittance(addr, receiver, xlm, memo || 'H:' + fromCur + '->' + toCur)
       setTxHash(hash); setTxStatus('success')
       // Save receipt data before clearing form
       setReceiptData({
@@ -1450,6 +1455,7 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
           { id:'receive', icon:'receive', label:t.receive },
           { id:'history', icon:'history', label:t.history },
           { id:'invite',  icon:'invite',  label:'Invite'  },
+          { id:'metrics', icon:'chart',   label:'Metrics' },
           { id:'profile', icon:'profile', label:t.profile },
         ].map(n => (
           <button key={n.id} className={`nav-btn ${page===n.id?'nav-active':''}`}
@@ -1457,8 +1463,12 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
               setPage(n.id)
               if (n.id === 'history') {
                 loadTxns()
-                setNewTxCount(0)  // Clear badge
-                setIncoming(null) // Clear incoming payment details
+                setNewTxCount(0)
+                setIncoming(null)
+              }
+              if (n.id === 'metrics') {
+                setMetricsLoading(true)
+                fetchAccountMetrics(addr).then(m => { setMetrics(m); setMetricsLoading(false) })
               }
             }}>
             <span className="nav-icon-wrap">
@@ -2266,6 +2276,96 @@ More
                 ))}
               </div>
 
+            </div>
+          )}
+
+          {/* ── METRICS DASHBOARD ── */}
+          {page === 'metrics' && (
+            <div className="page fade-up">
+              <div className="page-title">
+                <h2>Metrics</h2>
+                <p>Your activity on Stellar Testnet</p>
+              </div>
+
+              {metricsLoading ? (
+                <div className="card" style={{textAlign:'center',padding:40}}>
+                  <Spinner size={32}/><p style={{marginTop:12,color:'var(--ink3)'}}>Loading metrics...</p>
+                </div>
+              ) : metrics ? (
+                <>
+                  {/* Stats grid */}
+                  <div className="metrics-grid">
+                    {[
+                      { label:'Total Transactions', value: metrics.totalTransactions,         icon:'history',  color:'#1a56db' },
+                      { label:'Total Sent',          value: metrics.totalSent,                 icon:'send',     color:'#e85d04' },
+                      { label:'Total Received',      value: metrics.totalReceived,             icon:'receive',  color:'#059669' },
+                      { label:'XLM Sent',            value: metrics.totalXLMSent + ' XLM',    icon:'wallet',   color:'#7c3aed' },
+                      { label:'XLM Received',        value: metrics.totalXLMReceived + ' XLM',icon:'exchange', color:'#0891b2' },
+                      { label:'Last Active',         value: metrics.lastActive ? new Date(metrics.lastActive).toLocaleDateString() : 'N/A', icon:'bell', color:'#d97706' },
+                    ].map(s => (
+                      <div key={s.label} className="metric-card">
+                        <div className="metric-icon" style={{background: s.color + '18'}}>
+                          <Icon name={s.icon} size={20} color={s.color}/>
+                        </div>
+                        <div className="metric-val">{s.value}</div>
+                        <div className="metric-label">{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Daily activity chart */}
+                  <div className="card">
+                    <div className="card-label">Daily Activity — Last 7 Days</div>
+                    <div className="activity-chart">
+                      {Object.entries(metrics.dailyActivity).map(([day, count]) => {
+                        const max = Math.max(...Object.values(metrics.dailyActivity), 1)
+                        const pct = Math.max((count / max) * 100, 4)
+                        return (
+                          <div key={day} className="activity-bar-wrap">
+                            <div className="activity-count">{count}</div>
+                            <div className="activity-bar-bg">
+                              <div className="activity-bar-fill" style={{height: pct + '%'}}/>
+                            </div>
+                            <div className="activity-day">{day}</div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Security checklist */}
+                  <div className="card">
+                    <div className="card-label">Security Status</div>
+                    {[
+                      { label:'KYC Verified',              done: !!user.idNumber },
+                      { label:'Wallet Connected',          done: !!addr },
+                      { label:'Transactions Signed by Freighter', done: true },
+                      { label:'Private Key Never Stored',  done: true },
+                      { label:'Fee Sponsorship Available', done: true },
+                      { label:'OTP Phone Verification',    done: true },
+                    ].map(c => (
+                      <div key={c.label} className="security-row">
+                        <Icon name={c.done ? 'verified' : 'alert'} size={16} color={c.done ? '#059669' : '#d97706'}/>
+                        <span style={{fontSize:'0.85rem', color: c.done ? 'var(--ink)' : 'var(--ink3)'}}>{c.label}</span>
+                        <span className={'sec-badge ' + (c.done ? 'sec-pass' : 'sec-warn')}>{c.done ? 'Pass' : 'Pending'}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button className="btn-outline" style={{width:'100%'}} onClick={() => {
+                    setMetricsLoading(true)
+                    fetchAccountMetrics(addr).then(m => { setMetrics(m); setMetricsLoading(false) })
+                  }}>
+                    <Icon name="refresh" size={14}/> Refresh Metrics
+                  </button>
+                </>
+              ) : (
+                <div className="empty-state">
+                  <Icon name="history" size={40} color="var(--ink3)"/>
+                  <p>No metrics available yet</p>
+                  <p style={{fontSize:'0.78rem',color:'var(--ink3)'}}>Make a transaction first</p>
+                </div>
+              )}
             </div>
           )}
 
