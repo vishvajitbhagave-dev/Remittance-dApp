@@ -26,8 +26,7 @@ Migrant workers send $800 billion/year back home. Traditional services charge 3â
 
 Demo Video: 
 
-https://drive.google.com/file/d/1Kiv2wedAoCbWgTu8k3fvKrs3VANoJa7V/view?usp=drive_link
-
+https://drive.google.com/file/d/1Kiv2wedAoCbWgTu8k3fvKrs3VANoJa7V/view?usp=sharing
 ---
 
 ## Testnet Users
