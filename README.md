@@ -80,7 +80,28 @@ https://drive.google.com/file/d/1Kiv2wedAoCbWgTu8k3fvKrs3VANoJa7V/view?usp=shari
 ### CI/CD Pipeline
 
 
+
 ### Mobile View
+
+<img width="605" height="749" alt="Screenshot 2026-04-20 182035" src="https://github.com/user-attachments/assets/12998745-4394-492e-b8ba-c9c56a68c807" />
+
+<img width="607" height="755" alt="Screenshot 2026-04-20 182116" src="https://github.com/user-attachments/assets/6b3dd229-a0af-4e6d-aab8-8964343c47a4" />
+
+<img width="603" height="751" alt="Screenshot 2026-04-20 182143" src="https://github.com/user-attachments/assets/50c48b5c-23e6-4ec9-ab0c-31a3d744677a" />
+
+<img width="600" height="749" alt="Screenshot 2026-04-20 182211" src="https://github.com/user-attachments/assets/9737f4b3-7827-4d82-907f-9e275cc53060" />
+
+<img width="602" height="747" alt="Screenshot 2026-04-20 182243" src="https://github.com/user-attachments/assets/03e84982-67a3-45b4-9472-12abb428197c" />
+
+<img width="602" height="749" alt="Screenshot 2026-04-20 182308" src="https://github.com/user-attachments/assets/e18189fe-06cb-4cc6-aa24-242c36a185d0" />
+
+<img width="600" height="746" alt="Screenshot 2026-04-20 182341" src="https://github.com/user-attachments/assets/adacab7f-928a-40d6-b2e2-551ff383c5c1" />
+
+<img width="599" height="753" alt="Screenshot 2026-04-20 182410" src="https://github.com/user-attachments/assets/0c7a416f-2aae-45db-acd8-fd18f469e3b8" />
+
+<img width="597" height="748" alt="Screenshot 2026-04-20 182430" src="https://github.com/user-attachments/assets/634c79cf-f292-41a2-99e5-6661e455299f" />
+
+<img width="604" height="746" alt="Screenshot 2026-04-20 182533" src="https://github.com/user-attachments/assets/159595ee-4d7a-4cbd-be9e-c4aae98496f1" />
 
 ---
 
