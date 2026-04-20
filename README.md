@@ -27,6 +27,61 @@ Migrant workers send $800 billion/year back home. Traditional services charge 3â
 Demo Video: 
 
 https://drive.google.com/file/d/1Kiv2wedAoCbWgTu8k3fvKrs3VANoJa7V/view?usp=sharing
+
+---
+## Screenshots
+
+### Desktop View
+<img width="1919" height="877" alt="Screenshot 2026-04-20 171607" src="https://github.com/user-attachments/assets/e0952015-97d5-4705-90fd-f5d32e043329" />
+
+<img width="1919" height="874" alt="Screenshot 2026-04-20 171753" src="https://github.com/user-attachments/assets/4069e03f-43a3-4b97-9273-7c3cf25f9716" />
+
+<img width="1919" height="875" alt="Screenshot 2026-04-20 172107" src="https://github.com/user-attachments/assets/5b9e4b95-f84e-45f9-a41b-29328e216fcd" />
+
+<img width="1919" height="877" alt="Screenshot 2026-04-20 172131" src="https://github.com/user-attachments/assets/1208474f-839b-4620-9264-7f73493dd4f9" />
+
+<img width="1919" height="935" alt="Screenshot 2026-04-20 172459" src="https://github.com/user-attachments/assets/1f1166f8-d243-490d-8a36-90091ac0e074" />
+
+<img width="1919" height="887" alt="Screenshot 2026-04-20 172542" src="https://github.com/user-attachments/assets/de5e1421-c098-49fd-80e8-5ffe6ad0b5e6" />
+
+<img width="1919" height="884" alt="Screenshot 2026-04-20 172615" src="https://github.com/user-attachments/assets/77caf3fb-ecc8-4740-95e7-f7c41627acfe" />
+
+<img width="1919" height="880" alt="Screenshot 2026-04-20 172656" src="https://github.com/user-attachments/assets/dd0aa728-2b61-4520-bd57-e0c411f32c9a" />
+
+<img width="1919" height="803" alt="Screenshot 2026-04-20 173136" src="https://github.com/user-attachments/assets/a498264a-0031-4612-aac4-492079035bf1" />
+
+<img width="1919" height="881" alt="Screenshot 2026-04-20 173208" src="https://github.com/user-attachments/assets/8f84c358-fcfa-4aec-a887-9e6df4ce94fb" />
+
+<img width="1919" height="880" alt="Screenshot 2026-04-20 173235" src="https://github.com/user-attachments/assets/3701bc37-7c76-4902-95d2-1af34c69243a" />
+
+<img width="1919" height="878" alt="Screenshot 2026-04-20 173757" src="https://github.com/user-attachments/assets/c71d149f-2675-419a-9003-f16c7c5ac8d4" />
+
+<img width="1919" height="848" alt="Screenshot 2026-04-20 173834" src="https://github.com/user-attachments/assets/06fad35d-8205-4d0f-b089-245c1563f548" />
+
+<img width="1919" height="873" alt="Screenshot 2026-04-20 173936" src="https://github.com/user-attachments/assets/fccb5b2f-309d-4a23-a825-c6e8e530cc7a" />
+
+<img width="1919" height="876" alt="Screenshot 2026-04-20 174157" src="https://github.com/user-attachments/assets/b9a1e1d8-0273-4bae-8328-3c48b60bc9de" />
+
+<img width="1919" height="953" alt="Screenshot 2026-04-20 174247" src="https://github.com/user-attachments/assets/1dccce14-5664-47fc-85f3-56a408fc68b5" />
+
+<img width="1919" height="877" alt="Screenshot 2026-04-20 174406" src="https://github.com/user-attachments/assets/e0aded27-a31f-4168-a1fd-e20707374b53" />
+
+<img width="1919" height="878" alt="Screenshot 2026-04-20 174532" src="https://github.com/user-attachments/assets/741d8a3f-5456-4ba3-8eef-de30964d7bc2" />
+
+<img width="1919" height="872" alt="Screenshot 2026-04-20 174602" src="https://github.com/user-attachments/assets/c821cb89-b47e-4335-9915-a19b57062bd6" />
+
+<img width="1919" height="865" alt="Screenshot 2026-04-20 174634" src="https://github.com/user-attachments/assets/e8b69105-98dd-4455-9034-8d9c67187989" />
+
+<img width="1919" height="885" alt="Screenshot 2026-04-20 174704" src="https://github.com/user-attachments/assets/caec5c91-89e0-442d-8784-32481efe9409" />
+
+<img width="1919" height="875" alt="Screenshot 2026-04-20 174900" src="https://github.com/user-attachments/assets/90c734e6-856e-4de7-bc09-b1e80bd5e6aa" />
+
+
+### CI/CD Pipeline
+
+
+### Mobile View
+
 ---
 
 ## Testnet Users
