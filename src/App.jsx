@@ -203,34 +203,31 @@ function PhoneInput({ countryCode, onCountryChange, phone, onPhoneChange, error 
   )
 }
 
-// ── Send OTP via Vercel serverless function ──────────────────────────────────
-async function sendOTP(phone, otp) {
-  try {
-    const resp = await fetch('/api/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, otp }),
-    })
-    const data = await resp.json()
-    if (data.testMode) {
-      // SMS not sent — show OTP in alert as fallback
-      alert(
-        'OTP (Test Mode): ' + data.otp +
-        '' + (data.message || '') +'Note: For real SMS, add FAST2SMS_API_KEY in Vercel environment variables.'
-      )
-    } else {
-      // Real SMS sent successfully — no alert needed
-      console.log('OTP sent via SMS:', data.message)
-    }
-    return data
-  } catch (err) {
-    // Fallback — show OTP in alert
-    alert('OTP: ' + otp + 
-      
-      '(Could not reach SMS server — showing OTP here)')
-    return { success: true, testMode: true, otp }
-  }
+// ── Email OTP Functions ───────────────────────────────────────────────────────
+
+// Step 1: Request OTP — calls /api/send-otp → sends email via Gmail SMTP
+async function requestEmailOTP(email) {
+  const resp = await fetch('/api/send-otp', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ email }),
+  })
+  const data = await resp.json()
+  if (!resp.ok) throw new Error(data.error || 'Failed to send OTP email. Please try again.')
+  return data
 }
+
+// Step 2: Verify OTP — calls /api/verify-otp → validates token + code
+async function verifyEmailOTP(token, otp, email) {
+  const resp = await fetch('/api/verify-otp', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ token, otp, email }),
+  })
+  const data = await resp.json()
+  return data
+}
+
 
 // ── Spinner ───────────────────────────────────────────────────────────────────
 function Spinner({ size = 18, color = 'var(--accent)' }) {
