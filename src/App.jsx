@@ -203,6 +203,35 @@ function PhoneInput({ countryCode, onCountryChange, phone, onPhoneChange, error 
   )
 }
 
+// ── Send OTP via Vercel serverless function ──────────────────────────────────
+async function sendOTP(phone, otp) {
+  try {
+    const resp = await fetch('/api/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, otp }),
+    })
+    const data = await resp.json()
+    if (data.testMode) {
+      // SMS not sent — show OTP in alert as fallback
+      alert(
+        'OTP (Test Mode): ' + data.otp +
+        '' + (data.message || '') +'Note: For real SMS, add FAST2SMS_API_KEY in Vercel environment variables.'
+      )
+    } else {
+      // Real SMS sent successfully — no alert needed
+      console.log('OTP sent via SMS:', data.message)
+    }
+    return data
+  } catch (err) {
+    // Fallback — show OTP in alert
+    alert('OTP: ' + otp + 
+      
+      '(Could not reach SMS server — showing OTP here)')
+    return { success: true, testMode: true, otp }
+  }
+}
+
 // ── Spinner ───────────────────────────────────────────────────────────────────
 function Spinner({ size = 18, color = 'var(--accent)' }) {
   return <span style={{
@@ -402,6 +431,8 @@ function SignupPage({ onSignup, onGoLogin }) {
   const [phoneError, setPhoneError]   = useState('')
   const [otp, setOtp]           = useState('')
   const [generatedOtp, setGeneratedOtp] = useState('')
+  const [otpToken, setOtpToken] = useState('')
+  const [otpAttemptsLeft, setOtpAttemptsLeft] = useState(3)
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
   const [connecting, setConnecting] = useState(false)
@@ -475,29 +506,49 @@ function SignupPage({ onSignup, onGoLogin }) {
     } finally { setConnecting(false) }
   }
 
-  function sendOtp() {
-    const code = generateOTP()
-    setGeneratedOtp(code)
-    // In production this would be SMS. For testnet we show it directly.
-    alert(`[TESTNET] Your OTP is: ${code}\n\nIn production this would be sent via SMS.`)
-    setStep(4)
+  async function sendOtp() {
+    if (!form.email?.trim() || !form.email.includes('@')) {
+      setError('Please enter a valid email address.'); return
+    }
+    setLoading(true); setError('')
+    try {
+      const result = await requestEmailOTP(form.email.trim())
+      setOtpToken(result.token || '')
+      setOtpAttemptsLeft(3)
+      setStep(4)
+    } catch(e) {
+      setError(e.message || 'Failed to send OTP. Please try again.')
+    } finally { setLoading(false) }
   }
 
-  function verifyAndSignup() {
-    if (otp !== generatedOtp) { setError('Incorrect OTP. Try again.'); return }
-    const user = {
-      name:          form.name.trim(),
-      phone:         countryCode + form.phone.trim(),
-      country:       form.country,
-      idType:        form.idType,
-      idNumber:      form.idNumber.trim(),
-      walletAddress: form.walletAddress,
-      kycVerified:   true,
-      createdAt:     new Date().toISOString(),
-    }
-    saveUser(user)
-    saveSession(user)
-    onSignup(user)
+  async function verifyAndSignup() {
+    if (!otp.trim()) { setError('Please enter the OTP.'); return }
+    setLoading(true); setError('')
+    try {
+      const result = await verifyEmailOTP(otpToken, otp.trim(), form.email.trim())
+      if (result.success) {
+        const user = {
+          name:          form.name.trim(),
+          phone:         countryCode + form.phone.trim(),
+          email:         form.email.trim(),
+          country:       form.country,
+          idType:        form.idType,
+          idNumber:      form.idNumber.trim(),
+          walletAddress: form.walletAddress,
+          kycVerified:   true,
+          createdAt:     new Date().toISOString(),
+        }
+        saveUser(user)
+        saveSession(user)
+        onSignup(user)
+      } else {
+        if (result.token) setOtpToken(result.token)
+        if (result.attemptsLeft !== undefined) setOtpAttemptsLeft(result.attemptsLeft)
+        setError(result.error || 'Incorrect OTP.')
+      }
+    } catch(e) {
+      setError('Verification failed. Please try again.')
+    } finally { setLoading(false) }
   }
 
 
@@ -716,7 +767,7 @@ Your data is encrypted and stored securely<br/>Compliant with Stellar SEP-12 KYC
         {step === 4 && (
           <div className="auth-form">
             <div className="otp-info">
-              OTP sent to <strong>{countryCode}{form.phone}</strong><br/>
+              OTP sent to <strong>{form.email}</strong><br/>
               <span style={{ fontSize:'0.78rem', color:'var(--ink3)' }}>(Check the popup for testnet OTP)</span>
             </div>
             <div className="field-group">
@@ -744,42 +795,62 @@ Your data is encrypted and stored securely<br/>Compliant with Stellar SEP-12 KYC
 // ── LOGIN PAGE ────────────────────────────────────────────────────────────────
 function LoginPage({ onLogin, onGoSignup }) {
   const [phone, setPhone]       = useState('')
+  const [loginEmail, setLoginEmail] = useState('')
   const [countryCode, setCC]    = useState('+91')
   const [phoneError, setPhoneErr] = useState('')
   const [otp, setOtp]           = useState('')
   const [genOtp, setGenOtp]     = useState('')
+  const [otpToken, setOtpToken] = useState('')
+  const [attemptsLeft, setAttemptsLeft] = useState(3)
   const [step, setStep]         = useState(1) // 1=phone, 2=otp
   const [error, setError]       = useState('')
+  const [loading, setLoading]   = useState(false)
 
-  function sendOtp() {
+  async function sendOtp() {
     setError(''); setPhoneErr('')
     if (!phone.trim()) { setPhoneErr('Please enter your phone number.'); return }
     const required = COUNTRY_CODES.find(c => c.code === countryCode)?.digits || 10
-    if (phone.length < required) {
-      setPhoneErr(`Phone number must be exactly ${required} digits.`)
-      return
-    }
-    if (phone.length > required) {
-      setPhoneErr(`Too many digits. Must be ${required} digits.`)
-      return
-    }
+    if (phone.length < required) { setPhoneErr(`Must be ${required} digits.`); return }
     const fullPhone = countryCode + phone
-    // Try with country code first, then without (backward compatibility)
     let user = getUserByPhone(fullPhone)
     if (!user) user = getUserByPhone(phone)
     if (!user) { setError('Phone number not registered. Please sign up.'); return }
-    const code = generateOTP()
-    setGenOtp(code)
-    alert(`[TESTNET] Your OTP is: ${code}\n\nIn production this would be sent via SMS.`)
-    setStep(2)
+    if (!loginEmail.trim() || !loginEmail.includes('@')) {
+      setError('Please enter your registered email address.'); return
+    }
+    // Verify email matches account
+    if (user.email && user.email.toLowerCase() !== loginEmail.trim().toLowerCase()) {
+      setError('Email does not match your registered account.'); return
+    }
+    setLoading(true); setError('')
+    try {
+      const result = await requestEmailOTP(loginEmail.trim())
+      setOtpToken(result.token || '')
+      setAttemptsLeft(3)
+      setStep(2)
+    } catch(e) {
+      setError(e.message || 'Failed to send OTP.')
+    } finally { setLoading(false) }
   }
 
-  function verify() {
-    if (otp !== genOtp) { setError('Incorrect OTP. Try again.'); return }
-    let user = getUserByPhone(countryCode + phone.trim())
-    if (!user) user = getUserByPhone(phone.trim())
-    saveSession(user)
-    onLogin(user)
+  async function verify() {
+    if (!otp.trim()) { setError('Please enter the OTP.'); return }
+    setLoading(true); setError('')
+    try {
+      const result = await verifyEmailOTP(otpToken, otp.trim(), loginEmail.trim())
+      if (result.success) {
+        let user = getUserByPhone(countryCode + phone.trim())
+        if (!user) user = getUserByPhone(phone.trim())
+        saveSession(user)
+        onLogin(user)
+      } else {
+        if (result.token) setOtpToken(result.token)
+        if (result.attemptsLeft !== undefined) setAttemptsLeft(result.attemptsLeft)
+        setError(result.error || 'Incorrect OTP.')
+      }
+    } catch(e) {
+      setError('Verification failed. Please try again.')
+    } finally { setLoading(false) }
   }
 
   return (
@@ -819,7 +890,12 @@ function LoginPage({ onLogin, onGoSignup }) {
         {step === 2 && (
           <div className="auth-form">
             <div className="otp-info">
-              OTP sent to <strong>{countryCode}{phone}</strong>
+              OTP sent to <strong>{loginEmail}</strong>
+              {attemptsLeft < 3 && (
+                <span style={{color:'var(--red)',display:'block',marginTop:4,fontSize:'0.8rem'}}>
+                  {attemptsLeft} attempt{attemptsLeft===1?'':'s'} remaining
+                </span>
+              )}
             </div>
             <div className="field-group">
               <label>Enter 6-digit OTP</label>
