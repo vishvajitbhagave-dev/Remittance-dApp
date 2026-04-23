@@ -9,16 +9,28 @@
 
 ---
 
+## What is Horizon?
+
+Horizon solves a real problem. Migrant workers send $800 billion per year back home. Traditional services like Western Union charge 3–7% fees and take 1–3 days. Horizon uses the Stellar blockchain to make it instant and nearly free.
+
+**Example:** Joy works in Dubai and wants to send money to his mother in Mumbai.
+- Traditional: Rs.200–500 fee, 1–3 days
+- Horizon: Rs.1.80 fee (0.1 XLM), 5–10 seconds
+
+---
+
 ## Live Demo
 
 **https://remittance-d-app.vercel.app**
 
-<<<<<<< HEAD
-Demo Video: 
+## Demo Video
 
 https://drive.google.com/file/d/1Kiv2wedAoCbWgTu8k3fvKrs3VANoJa7V/view?usp=sharing
 
+> The demo video covers: Account creation, KYC verification, wallet connection, sending money, QR code scanning, transaction history, notifications, and receipt sharing on WhatsApp.
+
 ---
+
 ## Screenshots
 
 ### Desktop View
@@ -93,75 +105,17 @@ https://drive.google.com/file/d/1Kiv2wedAoCbWgTu8k3fvKrs3VANoJa7V/view?usp=shari
 <img width="597" height="748" alt="Screenshot 2026-04-20 182430" src="https://github.com/user-attachments/assets/634c79cf-f292-41a2-99e5-6661e455299f" />
 
 <img width="604" height="746" alt="Screenshot 2026-04-20 182533" src="https://github.com/user-attachments/assets/159595ee-4d7a-4cbd-be9e-c4aae98496f1" />
+
 =======
-> Open the link → Click **Create Account** → Click **Fund Testnet** → Start sending money instantly.
-
----
-
-## Demo Video
-
-**https://www.youtube.com/watch?v=YOUR_VIDEO_ID**
-
-> The demo video covers: Account creation, KYC verification, wallet connection, sending money, QR code scanning, transaction history, notifications, and receipt sharing on WhatsApp.
-
----
-
-## What is Horizon?
-
-Horizon solves a real problem. Migrant workers send $800 billion per year back home. Traditional services like Western Union charge 3–7% fees and take 1–3 days. Horizon uses the Stellar blockchain to make it instant and nearly free.
-
-**Example:** Joy works in Dubai and wants to send money to his mother in Mumbai.
-- Traditional: Rs.200–500 fee, 1–3 days
-- Horizon: Rs.1.80 fee (0.1 XLM), 5–10 seconds
->>>>>>> 43bd86f (feat: Level 6 - Fee sponsorship, metrics dashboard)
-
----
-
-## Testnet Users
-
-<<<<<<< HEAD
-| User | Wallet Address | Country |
-|------|---------------|---------|
-| User 1 | GBPRWZNXA35EIBOVCSNWKHEBRXHG5FQRUNTH4FNL3DKK4TCXRUOBZ6EJ | India |
-| User 2 | GCLGE5VJFCZDWSPER46BOHKUZJVGGQFDUGGYR22S3HSKYVRJDRQ4RJVU | UAE |
-| User 3 | GCRVRBRQW55PGVAMGPSGPEV6LOABEZNIVT6TLW2FGKUIFX3MBVOZYGXG | Philippines |
-| User 4 | GA2VJZ7PMHW2YPEFZTEDXSAWEU57K66N2G7FMSZ3DDLRJZWRL4V3FOEK | Bangladesh |
-| User 5 | GA3JCZMJKM42J6Z732RKTQ5LWSDYAD7DCZIISAWR55HPPQ25EPK5N4KW | India |
-=======
-All 5 users created accounts, connected Freighter wallets, received testnet XLM, and completed transfers. Transactions are verifiable on Stellar Expert.
-
-| # | Name | Wallet Address | Stellar Explorer |
-|---|------|---------------|-----------------|
-| 1 | User 1 | `GABC...1234` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GABC1234) |
-| 2 | User 2 | `GDEF...5678` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDEF5678) |
-| 3 | User 3 | `GHIJ...9012` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GHIJ9012) |
-| 4 | User 4 | `GKLM...3456` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GKLM3456) |
-| 5 | User 5 | `GNOP...7890` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GNOP7890) |
-
-> Replace the wallet addresses above with real addresses from your 5 users.
-
----
 
 ## User Feedback
 
-**Feedback Document:** https://docs.google.com/document/d/YOUR_DOC_ID
-
-### Summary
-
-| User | Rating | Key Feedback |
-|------|--------|-------------|
-| User 1 | 5/5 | Fast and simple to use |
-| User 2 | 4/5 | QR code scanning works perfectly |
-| User 3 | 5/5 | Love the WhatsApp receipt sharing |
-| User 4 | 4/5 | Multi-language support is excellent |
-| User 5 | 5/5 | Notifications are instant and accurate |
+**Feedback Document:** https://docs.google.com/forms/d/10z7W0bSrdaaYPNl4pLfoMzqnFS2j31WEmFXle7lNn8Y/edit#responses
 
 **Iterations completed based on feedback:**
 - Added real-time notification badge on History tab after users reported not knowing when money arrived
 - Fixed QR code scanner to handle all formats after user testing showed it was rejecting valid codes
 - Made Download History popup appear at top-right corner after users couldn't find it
-- Added Copy icon next to wallet address after users requested it
->>>>>>> 43bd86f (feat: Level 6 - Fee sponsorship, metrics dashboard)
 
 ---
 
@@ -377,34 +331,6 @@ remitchain/
 ├── README.md                This file
 └── ARCHITECTURE.md          Detailed architecture document
 ```
-
----
-
-## Submission Checklist
-
-- [x] MVP fully functional and deployed
-- [x] Live demo link (Vercel)
-- [x] Demo video
-- [x] 5+ real testnet users with verifiable wallet addresses
-- [x] User feedback documented with iterations
-- [x] Architecture document (ARCHITECTURE.md)
-- [x] CI/CD pipeline (GitHub Actions)
-- [x] 10+ meaningful commits
-- [x] Smart contract deployed on Stellar Testnet
-- [x] README with all required documentation
-
----
-
-## Level Progression
-
-| Level | Belt | Status |
-|-------|------|--------|
-| 1 | White Belt | Done |
-| 2 | Yellow Belt | Done |
-| 3 | Orange Belt | Done |
-| 4 | Green Belt | Done |
-| 5 | Blue Belt | **Submitting now** |
-| 6 | Red Belt | Next |
 
 ---
 
