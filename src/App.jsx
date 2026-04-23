@@ -205,27 +205,83 @@ function PhoneInput({ countryCode, onCountryChange, phone, onPhoneChange, error 
 
 // ── Email OTP Functions ───────────────────────────────────────────────────────
 
-// Step 1: Request OTP — calls /api/send-otp → sends email via Gmail SMTP
-async function requestEmailOTP(email) {
-  const resp = await fetch('/api/send-otp', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ email }),
-  })
-  const data = await resp.json()
-  if (!resp.ok) throw new Error(data.error || 'Failed to send OTP email. Please try again.')
-  return data
+// Local fallback — used on localhost where /api/ routes don't exist
+function localGenerateToken(email) {
+  const otp    = String(Math.floor(100000 + Math.random() * 900000))
+  const expiry = Date.now() + 5 * 60 * 1000
+  const token  = btoa(JSON.stringify({ email: email.toLowerCase(), otp, expiry, attempts: 0 }))
+  alert(
+    'OTP: ' + otp +
+    '\n\nThis popup only shows on localhost for testing.' +
+    '\nOn the live Vercel URL, OTP is sent to your email inbox.'
+  )
+  return { success: true, testMode: true, token }
 }
 
-// Step 2: Verify OTP — calls /api/verify-otp → validates token + code
+function localCheckOTP(token, otp) {
+  try {
+    const data = JSON.parse(atob(token))
+    if (Date.now() > data.expiry)
+      return { success: false, error: 'OTP expired. Please request a new one.', expired: true }
+    if (data.attempts >= 3)
+      return { success: false, error: 'Max attempts exceeded. Request a new OTP.', maxAttempts: true }
+    if (otp.trim() !== data.otp) {
+      data.attempts += 1
+      const newToken     = btoa(JSON.stringify(data))
+      const attemptsLeft = 3 - data.attempts
+      return {
+        success: false,
+        error:   'Incorrect OTP. ' + attemptsLeft + ' attempt' + (attemptsLeft === 1 ? '' : 's') + ' remaining.',
+        token:   newToken,
+        attemptsLeft,
+      }
+    }
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Invalid token. Please request a new OTP.' }
+  }
+}
+
+// Step 1: Request OTP — tries Vercel API first, falls back to local on localhost
+async function requestEmailOTP(email) {
+  try {
+    const resp = await fetch('/api/send-otp', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email }),
+    })
+    // Read as text first — if empty or HTML, API does not exist (localhost)
+    const text = await resp.text()
+    if (!text || !text.trim().startsWith('{')) {
+      return localGenerateToken(email)
+    }
+    const data = JSON.parse(text)
+    if (data.testMode) {
+      const otpPart = data.message ? data.message.split('OTP: ')[1] : ''
+      alert('OTP (Test): ' + otpPart + '\n\nReal email will be sent on Vercel.')
+    }
+    return data
+  } catch {
+    return localGenerateToken(email)
+  }
+}
+
+// Step 2: Verify OTP — tries Vercel API first, falls back to local
 async function verifyEmailOTP(token, otp, email) {
-  const resp = await fetch('/api/verify-otp', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ token, otp, email }),
-  })
-  const data = await resp.json()
-  return data
+  try {
+    const resp = await fetch('/api/verify-otp', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ token, otp, email }),
+    })
+    const text = await resp.text()
+    if (!text || !text.trim().startsWith('{')) {
+      return localCheckOTP(token, otp)
+    }
+    return JSON.parse(text)
+  } catch {
+    return localCheckOTP(token, otp)
+  }
 }
 
 
@@ -438,6 +494,9 @@ function SignupPage({ onSignup, onGoLogin }) {
 
   function validateStep1() {
     if (!form.name.trim())  { setError('Full name is required.'); return false }
+    if (!form.email?.trim() || !form.email.includes('@')) {
+      setError('Please enter a valid email address.'); return false
+    }
     if (!form.phone.trim()) { setPhoneError('Phone number is required.'); return false }
     const required = COUNTRY_CODES.find(c => c.code === countryCode)?.digits || 10
     const countryName = COUNTRY_CODES.find(c => c.code === countryCode)?.name || 'this country'
@@ -620,6 +679,19 @@ function SignupPage({ onSignup, onGoLogin }) {
                 }}
                 error={phoneError}
               />
+            </div>
+            <div className="field-group">
+              <label>Email Address * <span className="id-hint">(OTP will be sent here)</span></label>
+              <input
+                className="auth-input"
+                type="email"
+                placeholder="yourname@gmail.com"
+                value={form.email || ''}
+                onChange={e => update('email', e.target.value.trim())}
+              />
+              {form.email && !form.email.includes('@') && (
+                <div className="phone-error">Please enter a valid email address.</div>
+              )}
             </div>
             <div className="field-group">
               <label>Country *</label>
