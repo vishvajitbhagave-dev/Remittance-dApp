@@ -1,4 +1,4 @@
-name: RemitChain CI/CD
+name: Horizon CI/CD
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Run tests
         run: npm test
