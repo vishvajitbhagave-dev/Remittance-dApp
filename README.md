@@ -115,7 +115,7 @@ https://drive.google.com/file/d/1Kiv2wedAoCbWgTu8k3fvKrs3VANoJa7V/view?usp=shari
 **Iterations completed based on feedback:**
 - Added real-time notification badge on History tab after users reported not knowing when money arrived
 - Fixed QR code scanner to handle all formats after user testing showed it was rejecting valid codes
-- Made Download History popup appear at top-right corner after users couldn't find it
+- Made Download History Button and Invite Friends section.
 
 ---
 
