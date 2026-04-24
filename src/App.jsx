@@ -210,12 +210,7 @@ function localGenerateToken(email) {
   const otp    = String(Math.floor(100000 + Math.random() * 900000))
   const expiry = Date.now() + 5 * 60 * 1000
   const token  = btoa(JSON.stringify({ email: email.toLowerCase(), otp, expiry, attempts: 0 }))
-  alert(
-    'OTP: ' + otp +
-    '\n\nThis popup only shows on localhost for testing.' +
-    '\nOn the live Vercel URL, OTP is sent to your email inbox.'
-  )
-  return { success: true, testMode: true, token }
+  return { success: true, testMode: true, token, otp }
 }
 
 function localCheckOTP(token, otp) {
@@ -256,9 +251,10 @@ async function requestEmailOTP(email) {
       return localGenerateToken(email)
     }
     const data = JSON.parse(text)
-    if (data.testMode) {
-      const otpPart = data.message ? data.message.split('OTP: ')[1] : ''
-      alert('OTP (Test): ' + otpPart + '\n\nReal email will be sent on Vercel.')
+    // No alert — testOtp will be shown in UI
+    if (data.testMode && data.message) {
+      const parts = data.message.split('OTP: ')
+      if (parts[1]) data.otp = parts[1].trim()
     }
     return data
   } catch {
@@ -484,8 +480,9 @@ function SignupPage({ onSignup, onGoLogin }) {
   const [phoneError, setPhoneError]   = useState('')
   const [otp, setOtp]           = useState('')
   const [generatedOtp, setGeneratedOtp] = useState('')
-  const [otpToken, setOtpToken] = useState('')
+  const [otpToken, setOtpToken]           = useState('')
   const [otpAttemptsLeft, setOtpAttemptsLeft] = useState(3)
+  const [testOtp, setTestOtp]               = useState('')
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
   const [connecting, setConnecting] = useState(false)
@@ -571,6 +568,7 @@ function SignupPage({ onSignup, onGoLogin }) {
       const result = await requestEmailOTP(form.email.trim())
       setOtpToken(result.token || '')
       setOtpAttemptsLeft(3)
+      setTestOtp(result.testMode && result.otp ? result.otp : '')
       setStep(4)
     } catch(e) {
       setError(e.message || 'Failed to send OTP. Please try again.')
@@ -869,8 +867,9 @@ function LoginPage({ onLogin, onGoSignup }) {
   const [phoneError, setPhoneErr] = useState('')
   const [otp, setOtp]           = useState('')
   const [genOtp, setGenOtp]     = useState('')
-  const [otpToken, setOtpToken] = useState('')
+  const [otpToken, setOtpToken]     = useState('')
   const [attemptsLeft, setAttemptsLeft] = useState(3)
+  const [testOtp, setTestOtp]         = useState('')
   const [step, setStep]         = useState(1) // 1=phone, 2=otp
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
@@ -896,6 +895,7 @@ function LoginPage({ onLogin, onGoSignup }) {
       const result = await requestEmailOTP(loginEmail.trim())
       setOtpToken(result.token || '')
       setAttemptsLeft(3)
+      setTestOtp(result.testMode && result.otp ? result.otp : '')
       setStep(2)
     } catch(e) {
       setError(e.message || 'Failed to send OTP.')
@@ -959,7 +959,11 @@ function LoginPage({ onLogin, onGoSignup }) {
         {step === 2 && (
           <div className="auth-form">
             <div className="otp-info">
-              OTP sent to <strong>{loginEmail}</strong>
+              {testOtp ? (
+                <>OTP sent in <strong>test mode</strong> — check the box below</>
+              ) : (
+                <>OTP sent to <strong>{loginEmail}</strong> — check your inbox</>
+              )}
               {attemptsLeft < 3 && (
                 <span style={{color:'var(--red)',display:'block',marginTop:4,fontSize:'0.8rem'}}>
                   {attemptsLeft} attempt{attemptsLeft===1?'':'s'} remaining
