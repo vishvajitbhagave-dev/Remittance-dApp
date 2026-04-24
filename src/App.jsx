@@ -203,7 +203,7 @@ function PhoneInput({ countryCode, onCountryChange, phone, onPhoneChange, error 
   )
 }
 
-// ── Email OTP Functions ───────────────────────────────────────────────────────
+// ── Email OTP Functions v2 ──────────────────────────────────────────────────────
 
 // Local fallback — used on localhost where /api/ routes don't exist
 function localGenerateToken(email) {
