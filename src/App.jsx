@@ -861,44 +861,37 @@ Your data is encrypted and stored securely<br/>Compliant with Stellar SEP-12 KYC
 
 // ── LOGIN PAGE ────────────────────────────────────────────────────────────────
 function LoginPage({ onLogin, onGoSignup }) {
-  const [phone, setPhone]       = useState('')
   const [loginEmail, setLoginEmail] = useState('')
-  const [countryCode, setCC]    = useState('+91')
-  const [phoneError, setPhoneErr] = useState('')
-  const [otp, setOtp]           = useState('')
-  const [genOtp, setGenOtp]     = useState('')
+  const [otp, setOtp]               = useState('')
   const [otpToken, setOtpToken]     = useState('')
   const [attemptsLeft, setAttemptsLeft] = useState(3)
-  const [testOtp, setTestOtp]         = useState('')
-  const [step, setStep]         = useState(1) // 1=phone, 2=otp
-  const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(false)
+  const [step, setStep]             = useState(1) // 1=email, 2=otp
+  const [error, setError]           = useState('')
+  const [loading, setLoading]       = useState(false)
 
   async function sendOtp() {
-    setError(''); setPhoneErr('')
-    if (!phone.trim()) { setPhoneErr('Please enter your phone number.'); return }
-    const required = COUNTRY_CODES.find(c => c.code === countryCode)?.digits || 10
-    if (phone.length < required) { setPhoneErr(`Must be ${required} digits.`); return }
-    const fullPhone = countryCode + phone
-    let user = getUserByPhone(fullPhone)
-    if (!user) user = getUserByPhone(phone)
-    if (!user) { setError('Phone number not registered. Please sign up.'); return }
+    setError('')
     if (!loginEmail.trim() || !loginEmail.includes('@')) {
-      setError('Please enter your registered email address.'); return
+      setError('Please enter a valid email address.'); return
     }
-    // Verify email matches account
-    if (user.email && user.email.toLowerCase() !== loginEmail.trim().toLowerCase()) {
-      setError('Email does not match your registered account.'); return
+
+    // Find user by email
+    const allUsers = JSON.parse(localStorage.getItem('remitchain_users') || '{}')
+    const user = Object.values(allUsers).find(
+      u => u.email && u.email.toLowerCase() === loginEmail.trim().toLowerCase()
+    )
+    if (!user) {
+      setError('No account found with this email. Please sign up first.'); return
     }
-    setLoading(true); setError('')
+
+    setLoading(true)
     try {
       const result = await requestEmailOTP(loginEmail.trim())
       setOtpToken(result.token || '')
       setAttemptsLeft(3)
-      setTestOtp(result.testMode && result.otp ? result.otp : '')
       setStep(2)
     } catch(e) {
-      setError(e.message || 'Failed to send OTP.')
+      setError(e.message || 'Failed to send OTP. Please try again.')
     } finally { setLoading(false) }
   }
 
@@ -908,10 +901,17 @@ function LoginPage({ onLogin, onGoSignup }) {
     try {
       const result = await verifyEmailOTP(otpToken, otp.trim(), loginEmail.trim())
       if (result.success) {
-        let user = getUserByPhone(countryCode + phone.trim())
-        if (!user) user = getUserByPhone(phone.trim())
-        saveSession(user)
-        onLogin(user)
+        // Find user by email and login
+        const allUsers = JSON.parse(localStorage.getItem('remitchain_users') || '{}')
+        const user = Object.values(allUsers).find(
+          u => u.email && u.email.toLowerCase() === loginEmail.trim().toLowerCase()
+        )
+        if (user) {
+          saveSession(user)
+          onLogin(user)
+        } else {
+          setError('Account not found. Please sign up.')
+        }
       } else {
         if (result.token) setOtpToken(result.token)
         if (result.attemptsLeft !== undefined) setAttemptsLeft(result.attemptsLeft)
@@ -941,17 +941,26 @@ function LoginPage({ onLogin, onGoSignup }) {
         {step === 1 && (
           <div className="auth-form">
             <div className="field-group">
-              <label>Phone Number</label>
-              <PhoneInput
-                countryCode={countryCode}
-                onCountryChange={c => { setCC(c); setPhoneErr(''); setPhone('') }}
-                phone={phone}
-                onPhoneChange={v => { setPhone(v.replace(/[^0-9]/g, '')); setPhoneErr('') }}
-                error={phoneError}
+              <label>Email Address *</label>
+              <input
+                className="auth-input"
+                type="email"
+                placeholder="yourname@gmail.com"
+                value={loginEmail}
+                onChange={e => { setLoginEmail(e.target.value.trim()); setError('') }}
+                onKeyDown={e => e.key === 'Enter' && sendOtp()}
+                autoFocus
               />
             </div>
-            <button className="auth-btn" onClick={sendOtp} disabled={!phone.trim()}>
-              Send OTP →
+            <button
+              className="auth-btn"
+              onClick={sendOtp}
+              disabled={!loginEmail.trim() || loading}
+            >
+              {loading
+                ? <><Spinner size={16} color="#fff"/> Sending OTP...</>
+                : 'Send OTP →'
+              }
             </button>
           </div>
         )}
@@ -959,11 +968,7 @@ function LoginPage({ onLogin, onGoSignup }) {
         {step === 2 && (
           <div className="auth-form">
             <div className="otp-info">
-              {testOtp ? (
-                <>OTP sent in <strong>test mode</strong> — check the box below</>
-              ) : (
-                <>OTP sent to <strong>{loginEmail}</strong> — check your inbox</>
-              )}
+              OTP sent to <strong>{loginEmail}</strong> — check your email inbox
               {attemptsLeft < 3 && (
                 <span style={{color:'var(--red)',display:'block',marginTop:4,fontSize:'0.8rem'}}>
                   {attemptsLeft} attempt{attemptsLeft===1?'':'s'} remaining
