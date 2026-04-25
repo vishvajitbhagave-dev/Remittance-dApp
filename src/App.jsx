@@ -876,12 +876,25 @@ function LoginPage({ onLogin, onGoSignup }) {
     }
 
     // Find user by email
+    // Also handles old accounts that were created before email field was added
     const allUsers = JSON.parse(localStorage.getItem('remitchain_users') || '{}')
-    const user = Object.values(allUsers).find(
+    const userList = Object.values(allUsers)
+
+    // Try exact email match first
+    let user = userList.find(
       u => u.email && u.email.toLowerCase() === loginEmail.trim().toLowerCase()
     )
+
+    // If not found — check for old accounts without email (created before email was required)
+    // In this case we allow login and will save email to their account after OTP verification
     if (!user) {
-      setError('No account found with this email. Please sign up first.'); return
+      // Check if there is any account at all
+      if (userList.length === 0) {
+        setError('No account found. Please create a new account.'); return
+      }
+      // Allow login for old accounts — OTP will verify identity
+      // We store the email and update the account after successful login
+      user = null // will be handled in verify()
     }
 
     setLoading(true)
@@ -901,16 +914,39 @@ function LoginPage({ onLogin, onGoSignup }) {
     try {
       const result = await verifyEmailOTP(otpToken, otp.trim(), loginEmail.trim())
       if (result.success) {
-        // Find user by email and login
         const allUsers = JSON.parse(localStorage.getItem('remitchain_users') || '{}')
-        const user = Object.values(allUsers).find(
+        const userList  = Object.values(allUsers)
+
+        // 1. Try to find user by exact email match
+        let user = userList.find(
           u => u.email && u.email.toLowerCase() === loginEmail.trim().toLowerCase()
         )
+
+        // 2. If not found (old account without email) — find most recently created account
+        //    and update it with this email
+        if (!user && userList.length > 0) {
+          // Sort by createdAt descending, pick most recent
+          const sorted = userList.sort((a, b) =>
+            new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+          )
+          // Pick the one without email (old account)
+          const oldAccount = sorted.find(u => !u.email)
+          if (oldAccount) {
+            // Update account with email
+            oldAccount.email = loginEmail.trim().toLowerCase()
+            // Save back to localStorage
+            const key = oldAccount.phone
+            allUsers[key] = oldAccount
+            localStorage.setItem('remitchain_users', JSON.stringify(allUsers))
+            user = oldAccount
+          }
+        }
+
         if (user) {
           saveSession(user)
           onLogin(user)
         } else {
-          setError('Account not found. Please sign up.')
+          setError('Account not found. Please create a new account.')
         }
       } else {
         if (result.token) setOtpToken(result.token)
