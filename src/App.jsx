@@ -594,6 +594,12 @@ function SignupPage({ onSignup, onGoLogin }) {
         }
         saveUser(user)
         saveSession(user)
+        // Save to cloud so other devices can find this user
+        fetch('/api/users', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ action: 'save', user }),
+        }).catch(() => {}) // silent fail — localStorage is fallback
         onSignup(user)
       } else {
         if (result.token) setOtpToken(result.token)
@@ -1407,15 +1413,45 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
   const [searchResults, setSearchResults] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
 
-  // Search user by name or phone
-  function handleSearch(q) {
+  // Search user by name or phone — checks cloud first, localStorage as fallback
+  async function handleSearch(q) {
     setSearchQuery(q)
     if (!q.trim()) { setSearchResults([]); return }
     setSearchLoading(true)
     try {
-      // Search from locally registered users (key = horizon_users)
+      // Try cloud search first
+      const resp = await fetch('/api/users', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ action: 'search', query: q, walletAddress: addr }),
+      })
+      const text = await resp.text()
+      if (text && text.trim().startsWith('{')) {
+        const data = JSON.parse(text)
+        if (data.users && data.users.length >= 0) {
+          // Also merge with local results
+          const localUsers = JSON.parse(localStorage.getItem('horizon_users') || '{}')
+          const localResults = Object.values(localUsers).filter(u =>
+            u.walletAddress !== addr && (
+              u.name?.toLowerCase().includes(q.toLowerCase()) ||
+              u.phone?.includes(q)
+            )
+          )
+          // Merge cloud + local, remove duplicates by walletAddress
+          const merged = [...data.users, ...localResults]
+          const unique  = merged.filter((u, i, arr) =>
+            arr.findIndex(x => x.walletAddress === u.walletAddress) === i
+          )
+          setSearchResults(unique)
+          setSearchLoading(false)
+          return
+        }
+      }
+    } catch {}
+    // Fallback: search localStorage only
+    try {
       const allUsers = JSON.parse(localStorage.getItem('horizon_users') || '{}')
-      const results = Object.values(allUsers).filter(u =>
+      const results  = Object.values(allUsers).filter(u =>
         u.walletAddress !== addr && (
           u.name?.toLowerCase().includes(q.toLowerCase()) ||
           u.phone?.includes(q)
