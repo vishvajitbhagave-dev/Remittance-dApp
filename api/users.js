@@ -2,6 +2,10 @@
 
 const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_KEY = process.env.SUPABASE_KEY
+const SUPABASE_BASE = (SUPABASE_URL || '').replace(/\/+$/, '')
+const REST_BASE = SUPABASE_BASE.endsWith('/rest/v1')
+  ? SUPABASE_BASE
+  : `${SUPABASE_BASE}/rest/v1`
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -32,7 +36,7 @@ export default async function handler(req, res) {
       // ── SAVE USER ─────────────────────────────────────────────────────────
       if (action === 'save') {
         // Upsert user by phone so updates are deterministic across devices
-        const resp = await fetch(`${SUPABASE_URL}/rest/v1/horizon_users?on_conflict=phone`, {
+        const resp = await fetch(`${REST_BASE}/horizon_users?on_conflict=phone`, {
           method:  'POST',
           headers: {
             ...headers,
@@ -64,8 +68,8 @@ export default async function handler(req, res) {
         const selectCols = 'name,phone,email,country,wallet_address,kyc_verified'
         const walletFilter = walletAddress ? `&wallet_address=neq.${encodeURIComponent(walletAddress)}` : ''
 
-        const byNameUrl  = `${SUPABASE_URL}/rest/v1/horizon_users?name=ilike.*${encodeURIComponent(q)}*&select=${selectCols}${walletFilter}`
-        const byPhoneUrl = `${SUPABASE_URL}/rest/v1/horizon_users?phone=ilike.*${encodeURIComponent(q)}*&select=${selectCols}${walletFilter}`
+        const byNameUrl  = `${REST_BASE}/horizon_users?name=ilike.*${encodeURIComponent(q)}*&select=${selectCols}${walletFilter}`
+        const byPhoneUrl = `${REST_BASE}/horizon_users?phone=ilike.*${encodeURIComponent(q)}*&select=${selectCols}${walletFilter}`
 
         const [nameResp, phoneResp] = await Promise.all([
           fetch(byNameUrl, { headers }),
