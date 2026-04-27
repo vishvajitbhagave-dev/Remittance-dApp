@@ -31,12 +31,12 @@ export default async function handler(req, res) {
 
       // ── SAVE USER ─────────────────────────────────────────────────────────
       if (action === 'save') {
-        // Upsert user — insert or update if phone already exists
-        const resp = await fetch(`${SUPABASE_URL}/rest/v1/horizon_users`, {
+        // Upsert user by phone so updates are deterministic across devices
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/horizon_users?on_conflict=phone`, {
           method:  'POST',
           headers: {
             ...headers,
-            'Prefer': 'resolution=merge-duplicates',
+            'Prefer': 'resolution=merge-duplicates,return=representation',
           },
           body: JSON.stringify({
             name:           user.name          || '',
@@ -60,16 +60,35 @@ export default async function handler(req, res) {
         const q = (query || '').trim()
         if (!q) return res.status(200).json({ users: [] })
 
-        // Search by name OR phone — exclude current user's wallet
-        const url = `${SUPABASE_URL}/rest/v1/horizon_users?or=(name.ilike.*${encodeURIComponent(q)}*,phone.ilike.*${encodeURIComponent(q)}*)&wallet_address=neq.${encodeURIComponent(walletAddress || '')}&select=name,phone,email,country,wallet_address,kyc_verified`
+        // Search name and phone separately; this avoids fragile OR parsing issues.
+        const selectCols = 'name,phone,email,country,wallet_address,kyc_verified'
+        const walletFilter = walletAddress ? `&wallet_address=neq.${encodeURIComponent(walletAddress)}` : ''
 
-        const resp = await fetch(url, { headers })
-        if (!resp.ok) {
-          const err = await resp.text()
-          console.error('Supabase search error:', err)
+        const byNameUrl  = `${SUPABASE_URL}/rest/v1/horizon_users?name=ilike.*${encodeURIComponent(q)}*&select=${selectCols}${walletFilter}`
+        const byPhoneUrl = `${SUPABASE_URL}/rest/v1/horizon_users?phone=ilike.*${encodeURIComponent(q)}*&select=${selectCols}${walletFilter}`
+
+        const [nameResp, phoneResp] = await Promise.all([
+          fetch(byNameUrl, { headers }),
+          fetch(byPhoneUrl, { headers }),
+        ])
+
+        if (!nameResp.ok || !phoneResp.ok) {
+          const nameErr = nameResp.ok ? '' : await nameResp.text()
+          const phoneErr = phoneResp.ok ? '' : await phoneResp.text()
+          console.error('Supabase search error:', { nameErr, phoneErr })
           return res.status(200).json({ users: [] })
         }
-        const rows = await resp.json()
+
+        const [nameRows, phoneRows] = await Promise.all([
+          nameResp.json(),
+          phoneResp.json(),
+        ])
+        const rowMap = new Map()
+        ;[...(nameRows || []), ...(phoneRows || [])].forEach((r) => {
+          const key = r.wallet_address || `${r.phone || ''}:${r.name || ''}`
+          if (!rowMap.has(key)) rowMap.set(key, r)
+        })
+        const rows = Array.from(rowMap.values())
 
         // Convert DB column names back to app format
         const users = (rows || []).map(r => ({
