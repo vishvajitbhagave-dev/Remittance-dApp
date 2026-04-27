@@ -632,7 +632,6 @@ function SignupPage({ onSignup, onGoLogin }) {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <img src="/horizon-logo-symbol.png" alt="Horizon logo" className="brand-logo auth-brand-logo" />
           Horizon
         </div>
         <div className="auth-title">Create Account</div>
@@ -970,7 +969,6 @@ function LoginPage({ onLogin, onGoSignup }) {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <img src="/horizon-logo-symbol.png" alt="Horizon logo" className="brand-logo auth-brand-logo" />
           Horizon
         </div>
         <div className="auth-title">Welcome Back</div>
@@ -1621,7 +1619,6 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
       <header className="header">
         <div className="header-left">
           <div className="logo">
-            <img src="/horizon-logo-symbol.png" alt="Horizon logo" className="brand-logo header-brand-logo" />
             <span className="logo-text">Horizon</span>
           </div>
           <span className="logo-tag">Testnet</span>
