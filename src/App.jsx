@@ -632,11 +632,7 @@ function SignupPage({ onSignup, onGoLogin }) {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-            <rect width="32" height="32" rx="8" fill="#1a56db"/>
-            <path d="M8 16l6 6 10-12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="24" cy="10" r="3" fill="#38bdf8"/>
-          </svg>
+          <img src="/horizon-logo.png" alt="Horizon logo" className="brand-logo auth-brand-logo" />
           Horizon
         </div>
         <div className="auth-title">Create Account</div>
@@ -974,11 +970,7 @@ function LoginPage({ onLogin, onGoSignup }) {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-            <rect width="32" height="32" rx="8" fill="#1a56db"/>
-            <path d="M8 16l6 6 10-12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="24" cy="10" r="3" fill="#38bdf8"/>
-          </svg>
+          <img src="/horizon-logo.png" alt="Horizon logo" className="brand-logo auth-brand-logo" />
           Horizon
         </div>
         <div className="auth-title">Welcome Back</div>
@@ -1629,11 +1621,7 @@ function MainApp({ user, onLogout, qrPayload, setQrPayload }) {
       <header className="header">
         <div className="header-left">
           <div className="logo">
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="8" fill="#1a56db"/>
-              <path d="M8 16l6 6 10-12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="24" cy="10" r="3" fill="#38bdf8"/>
-            </svg>
+            <img src="/horizon-logo.png" alt="Horizon logo" className="brand-logo header-brand-logo" />
             <span className="logo-text">Horizon</span>
           </div>
           <span className="logo-tag">Testnet</span>

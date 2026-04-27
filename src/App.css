@@ -15,7 +15,9 @@
   background:var(--bg2); border:1px solid var(--border); border-radius:20px;
   padding:36px 32px; width:100%; max-width:480px; box-shadow:var(--shadow2);
 }
-.auth-logo  { font-size:1.5rem; font-weight:900; color:var(--ink); text-align:center; margin-bottom:8px; }
+.auth-logo  { font-size:1.5rem; font-weight:900; color:var(--ink); text-align:center; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:10px; }
+.brand-logo { object-fit:contain; flex-shrink:0; }
+.auth-brand-logo { width:34px; height:34px; }
 .auth-title { font-size:1.3rem; font-weight:800; color:var(--ink); text-align:center; margin-bottom:4px; }
 .auth-subtitle { font-size:0.85rem; color:var(--ink3); text-align:center; margin-bottom:24px; }
 .auth-error { background:var(--red-dim); border:1px solid rgba(193,18,31,.3); color:var(--red); border-radius:8px; padding:10px 14px; font-size:0.82rem; margin-bottom:14px; }
@@ -88,6 +90,7 @@
 }
 .header-left { display:flex; align-items:center; gap:10px; }
 .logo        { display:flex; align-items:center; gap:7px; }
+.header-brand-logo { width:30px; height:30px; }
 .logo-icon   { font-size:1.35rem; }
 .logo-text   { font-weight:800; font-size:1.1rem; color:var(--ink); }
 .logo-tag    { font-family:var(--mono); font-size:0.62rem; background:var(--accent-dim); border:1px solid rgba(232,93,4,.2); color:var(--accent); padding:3px 9px; border-radius:999px; }
