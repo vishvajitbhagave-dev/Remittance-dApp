@@ -1043,14 +1043,6 @@ function LoginPage({ onLogin, onGoSignup }) {
         <button className="signup-big-btn" onClick={onGoSignup}>
           ✏️ Create New Account
         </button>
-        <button className="clear-data-btn" onClick={() => {
-          if (window.confirm('This will delete all saved accounts and data. Continue?')) {
-            localStorage.clear()
-            window.location.reload()
-          }
-        }}>
-          🗑️ Clear all data (for testing)
-        </button>
       </div>
     </div>
   )
