@@ -654,7 +654,7 @@ function SignupPage({ onSignup, onGoLogin }) {
           <div className="auth-form">
             <div className="field-group">
               <label>Full Name *</label>
-              <input className="auth-input" placeholder="e.g. Vishvajit Bhagave"
+              <input className="auth-input" placeholder="e.g. John Smith"
                 value={form.name} onChange={e => update('name', e.target.value)} />
             </div>
             <div className="field-group">
