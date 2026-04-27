@@ -889,7 +889,7 @@ function LoginPage({ onLogin, onGoSignup }) {
 
     // Find user by email
     // Also handles old accounts that were created before email field was added
-    const allUsers = JSON.parse(localStorage.getItem('remitchain_users') || '{}')
+    const allUsers = JSON.parse(localStorage.getItem('horizon_users') || '{}')
     const userList = Object.values(allUsers)
 
     // Try exact email match first
@@ -926,7 +926,7 @@ function LoginPage({ onLogin, onGoSignup }) {
     try {
       const result = await verifyEmailOTP(otpToken, otp.trim(), loginEmail.trim())
       if (result.success) {
-        const allUsers = JSON.parse(localStorage.getItem('remitchain_users') || '{}')
+        const allUsers = JSON.parse(localStorage.getItem('horizon_users') || '{}')
         const userList  = Object.values(allUsers)
 
         // 1. Try to find user by exact email match
@@ -949,7 +949,7 @@ function LoginPage({ onLogin, onGoSignup }) {
             // Save back to localStorage
             const key = oldAccount.phone
             allUsers[key] = oldAccount
-            localStorage.setItem('remitchain_users', JSON.stringify(allUsers))
+            localStorage.setItem('horizon_users', JSON.stringify(allUsers))
             user = oldAccount
           }
         }
