@@ -594,12 +594,18 @@ function SignupPage({ onSignup, onGoLogin }) {
         }
         saveUser(user)
         saveSession(user)
-        // Save to cloud so other devices can find this user
-        fetch('/api/users', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ action: 'save', user }),
-        }).catch(() => {}) // silent fail — localStorage is fallback
+        // Save to cloud — await so it completes before login
+        try {
+          const cloudResp = await fetch('/api/users', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ action: 'save', user }),
+          })
+          const cloudText = await cloudResp.text()
+          console.log('Cloud save result:', cloudText)
+        } catch(e) {
+          console.log('Cloud save failed (using localStorage fallback):', e.message)
+        }
         onSignup(user)
       } else {
         if (result.token) setOtpToken(result.token)
