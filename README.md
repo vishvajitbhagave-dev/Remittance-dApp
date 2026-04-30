@@ -170,17 +170,7 @@ All 30 users created accounts, connected Freighter wallets, received testnet XLM
 
 ## Community Contribution
  
-🔗 **Twitter/X Post:** *(add your Twitter post link here)*
- 
-Example post content:
-> Just shipped **Horizon** — a cross-border remittance dApp on @StellarOrg blockchain!
-> 
-> Send money home in under 10 seconds for less than ₹2 fee 🚀
-> Built with React + Soroban smart contracts + Supabase
-> 
-> Try it: [your Vercel link]
-> 
-> \#Stellar \#Web3 \#BuildOnStellar \#Blockchain \#DeFi
+🔗 **Twitter/X Post:** *...*
  
 ---
  
@@ -274,7 +264,6 @@ External Services
 - `get_question` / `get_total` — Read contract state
 - `has_voted` — Check if address already acted
 ---
----
 
 ## Advanced Feature: Fee Sponsorship
  
@@ -365,15 +354,15 @@ Base URL: `https://horizon-testnet.stellar.org`
 ---
 
 ## Run Locally
-
 ## Local Setup
+
 ### Prerequisites
 - Node.js v18+
 - Freighter Wallet browser extension ([freighter.app](https://freighter.app))
 - Git
 
   
-  ### Installation
+### Installation
 ```bash
 # Clone
 git clone https://github.com/vishvajitbhagave-dev/Remittance-dApp.git
@@ -438,7 +427,7 @@ GitHub Actions runs automatically on every push:
 2. **Test** — `npm test` (38 tests, all passing)
 3. **Build** — `npm run build`
 4. **Deploy** — Auto-deploy to Vercel
-📸 **CI/CD Screenshot:** *(add GitHub Actions screenshot here)*
+**CI/CD Screenshot:** *...*
 
 ---
 
