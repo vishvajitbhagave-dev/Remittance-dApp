@@ -9,6 +9,68 @@
 
 ---
 
+## What is Horizon?
+
+Horizon solves a real problem. Migrant workers send $800 billion per year back home. Traditional services like Western Union charge 3–7% fees and take 1–3 days. Horizon uses the Stellar blockchain to make it instant and nearly free.
+
+**Example:** Joy works in Dubai and wants to send money to his mother in Mumbai.
+- Traditional: Rs.200–500 fee, 1–3 days
+- Horizon: Rs.1.80 fee (0.1 XLM), 5–10 seconds
+
+---
+
+## Problem Statement
+ 
+Every month, millions of migrant workers send money home to their families across borders. The current reality:
+ 
+| Problem | Reality |
+|---------|---------|
+| Bank transfer fee | ₹150–500 per transfer |
+| Transfer time | 1–3 business days |
+| No bank account access | 1.4 billion people unbanked worldwide |
+| Western Union / MoneyGram | 5–8% fee deducted from poor families |
+| Hidden exchange rate cuts | Additional 2–3% loss |
+ 
+**Horizon solves this.** Send money in under 10 seconds for less than ₹2 — no bank account required.
+ 
+---
+ 
+## Solution
+ 
+Horizon is a mobile-first cross-border remittance dApp built on Stellar Blockchain:
+ 
+- Sender scans receiver's QR code → sends money in under 10 seconds
+- Receiver gets instant in-app notification and sees balance in local currency
+- Pay anyone by scanning their QR code
+- Withdraw cash from ATM using a 6-digit code
+- No bank account needed — no crypto knowledge required
+- Fee: Less than ₹2 per transfer
+
+---
+
+## Features
+
+### Core
+- **Send Money** — Search contact, scan QR code, or paste wallet address
+- **Receive Money** — QR code generation scannable by any phone camera
+- **Transaction History** — Full history with search, filter (All/Sent/Received), and sort
+- **Real-time Notifications** — Badge + popup when money is received (polls every 8 seconds)
+- **KYC Verification** — Aadhaar, PAN Card, Passport, Driving License, Voter ID validation
+
+### User Experience
+- **Live Exchange Rates** — Real-time rates for 100+ currencies from open.er-api.com
+- **Transfer Receipt** — Download as image or share on WhatsApp
+- **QR Scanner** — Camera-based QR scanning with auto-fill
+- **Download History** — Export as PDF or CSV with year filter
+- **Multi-language** — 30 languages including Hindi, Marathi, Gujarati, Arabic, Spanish
+- **Invite Friends** — Referral system with WhatsApp, Telegram, Twitter sharing
+- **Profile Photo** — Upload and save profile picture
+- **Dark/Light** — Clean professional UI inspired by Wise and Remitly
+
+---
+
+
+
 ## Live Demo
 
 **https://remittance-d-app.vercel.app**
@@ -23,17 +85,6 @@
 
 > The demo video covers: Account creation, KYC verification, wallet connection, sending money, QR code scanning, transaction history, notifications, and receipt sharing on WhatsApp.
 
----
-
-## What is Horizon?
-
-Horizon solves a real problem. Migrant workers send $800 billion per year back home. Traditional services like Western Union charge 3–7% fees and take 1–3 days. Horizon uses the Stellar blockchain to make it instant and nearly free.
-
-**Example:** Joy works in Dubai and wants to send money to his mother in Mumbai.
-- Traditional: Rs.200–500 fee, 1–3 days
-- Horizon: Rs.1.80 fee (0.1 XLM), 5–10 seconds
-
----
 
 ## Testnet Users
 
@@ -70,27 +121,6 @@ All 5 users created accounts, connected Freighter wallets, received testnet XLM,
 - Fixed QR code scanner to handle all formats after user testing showed it was rejecting valid codes
 - Made Download History popup appear at top-right corner after users couldn't find it
 - Added Copy icon next to wallet address after users requested it
-
----
-
-## Features
-
-### Core
-- **Send Money** — Search contact, scan QR code, or paste wallet address
-- **Receive Money** — QR code generation scannable by any phone camera
-- **Transaction History** — Full history with search, filter (All/Sent/Received), and sort
-- **Real-time Notifications** — Badge + popup when money is received (polls every 8 seconds)
-- **KYC Verification** — Aadhaar, PAN Card, Passport, Driving License, Voter ID validation
-
-### User Experience
-- **Live Exchange Rates** — Real-time rates for 100+ currencies from open.er-api.com
-- **Transfer Receipt** — Download as image or share on WhatsApp
-- **QR Scanner** — Camera-based QR scanning with auto-fill
-- **Download History** — Export as PDF or CSV with year filter
-- **Multi-language** — 30 languages including Hindi, Marathi, Gujarati, Arabic, Spanish
-- **Invite Friends** — Referral system with WhatsApp, Telegram, Twitter sharing
-- **Profile Photo** — Upload and save profile picture
-- **Dark/Light** — Clean professional UI inspired by Wise and Remitly
 
 ---
 
