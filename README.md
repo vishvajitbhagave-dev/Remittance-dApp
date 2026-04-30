@@ -167,6 +167,22 @@ All 30 users created accounts, connected Freighter wallets, received testnet XLM
 - Added history refresh button, view more, and download PDF/CSV
 
 ---
+
+## 🐦 Community Contribution
+ 
+🔗 **Twitter/X Post:** *(add your Twitter post link here)*
+ 
+Example post content:
+> Just shipped **Horizon** — a cross-border remittance dApp on @StellarOrg blockchain!
+> 
+> Send money home in under 10 seconds for less than ₹2 fee 🚀
+> Built with React + Soroban smart contracts + Supabase
+> 
+> Try it: [your Vercel link]
+> 
+> \#Stellar \#Web3 \#BuildOnStellar \#Blockchain \#DeFi
+ 
+---
  
 ## Project Structure
  
@@ -393,36 +409,41 @@ remitchain/
 
 ---
 
-## Submission Checklist
-
-- [x] MVP fully functional and deployed
-- [x] Live demo link (Vercel)
-- [x] Demo video
-- [x] 5+ real testnet users with verifiable wallet addresses
-- [x] User feedback documented with iterations
-- [x] Architecture document (ARCHITECTURE.md)
-- [x] CI/CD pipeline (GitHub Actions)
-- [x] 10+ meaningful commits
-- [x] Smart contract deployed on Stellar Testnet
-- [x] README with all required documentation
-
+## Roadmap (Next Phase)
+ 
+Based on user feedback, the following improvements are planned:
+ 
+| Priority | Feature | Status |
+|----------|---------|--------|
+| High     | Dark mode toggle                             | 🔜 Planned |
+| High     | Saved contacts / address book                | 🔜 Planned |
+| High     | Monthly spending summary on Home             | 🔜 Planned |
+| Medium   | Push notifications (PWA)                     | 🔜 Planned |
+| Future   | SEP-24 anchor integration (fiat on/off ramp) | 🔜 Future  |
+| Future   | Multi-signature support                      | 🔜 Future  |
+| Future   | Mainnet launch                               | 🔜 Future  |
+ 
 ---
-
-## Level Progression
-
-| Level | Belt | Status |
-|-------|------|--------|
-| 1 | White Belt | Done |
-| 2 | Yellow Belt | Done |
-| 3 | Orange Belt | Done |
-| 4 | Green Belt | Done |
-| 5 | Blue Belt | **Submitting now** |
-| 6 | Red Belt | Next |
-
+ 
+## Documentation
+ 
+- [Architecture Document](./ARCHITECTURE.md)
+- [Security Checklist](./SECURITY.md)
+- [User Guide](./USER_GUIDE.md)
 ---
-
-## Developer
-
-**Vishvajit Bhagave**
-Stellar Journey to Mastery — Level 5 Blue Belt
-GitHub: https://github.com/vishvajitbhagave-dev
+ 
+## Contact
+ 
+**Developer:** Vishvajit Bhagave  
+**E-mail:** [vishvajitbhagave@gmail.com](vishvajitbhagave@gmail.com)
+**LinkedIn:** [Vishvajit Bhagave](www.linkedin.com/in/vishvajit-bhagave-86b343323)
+**Twitter:** [@v_bhagave](@v_bhagave)
+**GitHub:** [@vishvajitbhagave-dev](https://github.com/vishvajitbhagave-dev)
+ 
+---
+ 
+## License
+ 
+MIT License — see [LICENSE](LICENSE) for details.
+ 
+---
