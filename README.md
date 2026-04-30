@@ -91,7 +91,7 @@ Horizon is a mobile-first cross-border remittance dApp built on Stellar Blockcha
 
 ---
 
-## 👥 Verified Users (30+)
+## Verified Users (30+)
 All 30 users created accounts, connected Freighter wallets, received testnet XLM, and completed transfers. Transactions are verifiable on Stellar Expert.
  
 > All transactions verifiable on [Stellar Expert Testnet Explorer](https://stellar.expert/explorer/testnet)
@@ -146,7 +146,7 @@ All 30 users created accounts, connected Freighter wallets, received testnet XLM
 | 4 | Shahin Shaikh     | chainwiselearning@gmail.com     | **GDBXGKJ6VTWWYA4QF7IJZ3JQ3PCTENVJQZFHXLRGCIJJ3SB374HBKRYT* | Download history button does not working| **https://github.com/vishvajitbhagave-dev/Remittance-dApp/actions/runs/24522353462** |
 
 ### Excel Response Sheet
-📊 **Exported Responses:** *https://docs.google.com/spreadsheets/d/1E2giGbPvbbbbly2iVsqqDkaGcxOZ3u6jZJEAyXJJ3Gs/edit?resourcekey=&gid=700985705#gid=700985705*
+**Exported Responses:** *https://docs.google.com/spreadsheets/d/1E2giGbPvbbbbly2iVsqqDkaGcxOZ3u6jZJEAyXJJ3Gs/edit?resourcekey=&gid=700985705#gid=700985705*
  
 ### Improvements Implemented Based on Feedback
  
@@ -168,7 +168,7 @@ All 30 users created accounts, connected Freighter wallets, received testnet XLM
 
 ---
 
-## 🐦 Community Contribution
+## Community Contribution
  
 🔗 **Twitter/X Post:** *(add your Twitter post link here)*
  
@@ -215,52 +215,123 @@ Remittance-dApp/
 ```
  
 ---
-## Architecture
-
+ 
+## Technical Architecture
+ 
 ```
+User Device (React PWA)
+        ↓
 Horizon Frontend (React + Vite)
-Deployed on Vercel
-        |
-        |-- src/App.jsx          Main application (2400+ lines)
-        |-- src/stellar.js       All blockchain logic
-        |-- src/translations.js  30 language support
-        |-- src/icons.jsx        Professional SVG icon system
-        |-- src/App.css          All styling
-        |-- contract/lib.rs      Soroban smart contract (Rust)
-        |
-        v
-Stellar Testnet
-        |
-        |-- Horizon API     https://horizon-testnet.stellar.org
-        |   Balances, transactions, payments
-        |
-        |-- Soroban RPC     https://soroban-testnet.stellar.org
-        |   Smart contract calls
-        |
-        |-- Freighter Wallet (browser extension)
-            Keypair storage and transaction signing
-
-External APIs
-        |-- open.er-api.com      Live exchange rates
-        |-- api.qrserver.com     QR code image generation
-        |-- stellar.expert       Transaction explorer
-        |-- friendbot.stellar.org Fund testnet accounts
+        ↓
+Vercel Serverless Functions (Node.js)
+  ├── /api/send-otp.js       → Gmail SMTP OTP
+  ├── /api/verify-otp.js     → OTP verification
+  └── /api/users.js          → Supabase user management
+        ↓
+Stellar Blockchain (Testnet)
+  ├── Soroban Smart Contract  → Transfer tracking + Fee Sponsorship
+  ├── Horizon REST API        → Transaction history + Balance
+  └── USDC (stablecoin)       → Currency bridge (AED → USDC → INR)
+        ↓
+External Services
+  ├── Supabase (PostgreSQL)   → Cross-device user database
+  ├── open.er-api.com         → Live exchange rates
+  └── Gmail SMTP              → Email OTP delivery
 ```
 
 ---
 
-## Blockchain Details
+##  Tech Stack
+ 
+| Category | Technology |
+|----------|------------|
+| Frontend | React 18, Vite, CSS3 |
+| Blockchain | Stellar Testnet, Soroban Smart Contracts |
+| Wallet | Freighter, LOBSTR, xBull |
+| Backend | Vercel Serverless Functions (Node.js) |
+| Database | Supabase (PostgreSQL) |
+| Email | Nodemailer + Gmail SMTP |
+| Exchange Rates | open.er-api.com |
+| CI/CD | GitHub Actions |
+| Deployment | Vercel |
+| Testing | Vitest (38 tests passing) |
+ 
+---
 
-| Detail | Value |
-|--------|-------|
-| Network | Stellar Testnet |
-| Horizon URL | https://horizon-testnet.stellar.org |
-| Soroban RPC | https://soroban-testnet.stellar.org |
-| Contract ID | `CDSVXG7VBBP2IASOP4V4ARRZNVPI2VHX5ARJEY7ZZD6K2WCGFAC54S4V` |
-| Fee per transfer | 0.1 XLM (approximately Rs.1.80) |
-| Settlement time | 5–10 seconds |
-| Native asset | XLM (Lumens) as bridge currency |
+## Smart Contract
+ 
+| Item | Value |
+|------|-------|
+| **Contract Address** | `CDSVXG7VBBP2IASOP4V4ARRZNVPI2VHX5ARJEY7ZZD6K2WCGFAC54S4V` |
+| **Deploy TX Hash** | `41fc8025e30c4a788b2deac516a60cfa761976b185d7b6b61d6c93e5e6043b7d` |
+| **Init TX Hash** | `2eaba20d07fab964a757d9b5c957fede094d7009eaa456e4317d537759f41680` |
+| **Network** | Stellar Testnet |
+| **Explorer** | [View Contract on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CDSVXG7VBBP2IASOP4V4ARRZNVPI2VHX5ARJEY7ZZD6K2WCGFAC54S4V) |
+ 
+### Exported Contract Functions
+- `init` — Initialize poll/transfer contract
+- `vote` / `get_votes` — Track transfers per option
+- `get_question` / `get_total` — Read contract state
+- `has_voted` — Check if address already acted
+---
+---
 
+## Advanced Feature: Fee Sponsorship
+ 
+Horizon implements **Stellar Fee Bump Transactions** for gasless receiving:
+ 
+- Receivers pay **zero XLM fees** when receiving money
+- Horizon's fee sponsor account covers all network fees
+- Toggle available on the Send page: `Gasless Transfer (Fee Sponsored)`
+- Implemented via `StellarSdk.TransactionBuilder.buildFeeBumpTransaction()`
+---
+ 
+## Metrics Dashboard
+ 
+Live metrics tracked in-app under the **Metrics** tab:
+ 
+| Metric | Description |
+|--------|-------------|
+| Daily Active Users (DAU) | Unique users active each day |
+| Total Transactions | All on-chain transfers counted |
+| User Retention | 7-day and 30-day retention rates |
+| Security Status | KYC verified users percentage |
+| Transfer Volume | Total XLM/USDC sent through app |
+ 
+**Metrics Screenshot:** *(add screenshot here)*
+ 
+---
+ 
+## Security
+ 
+Full security checklist: [SECURITY.md](./SECURITY.md)
+ 
+| Check | Status |
+|-------|--------|
+| Email OTP verification (6-digit, 5-min expiry) | ✅ |
+| Max 3 OTP attempts | ✅ |
+| KYC document validation (Aadhaar, PAN format) | ✅ |
+| Rate limiting on OTP requests | ✅ |
+| Environment variables (no secrets in code) | ✅ |
+| HTTPS on Vercel deployment | ✅ |
+| Stellar Testnet (no real funds at risk) | ✅ |
+| PAN card format validation (position by position) | ✅ |
+ 
+---
+ 
+## Data Indexing
+ 
+Horizon uses **Stellar Horizon REST API** for data indexing:
+ 
+| Endpoint | Usage |
+|----------|-------|
+| `GET /accounts/{address}` | Fetch wallet balance |
+| `GET /accounts/{address}/payments` | Transaction history |
+| `GET /accounts/{address}/transactions` | Full transaction list |
+| `POST /transactions` | Submit signed transaction |
+ 
+Base URL: `https://horizon-testnet.stellar.org`
+ 
 ---
 
 ## Transaction Flow
@@ -291,39 +362,18 @@ External APIs
    → Shows all transfer details
    → Save as image or share on WhatsApp
 ```
-
----
-
-## Tech Stack
-
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| React | 18 | Frontend UI framework |
-| Vite | 5 | Build tool |
-| @stellar/stellar-sdk | latest | Blockchain interactions |
-| Freighter API | latest | Browser wallet |
-| Rust + Soroban SDK | latest | Smart contract |
-| Vitest | 1.6 | Unit testing |
-| GitHub Actions | — | CI/CD pipeline |
-| Vercel | — | Deployment |
-
----
-
-## Smart Contract
-
-**File:** `contract/src/lib.rs`  
-**Language:** Rust  
-**SDK:** Soroban SDK  
-**Contract ID:** `CDSVXG7VBBP2IASOP4V4ARRZNVPI2VHX5ARJEY7ZZD6K2WCGFAC54S4V`
-
-The contract validates remittance transactions and emits events for on-chain tracking.
-
 ---
 
 ## Run Locally
 
-**Requirements:** Node.js 20+, Freighter Wallet browser extension
+## Local Setup
+### Prerequisites
+- Node.js v18+
+- Freighter Wallet browser extension ([freighter.app](https://freighter.app))
+- Git
 
+  
+  ### Installation
 ```bash
 # Clone
 git clone https://github.com/vishvajitbhagave-dev/Remittance-dApp.git
@@ -343,7 +393,20 @@ npm test
 # Build
 npm run build
 ```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+---
+
+### Environment Variables (for Vercel deployment)
+ 
+| Variable | Description |
+|----------|-------------|
+| `GMAIL_USER` | Your Gmail address for sending OTP |
+| `GMAIL_APP_PASSWORD` | Gmail App Password (16 characters) |
+| `OTP_SECRET` | Any random secret string |
+| `SUPABASE_URL` | Your Supabase project URL |
+| `SUPABASE_KEY` | Your Supabase anon/public key |
+ 
 ---
 
 ## Tests
@@ -367,45 +430,15 @@ npm test
 
 ---
 
-## CI/CD Pipeline
-
-Every push to `master` or `main` branch automatically:
-
-1. Installs dependencies
-2. Runs all 38 tests
-3. Builds the production app
-
-Pipeline fails if any test fails or build breaks.
-
-**GitHub Actions:** https://github.com/vishvajitbhagave-dev/Remittance-dApp/actions
-
----
-
-## Project Structure
-
-```
-remitchain/
-├── src/
-│   ├── App.jsx              Main React application
-│   ├── App.css              All styles
-│   ├── stellar.js           Blockchain logic + 100+ currencies
-│   ├── translations.js      30 language support
-│   ├── icons.jsx            Professional SVG icon system
-│   ├── main.jsx             Entry point
-│   └── __tests__/
-│       ├── stellar.test.js  38 unit tests
-│       └── setup.js         Test setup
-├── contract/
-│   └── src/lib.rs           Soroban smart contract (Rust)
-├── .github/
-│   └── workflows/ci.yml     GitHub Actions CI/CD
-├── public/
-├── vercel.json              Vercel deployment config
-├── vite.config.js           Vite + Vitest config
-├── package.json
-├── README.md                This file
-└── ARCHITECTURE.md          Detailed architecture document
-```
+##  CI/CD Pipeline
+ 
+GitHub Actions runs automatically on every push:
+ 
+1. **Install** — `npm install`
+2. **Test** — `npm test` (38 tests, all passing)
+3. **Build** — `npm run build`
+4. **Deploy** — Auto-deploy to Vercel
+📸 **CI/CD Screenshot:** *(add GitHub Actions screenshot here)*
 
 ---
 
