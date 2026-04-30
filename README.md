@@ -67,6 +67,15 @@ Horizon is a mobile-first cross-border remittance dApp built on Stellar Blockcha
 - **Profile Photo** — Upload and save profile picture
 - **Dark/Light** — Clean professional UI inspired by Wise and Remitly
 
+### Advanced Features 
+| Feature | Description |
+|---------|-------------|
+| Fee Sponsorship | Gasless transactions using Stellar fee bump — receivers pay zero fees |
+| Cloud Database | Supabase PostgreSQL — user accounts work across all devices |
+| Email OTP | Gmail SMTP via Vercel serverless functions |
+| Live Exchange Rates | Fetched from open.er-api.com every hour |
+| Cross-device Search | Search any user by name or phone number across all devices |
+
 ---
 
 ## Important Links
