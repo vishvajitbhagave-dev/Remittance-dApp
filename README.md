@@ -69,22 +69,18 @@ Horizon is a mobile-first cross-border remittance dApp built on Stellar Blockcha
 
 ---
 
+## Important Links
 
-
-## Live Demo
-
-**https://remittance-d-app.vercel.app**
-
-> Open the link → Click **Create Account** → Click **Fund Testnet** → Start sending money instantly.
+| Resource | Link |
+|----------|------|
+| **Live Demo Link** | https://remittance-d-app.vercel.app/ |
+| **Demo Video Link** | https://drive.google.com/file/d/1Kiv2wedAoCbWgTu8k3fvKrs3VANoJa7V/view?usp=drive_link |
+| **User Google Form** | https://docs.google.com/forms/d/10z7W0bSrdaaYPNl4pLfoMzqnFS2j31WEmFXle7lNn8Y/edit |
+| **User Feedback Form** | https://docs.google.com/spreadsheets/d/1E2giGbPvbbbbly2iVsqqDkaGcxOZ3u6jZJEAyXJJ3Gs/edit?resourcekey=&gid=700985705#gid=700985705 |
+| **Security Checklist** | https://github.com/vishvajitbhagave-dev/Remittance-dApp/blob/master/SECURITY.md |
+| **Architecture Document** | https://github.com/vishvajitbhagave-dev/Remittance-dApp/blob/master/ARCHITECTURE.md |
 
 ---
-
-## Demo Video
-
-**https://www.youtube.com/watch?v=YOUR_VIDEO_ID**
-
-> The demo video covers: Account creation, KYC verification, wallet connection, sending money, QR code scanning, transaction history, notifications, and receipt sharing on WhatsApp.
-
 
 ## Testnet Users
 
