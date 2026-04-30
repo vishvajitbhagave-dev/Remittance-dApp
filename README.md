@@ -91,44 +91,114 @@ Horizon is a mobile-first cross-border remittance dApp built on Stellar Blockcha
 
 ---
 
-## Testnet Users
-
-All 5 users created accounts, connected Freighter wallets, received testnet XLM, and completed transfers. Transactions are verifiable on Stellar Expert.
-
-| # | Name | Wallet Address | Stellar Explorer |
-|---|------|---------------|-----------------|
-| 1 | User 1 | `GABC...1234` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GABC1234) |
-| 2 | User 2 | `GDEF...5678` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDEF5678) |
-| 3 | User 3 | `GHIJ...9012` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GHIJ9012) |
-| 4 | User 4 | `GKLM...3456` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GKLM3456) |
-| 5 | User 5 | `GNOP...7890` | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GNOP7890) |
-
-> Replace the wallet addresses above with real addresses from your 5 users.
+## 👥 Verified Users (30+)
+All 30 users created accounts, connected Freighter wallets, received testnet XLM, and completed transfers. Transactions are verifiable on Stellar Expert.
+ 
+> All transactions verifiable on [Stellar Expert Testnet Explorer](https://stellar.expert/explorer/testnet)
+ 
+| # | Name | Wallet Address |
+|---|------|----------------|
+| 1  | *Sadiya Mulani*      | *GCCQQTDVHNIB6INPIUS2F2VASHVH4NPWMIVX2LKFGAQY7LEU6EFISVNK* | 
+| 2  | *Rohit Labase*       | *GAEHAI64AJE6DIMWXLQVTIK5CJ5CSRUXTVFOV23DIXUXFXF6BMGQ4ASQ* |
+| 3  | *Shahin Shaikh*      | *GDBXGKJ6VTWWYA4QF7IJZ3JQ3PCTENVJQZFHXLRGCIJJ3SB374HBKRYT* |
+| 4  | *Bhavesh Patil*      | *GADSVJJYMZTCIDB4NVGXKKPNMNGAZRFXIV5534U7QK6R4IYNSWMZDA65* |
+| 5  | *Piyush Dixit*       | *GCNZMMC5ENSGABZAH7LH2JBKI4RQMG6DM3YR3FLJ2OZSZI6AGKF7FJPK* |
+| 6  | *Shivtej Shelake*    | *GABYESX3AR6S7ATWI7M6HRCNVWU3SNPV43M4GZSUZPVOYHOTRCRCICZ6* |
+| 7  | *Pratiksha kalbhor*  | *GCXF754WQZ5ELFJMQTWJDOTUR6MQQXHDVEFEYDQBIQICQ6H7XLRM4VRZ* |
+| 8  | *shriram masalge*    | *GAV454GTJ7UUVWNVZXUNIO75LZ5UOKSEIRVU6BH3VOKU6CRPGQXTCOF7* |
+| 9  | *Sudhakar sutar*     | *GALULA4PSYS4AVX7AIUDZ5IVUUWJAGT4BECMICA3JQMCO3HICKQEKJXS* |
+| 10 | *Payal Babar*        | *GA7IXJAO4NMPRXMQD4MTOZICZCSVK5KWWFGFR3GVQHGC4FNRLHHZMHKG* |
+| 11 | *Dnyaneshwari Badhe* | *GDLLRKGBCPUYRJE3HFYUNI46PQQNA5HPP6QR43FDPZJXNVHEW5QJ5LKV* |
+| 12 | *Harshal Jagdale*    | *GCATAASNFHODIKA4VTIEZHONZB3BGZJL42FXHHZ3VS6YKX2PCDIJ3LDY* |
+| 13 | *Harshal Jagdale*    | *GCATAASNFHODIKA4VTIEZHONZB3BGZJL42FXHHZ3VS6YKX2PCDIJ3LDY* |
+| 14 | *Zeel Chauhan*       | *GBHUU5VLLXN75JCIML7RY2EHZU2AIXRWT7X6Q4UUE7GDIPXZSN4TNSLZ* |
+| 15 | *shivam*             | *GCKZWX5VBPBANLDDMMCS35UL7ZSD46PSAOBYPNA6O7562SCDO2CNBX43* |
+| 16 | *Vedang Bahirat*     | *GAYMWU2VTZC6646FV4M5753ZZUBIXZHSBLBOLTHBHCVFQIOBZH6D5W4H* |
+| 17 | *Nandini Jadhav*     | *GCT3E7HUMKYVC2MXFURGRQJF5PMS4V6ZFZQORNW75L2TZIWFF2HM5CMH* |
+| 18 | *Nikita Biradar*     | *GAVOLZD4APA2R7LOG5T45OBWGXAXQ57J63L7Z2YUOL2EZ33FY7YMC4PX* |
+| 19 | *Shivam Patil*       | *GBKNB5MGFWWRHQWPIBEVJXCBYUWPD7Z5WXOI5ZBRN6U32RDMB3DWH7XP* |
+| 20 | *shinde harshwardhan balsaheb* | *GA4NSQ4YM5CEHR6JETBFTFCMLGRNFJHZOV6M76QHEFPNEWZBXUEFXYQN* |
+| 21 | *PRANAV PATIL*       | *GCIGDFLUD5QOTNCUFK65GTIIQM5PMISYXN32YYIJR4KXWEYRABUARR47* |
+| 22 | *om mane*            | *GDTKMRMD6TDR7X662CWDIK2DMLCKMX3XX3T5C5YP4AIH6ABTQ6YPYYQC* |
+| 23 | *Aradhya Bhagave*    | *GBZ3PQMIMFBS4J3XMOT3V7SWCN3ZVY3EXA7Y2ZLFKR6SDZYNW737Y4GS* |
+| 24 | *Samruddhi Nevse*    | *GCWHSFPEKYG5OYYQT2M5VRRVM3LSCXACMBNKSZUTH7XCIUGQTGFDAYWD* |
+| 25 | *Nikita*             | *GCEGKCDKELBY2QYZCZRPVPX5IKGEDW6T4IT32X6OSYNAICC4JNFQPN2A* |
+| 26 | *prem*               | *GDUEJLRSWYZPOZPQRRTT2RP2QK2ZEUOCSQPFTCDZTDP5X2545PZ5GVAF* |
+| 27 | *Yash Patil*         | *GB5A7E26DW4RVWPGUNVJCTWAT572Z45UBHP7L5YQOEVULKTNZOAOXAQB* |
+| 28 | *yashwant*           | *GCQTUYQC2ZGYZSLW2WIBHDJFWF7IQIUBMIXA2SZ3D36PIJYOXZDPFBGX* |
+| 29 | *Rohini Bhagave*     | *GCXE2OJEACVGLUPZ3DFZ6LSJGBSOKVUMHL3ZNH7C74BVQHPPNSHLJQMT* |
+| 30 | *Ajay Bhagave*       | *GC7GMNPQRJU2VGJ3WPRUU47BCRNN3PHTSPRSCBVR6TOSPXCP5Z53FQE3* |
 
 ---
 
-## User Feedback
+## User Onboarding & Feedback
+ 
+### Google Form
+🔗 **Feedback Form:** *https://docs.google.com/forms/d/10z7W0bSrdaaYPNl4pLfoMzqnFS2j31WEmFXle7lNn8Y/edit *
+ 
+### User Feedback Summary
+ 
+| # | Name              | Email          | Wallet Address | Feedback | Improvement Commit |
+|---|------|-------|----------------|----------|--------------------|
+| 1 | Sadiya Mulani     | sadiyamulani03@gmail.com        | *GCCQQTDVHNIB6INPIUS2F2VASHVH4NPWMIVX2LKFGAQY7LEU6EFISVNK* | I want to see the exact INR amount before confirming the transfer | **https://github.com/vishvajitbhagave-dev/Remittance-dApp/actions/runs/24584736197** |
+| 2 | Rohit Labase      | rohitlabae@gmail.com            | *GAEHAI64AJE6DIMWXLQVTIK5CJ5CSRUXTVFOV23DIXUXFXF6BMGQ4ASQ* | I want to see Notification after receiving money| **https://github.com/vishvajitbhagave-dev/Remittance-dApp/actions/runs/24323752512** |
+| 3 | Dnyaneshwari Badhe| dnyaneshwaribadhe2323@gmail.com | *GDLLRKGBCPUYRJE3HFYUNI46PQQNA5HPP6QR43FDPZJXNVHEW5QJ5LKV* | Some more features can be added| **https://github.com/vishvajitbhagave-dev/Remittance-dApp/actions/runs/24827882351** |
+| 4 | Shahin Shaikh     | chainwiselearning@gmail.com     | **GDBXGKJ6VTWWYA4QF7IJZ3JQ3PCTENVJQZFHXLRGCIJJ3SB374HBKRYT* | Download history button does not working| **https://github.com/vishvajitbhagave-dev/Remittance-dApp/actions/runs/24522353462** |
 
-**Feedback Document:** https://docs.google.com/document/d/YOUR_DOC_ID
+### Excel Response Sheet
+📊 **Exported Responses:** *https://docs.google.com/spreadsheets/d/1E2giGbPvbbbbly2iVsqqDkaGcxOZ3u6jZJEAyXJJ3Gs/edit?resourcekey=&gid=700985705#gid=700985705*
+ 
+### Improvements Implemented Based on Feedback
+ 
+| Feedback | Improvement Made | Commit |
+|----------|-----------------|--------|
+|  I want to see the exact INR amount before confirming the transfer | Added all world currencies alphabetically, live exchange rates, search | *https://github.com/vishvajitbhagave-dev/Remittance-dApp/actions/runs/24584736197* |
+|  I want to see Notification after receiving money                  | Added real-time incoming payment notification for receiver | *https://github.com/vishvajitbhagave-dev/Remittance-dApp/actions/runs/24323752512* |
+|  Some more features can be added| Added Email OTP verification via SMTP | *https://github.com/vishvajitbhagave-dev/Remittance-dApp/actions/runs/24827882351* |
+| Download history button does not working | Added history refresh button, view more, and download PDF/CSV | *https://github.com/vishvajitbhagave-dev/Remittance-dApp/actions/runs/24522353462* | 
 
-### Summary
-
-| User | Rating | Key Feedback |
-|------|--------|-------------|
-| User 1 | 5/5 | Fast and simple to use |
-| User 2 | 4/5 | QR code scanning works perfectly |
-| User 3 | 5/5 | Love the WhatsApp receipt sharing |
-| User 4 | 4/5 | Multi-language support is excellent |
-| User 5 | 5/5 | Notifications are instant and accurate |
+ 
+---
 
 **Iterations completed based on feedback:**
-- Added real-time notification badge on History tab after users reported not knowing when money arrived
-- Fixed QR code scanner to handle all formats after user testing showed it was rejecting valid codes
-- Made Download History popup appear at top-right corner after users couldn't find it
-- Added Copy icon next to wallet address after users requested it
+- Added all world currencies alphabetically, live exchange rates, search
+- Added real-time incoming payment notification for receiver
+- Added Email OTP verification via SMTP
+- Added history refresh button, view more, and download PDF/CSV
 
 ---
-
+ 
+## Project Structure
+ 
+```
+Remittance-dApp/
+├── src/
+│   ├── App.jsx              # Main app — all UI pages
+│   ├── App.css              # Styles — mobile responsive
+│   ├── stellar.js           # Blockchain logic
+│   ├── icons.jsx            # Professional SVG icons
+│   ├── translations.js      # 30 languages
+│   └── __tests__/
+│       ├── setup.js
+│       └── stellar.test.js  # 38 unit tests
+├── api/
+│   ├── send-otp.js          # Vercel serverless — Gmail OTP
+│   ├── verify-otp.js        # Vercel serverless — OTP check
+│   └── users.js             # Vercel serverless — Supabase CRUD
+├── contract/
+│   ├── src/lib.rs           # Soroban smart contract (Rust)
+│   └── Cargo.toml
+├── .github/workflows/
+│   └── ci.yml               # GitHub Actions CI/CD
+├── ARCHITECTURE.md
+├── SECURITY.md
+├── USER_GUIDE.md
+├── vercel.json
+├── vite.config.js
+└── package.json
+```
+ 
+---
 ## Architecture
 
 ```
