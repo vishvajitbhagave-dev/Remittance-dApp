@@ -206,7 +206,7 @@ All 30 users created accounts, connected Freighter wallets, received testnet XLM
 
 ## Community Contribution
  
-- **Twitter Post:** — Shared Horizon with the Stellar and Web3 communities.
+- **Twitter/X Post:** *https://x.com/i/status/2050271269225218142* — Shared Horizon with the Stellar and Web3 communities.
 - **Open Source:** Full codebase at [github.com/vishvajitbhagave-dev/Remittance-dApp](https://github.com/vishvajitbhagave-dev/Remittance-dApp)
  
 ---
