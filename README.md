@@ -78,6 +78,42 @@ Horizon is a mobile-first cross-border remittance dApp built on Stellar Blockcha
 
 ---
 
+## Screensots
+
+### Home
+
+<img width="1919" height="900" alt="Screenshot 2026-05-01 165533" src="https://github.com/user-attachments/assets/8aa96589-e114-49e5-b7de-3bf374fe24f7" />
+<img width="1919" height="948" alt="Screenshot 2026-05-01 165553" src="https://github.com/user-attachments/assets/f42ba39f-f079-4a5a-a47b-633dcde5053a" />
+
+### Send
+
+<img width="1919" height="949" alt="Screenshot 2026-05-01 165609" src="https://github.com/user-attachments/assets/119ef92c-7a36-40b6-8645-279595865e67" />
+
+### Receive
+
+<img width="1919" height="948" alt="Screenshot 2026-05-01 165627" src="https://github.com/user-attachments/assets/86eb75b6-68e3-43b3-bcde-8241f6942176" />
+<img width="1919" height="946" alt="Screenshot 2026-05-01 165647" src="https://github.com/user-attachments/assets/0ad27749-e116-4a89-9ff1-fecddde18d6a" />
+
+### History
+
+<img width="1919" height="944" alt="Screenshot 2026-05-01 165721" src="https://github.com/user-attachments/assets/e12451bc-eb6a-41e1-aa0a-11b64debef7b" />
+
+### Invite
+
+<img width="1919" height="953" alt="Screenshot 2026-05-01 165743" src="https://github.com/user-attachments/assets/9179dde8-9890-4a8d-bedb-29c69af75e7d" />
+<img width="1919" height="945" alt="Screenshot 2026-05-01 165809" src="https://github.com/user-attachments/assets/f255892b-7157-4c94-b022-1bab3fe33302" />
+
+### Metrics 
+
+<img width="1919" height="952" alt="Screenshot 2026-05-01 164627" src="https://github.com/user-attachments/assets/b323dac7-c3c6-4528-898a-e0346c76746f" />
+<img width="1919" height="945" alt="Screenshot 2026-05-01 164735" src="https://github.com/user-attachments/assets/35c67667-aff0-4646-9a93-c74993176d49" />
+
+### Profile
+
+<img width="1919" height="950" alt="Screenshot 2026-05-01 165836" src="https://github.com/user-attachments/assets/a73b3c54-39d1-4b43-bdf9-a850e0d3ea38" />
+
+---
+
 ## Important Links
 
 | Resource | Link |
@@ -170,7 +206,8 @@ All 30 users created accounts, connected Freighter wallets, received testnet XLM
 
 ## Community Contribution
  
-🔗 **Twitter/X Post:** *...*
+- **Twitter Post:** — Shared Horizon with the Stellar and Web3 communities.
+- **Open Source:** Full codebase at [github.com/vishvajitbhagave-dev/Remittance-dApp](https://github.com/vishvajitbhagave-dev/Remittance-dApp)
  
 ---
  
@@ -207,6 +244,8 @@ Remittance-dApp/
 ---
  
 ## Technical Architecture
+
+Full architecture: **[ARCHITECTURE.md](./ARCHITECTURE.md)**
  
 ```
 User Device (React PWA)
@@ -258,14 +297,17 @@ External Services
 | **Network** | Stellar Testnet |
 | **Explorer** | [View Contract on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CDSVXG7VBBP2IASOP4V4ARRZNVPI2VHX5ARJEY7ZZD6K2WCGFAC54S4V) |
  
-### Exported Contract Functions
-- `init` — Initialize poll/transfer contract
-- `vote` / `get_votes` — Track transfers per option
-- `get_question` / `get_total` — Read contract state
-- `has_voted` — Check if address already acted
+| Function | Description |
+|----------|-------------|
+| `send_remittance(from, to, amount, memo)` | Records and validates cross-border transfer |
+| `get_transaction(hash)` | Retrieves transaction details by hash |
+| `get_user_transfers(wallet)` | Returns full transfer history for a wallet |
+
 ---
 
-## Advanced Feature: Fee Sponsorship
+## Advanced Features: 
+
+### 1] Fee Sponsorship
  
 Horizon implements **Stellar Fee Bump Transactions** for gasless receiving:
  
@@ -275,7 +317,7 @@ Horizon implements **Stellar Fee Bump Transactions** for gasless receiving:
 - Implemented via `StellarSdk.TransactionBuilder.buildFeeBumpTransaction()`
 ---
  
-## Metrics Dashboard
+### 2] Metrics Dashboard
  
 Live metrics tracked in-app under the **Metrics** tab:
  
@@ -287,11 +329,15 @@ Live metrics tracked in-app under the **Metrics** tab:
 | Security Status | KYC verified users percentage |
 | Transfer Volume | Total XLM/USDC sent through app |
  
-**Metrics Screenshot:** *(add screenshot here)*
+**Metrics Screenshot:** 
+
+<img width="1919" height="952" alt="Screenshot 2026-05-01 164627" src="https://github.com/user-attachments/assets/12e96c54-bfed-445a-a896-11ef6d3f22bc" />
+
+<img width="1919" height="945" alt="Screenshot 2026-05-01 164735" src="https://github.com/user-attachments/assets/bbbfbcc5-caed-4772-b63f-3d098dfc04b8" />
  
 ---
  
-## Security
+### 3] Security
  
 Full security checklist: [SECURITY.md](./SECURITY.md)
  
@@ -308,7 +354,7 @@ Full security checklist: [SECURITY.md](./SECURITY.md)
  
 ---
  
-## Data Indexing
+### 4] Data Indexing
  
 Horizon uses **Stellar Horizon REST API** for data indexing:
  
@@ -427,7 +473,9 @@ GitHub Actions runs automatically on every push:
 2. **Test** — `npm test` (38 tests, all passing)
 3. **Build** — `npm run build`
 4. **Deploy** — Auto-deploy to Vercel
-**CI/CD Screenshot:** *...*
+**CI/CD Screenshot:**
+
+<img width="959" height="476" alt="image" src="https://github.com/user-attachments/assets/a8a47520-896d-434c-8f47-d9ee522b05e5" />
 
 ---
 
