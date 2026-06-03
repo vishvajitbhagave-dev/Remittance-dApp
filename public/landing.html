@@ -374,7 +374,7 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
         <div class="conv-input-row">
           <input class="conv-input" type="number" value="1000" id="sendAmt" oninput="calcConvert()"/>
           <div class="conv-currency" onclick="toggleFromCur()">
-            <img id="fromFlag" src="https://flagcdn.com/w40/24x18/in.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
+            <img id="fromFlag" src="https://flagcdn.com/w40/in.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
             <span id="fromCur">INR</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -389,7 +389,7 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
         <div class="conv-input-row">
           <input class="conv-input" type="number" id="receiveAmt" value="11.22" readonly style="opacity:.8"/>
           <div class="conv-currency" onclick="toggleToCur()">
-            <img id="toFlag" src="https://flagcdn.com/w40/24x18/us.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
+            <img id="toFlag" src="https://flagcdn.com/w40/us.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
             <span id="toCur">USD</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -569,31 +569,64 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
     <h2 class="section-h" style="text-align:center;margin:0 auto 12px">Horizon works nearly everywhere</h2>
     <p class="section-sub" style="margin:0 auto">Send to 100+ world currencies with live exchange rates updated every hour.</p>
     <div class="currency-grid">
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/in.png" alt="IN"/> INR — India</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/ae.png" alt="AE"/> AED — UAE</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/us.png" alt="US"/> USD — United States</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/gb.png" alt="GB"/> GBP — United Kingdom</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/eu.png" alt="EU"/> EUR — Europe</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/ph.png" alt="PH"/> PHP — Philippines</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/bd.png" alt="BD"/> BDT — Bangladesh</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/pk.png" alt="PK"/> PKR — Pakistan</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/np.png" alt="NP"/> NPR — Nepal</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/sa.png" alt="SA"/> SAR — Saudi Arabia</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/qa.png" alt="QA"/> QAR — Qatar</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/sg.png" alt="SG"/> SGD — Singapore</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/ca.png" alt="CA"/> CAD — Canada</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/au.png" alt="AU"/> AUD — Australia</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/jp.png" alt="JP"/> JPY — Japan</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/my.png" alt="MY"/> MYR — Malaysia</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/kw.png" alt="KW"/> KWD — Kuwait</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/za.png" alt="ZA"/> ZAR — South Africa</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/om.png" alt="OM"/> OMR — Oman</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/bh.png" alt="BH"/> BHD — Bahrain</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/lk.png" alt="LK"/> LKR — Sri Lanka</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/mm.png" alt="MM"/> MMK — Myanmar</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/id.png" alt="ID"/> IDR — Indonesia</div>
-      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/24x18/th.png" alt="TH"/> THB — Thailand</div>
-      <div class="currency-chip" style="border-style:dashed;color:var(--blue);font-weight:600;background:var(--blue-lt)">+ 76 more currencies →</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/in.png" alt="IN"/> INR — India</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/ae.png" alt="AE"/> AED — UAE</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/us.png" alt="US"/> USD — United States</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/gb.png" alt="GB"/> GBP — United Kingdom</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/eu.png" alt="EU"/> EUR — Europe</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/ph.png" alt="PH"/> PHP — Philippines</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/bd.png" alt="BD"/> BDT — Bangladesh</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/pk.png" alt="PK"/> PKR — Pakistan</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/np.png" alt="NP"/> NPR — Nepal</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/sa.png" alt="SA"/> SAR — Saudi Arabia</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/qa.png" alt="QA"/> QAR — Qatar</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/sg.png" alt="SG"/> SGD — Singapore</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/ca.png" alt="CA"/> CAD — Canada</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/au.png" alt="AU"/> AUD — Australia</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/jp.png" alt="JP"/> JPY — Japan</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/my.png" alt="MY"/> MYR — Malaysia</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/kw.png" alt="KW"/> KWD — Kuwait</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/za.png" alt="ZA"/> ZAR — South Africa</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/om.png" alt="OM"/> OMR — Oman</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/bh.png" alt="BH"/> BHD — Bahrain</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/lk.png" alt="LK"/> LKR — Sri Lanka</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/mm.png" alt="MM"/> MMK — Myanmar</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/id.png" alt="ID"/> IDR — Indonesia</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/w40/th.png" alt="TH"/> THB — Thailand</div>
+    </div>
+
+    <!-- More Currencies Button -->
+    <div style="text-align:center;margin-top:28px">
+      <button id="moreCurrBtn" onclick="toggleAllCurrencies()" style="
+        background:none;border:2px solid var(--blue);color:var(--blue);
+        padding:12px 32px;border-radius:999px;font-size:.92rem;font-weight:700;
+        cursor:pointer;font-family:var(--display);transition:all .2s;
+        display:inline-flex;align-items:center;gap:8px;
+      ">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Show All 100 Currencies
+      </button>
+    </div>
+
+    <!-- All Currencies Expandable Panel -->
+    <div id="allCurrPanel" style="display:none;margin-top:32px;animation:fadeIn .3s ease">
+      <!-- Search -->
+      <div style="max-width:440px;margin:0 auto 24px;position:relative">
+        <input
+          id="currSearchInput"
+          oninput="filterAllCurrencies()"
+          placeholder="Search by currency code or country..."
+          style="width:100%;padding:12px 16px 12px 42px;border:1.5px solid rgba(26,86,219,.2);
+                 border-radius:999px;font-size:.88rem;outline:none;font-family:var(--font);
+                 color:var(--ink);background:#fff;box-shadow:0 2px 8px rgba(26,86,219,.08)"
+        />
+        <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <!-- Grid -->
+      <div id="allCurrGrid" style="
+        display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+        gap:10px;max-height:520px;overflow-y:auto;padding:4px 2px;
+      "></div>
     </div>
   </div>
 </section>
@@ -894,7 +927,7 @@ function toggleFromCur() {
   const currs = Object.keys(rates); const idx = currs.indexOf(fromCur)
   fromCur = currs[(idx + 1) % currs.length]
   document.getElementById('fromCur').textContent = fromCur
-  document.getElementById('fromFlag').src = 'https://flagcdn.com/w40/24x18/' + (flagCodes[fromCur]||'un') + '.png'
+  document.getElementById('fromFlag').src = 'https://flagcdn.com/w40/' + (flagCodes[fromCur]||'un') + '.png'
   calcConvert()
 }
 
@@ -902,7 +935,7 @@ function toggleToCur() {
   const currs = Object.keys(rates); const idx = currs.indexOf(toCur)
   toCur = currs[(idx + 1) % currs.length]
   document.getElementById('toCur').textContent = toCur
-  document.getElementById('toFlag').src = 'https://flagcdn.com/w40/24x18/' + (flagCodes[toCur]||'un') + '.png'
+  document.getElementById('toFlag').src = 'https://flagcdn.com/w40/' + (flagCodes[toCur]||'un') + '.png'
   calcConvert()
 }
 
@@ -1086,31 +1119,49 @@ const allCurrData = [
 
 function renderAllCurrencies(list) {
   const grid = document.getElementById('allCurrGrid')
+  if (!grid) return
+  if (list.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--ink3)">No currencies found</div>'
+    return
+  }
   grid.innerHTML = list.map(c => `
-    <div class="all-curr-item">
-      <img src="https://flagcdn.com/w40/${c.flag}.png" alt="${c.country}" onerror="this.src='https://flagcdn.com/w40/un.png'"/>
-      <span class="all-curr-code">${c.code}</span>
-      <span>${c.country}</span>
+    <div style="display:flex;align-items:center;gap:10px;background:#fff;
+                border:1.5px solid rgba(26,86,219,.09);border-radius:10px;
+                padding:10px 14px;font-size:.82rem;color:var(--ink2);font-weight:500;
+                transition:all .2s;cursor:default"
+         onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(26,86,219,.12)'"
+         onmouseout="this.style.borderColor='rgba(26,86,219,.09)';this.style.color='var(--ink2)';this.style.transform='none';this.style.boxShadow='none'">
+      <img src="https://flagcdn.com/w40/${c.flag}.png" alt="${c.code}"
+           style="width:26px;height:18px;object-fit:cover;border-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,.18);flex-shrink:0"
+           onerror="this.style.display='none'"/>
+      <span style="font-family:var(--mono);font-size:.75rem;font-weight:700;color:var(--blue);
+                   background:rgba(26,86,219,.08);padding:2px 7px;border-radius:5px;flex-shrink:0">${c.code}</span>
+      <span style="font-size:.8rem">${c.country}</span>
     </div>
   `).join('')
 }
 
 function toggleAllCurrencies() {
-  const panel = document.getElementById('allCurrencies')
+  const panel = document.getElementById('allCurrPanel')
   const btn   = document.getElementById('moreCurrBtn')
-  if (panel.style.display === 'none') {
+  const isHidden = panel.style.display === 'none'
+  if (isHidden) {
     panel.style.display = 'block'
-    btn.textContent = '▲ Show Less'
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg> Show Less'
+    btn.style.background = 'var(--blue)'
+    btn.style.color = '#fff'
     renderAllCurrencies(allCurrData)
-    setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'start' }), 100)
+    setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'start' }), 150)
   } else {
     panel.style.display = 'none'
-    btn.textContent = '+ 76 more currencies →'
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Show All 100 Currencies'
+    btn.style.background = 'none'
+    btn.style.color = 'var(--blue)'
   }
 }
 
-function filterCurrencies() {
-  const q = document.getElementById('currSearch').value.toLowerCase()
+function filterAllCurrencies() {
+  const q = (document.getElementById('currSearchInput').value || '').toLowerCase()
   const filtered = allCurrData.filter(c =>
     c.code.toLowerCase().includes(q) ||
     c.name.toLowerCase().includes(q) ||
@@ -1201,7 +1252,7 @@ document.querySelectorAll('.step-card, .feature-card, .sec-stat-card, .currency-
   el.style.opacity = '0'
   el.style.transform = 'translateY(24px)'
   el.style.transition = 'opacity .5s ease, transform .5s ease'
-  observer.observe(el) //Refining
+  observer.observe(el)
 })
 </script>
 </body>
