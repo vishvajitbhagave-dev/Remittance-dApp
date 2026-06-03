@@ -180,7 +180,8 @@ nav{
 .currency-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:40px;justify-content:center}
 .currency-chip{display:flex;align-items:center;gap:6px;background:var(--white);border:1.5px solid rgba(26,86,219,.1);border-radius:999px;padding:8px 16px;font-size:.83rem;font-weight:500;color:var(--ink2);transition:all .2s}
 .currency-chip:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-2px);box-shadow:var(--shadow)}
-.currency-chip .flag{font-size:1.1rem}
+.flag-img{width:22px;height:15px;border-radius:3px;object-fit:cover;display:inline-block;vertical-align:middle;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.currency-chip img{width:24px;height:18px;border-radius:3px;object-fit:cover;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 
 /* ─── FAQ ──────────────────────────────────────────────────────────────────── */
 .faq-section{padding:96px 5%}
@@ -320,7 +321,7 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
         <div class="conv-input-row">
           <input class="conv-input" type="number" value="1000" id="sendAmt" oninput="calcConvert()"/>
           <div class="conv-currency" onclick="toggleFromCur()">
-            <span class="conv-flag" id="fromFlag">🇮🇳</span>
+            <img id="fromFlag" src="https://flagcdn.com/24x18/in.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
             <span id="fromCur">INR</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -335,7 +336,7 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
         <div class="conv-input-row">
           <input class="conv-input" type="number" id="receiveAmt" value="11.22" readonly style="opacity:.8"/>
           <div class="conv-currency" onclick="toggleToCur()">
-            <span class="conv-flag" id="toFlag">🇺🇸</span>
+            <img id="toFlag" src="https://flagcdn.com/24x18/us.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
             <span id="toCur">USD</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -515,25 +516,31 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
     <h2 class="section-h" style="text-align:center;margin:0 auto 12px">Horizon works nearly everywhere</h2>
     <p class="section-sub" style="margin:0 auto">Send to 100+ world currencies with live exchange rates updated every hour.</p>
     <div class="currency-grid">
-      <div class="currency-chip"><span class="flag">🇮🇳</span> INR — India</div>
-      <div class="currency-chip"><span class="flag">🇦🇪</span> AED — UAE</div>
-      <div class="currency-chip"><span class="flag">🇺🇸</span> USD — United States</div>
-      <div class="currency-chip"><span class="flag">🇬🇧</span> GBP — United Kingdom</div>
-      <div class="currency-chip"><span class="flag">🇪🇺</span> EUR — Europe</div>
-      <div class="currency-chip"><span class="flag">🇵🇭</span> PHP — Philippines</div>
-      <div class="currency-chip"><span class="flag">🇧🇩</span> BDT — Bangladesh</div>
-      <div class="currency-chip"><span class="flag">🇵🇰</span> PKR — Pakistan</div>
-      <div class="currency-chip"><span class="flag">🇳🇵</span> NPR — Nepal</div>
-      <div class="currency-chip"><span class="flag">🇸🇦</span> SAR — Saudi Arabia</div>
-      <div class="currency-chip"><span class="flag">🇶🇦</span> QAR — Qatar</div>
-      <div class="currency-chip"><span class="flag">🇸🇬</span> SGD — Singapore</div>
-      <div class="currency-chip"><span class="flag">🇨🇦</span> CAD — Canada</div>
-      <div class="currency-chip"><span class="flag">🇦🇺</span> AUD — Australia</div>
-      <div class="currency-chip"><span class="flag">🇯🇵</span> JPY — Japan</div>
-      <div class="currency-chip"><span class="flag">🇲🇾</span> MYR — Malaysia</div>
-      <div class="currency-chip"><span class="flag">🇰🇼</span> KWD — Kuwait</div>
-      <div class="currency-chip"><span class="flag">🇿🇦</span> ZAR — South Africa</div>
-      <div class="currency-chip" style="border-style:dashed;color:var(--blue);font-weight:600">+ 82 more currencies →</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/in.png" alt="IN"/> INR — India</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/ae.png" alt="AE"/> AED — UAE</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/us.png" alt="US"/> USD — United States</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/gb.png" alt="GB"/> GBP — United Kingdom</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/eu.png" alt="EU"/> EUR — Europe</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/ph.png" alt="PH"/> PHP — Philippines</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/bd.png" alt="BD"/> BDT — Bangladesh</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/pk.png" alt="PK"/> PKR — Pakistan</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/np.png" alt="NP"/> NPR — Nepal</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/sa.png" alt="SA"/> SAR — Saudi Arabia</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/qa.png" alt="QA"/> QAR — Qatar</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/sg.png" alt="SG"/> SGD — Singapore</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/ca.png" alt="CA"/> CAD — Canada</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/au.png" alt="AU"/> AUD — Australia</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/jp.png" alt="JP"/> JPY — Japan</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/my.png" alt="MY"/> MYR — Malaysia</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/kw.png" alt="KW"/> KWD — Kuwait</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/za.png" alt="ZA"/> ZAR — South Africa</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/om.png" alt="OM"/> OMR — Oman</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/bh.png" alt="BH"/> BHD — Bahrain</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/lk.png" alt="LK"/> LKR — Sri Lanka</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/mm.png" alt="MM"/> MMK — Myanmar</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/id.png" alt="ID"/> IDR — Indonesia</div>
+      <div class="currency-chip"><img class="flag-img" src="https://flagcdn.com/24x18/th.png" alt="TH"/> THB — Thailand</div>
+      <div class="currency-chip" style="border-style:dashed;color:var(--blue);font-weight:600;background:var(--blue-lt)">+ 76 more currencies →</div>
     </div>
   </div>
 </section>
@@ -622,7 +629,7 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
 <script>
 // ── Currency Converter ────────────────────────────────────────────────────────
 const rates = { INR:83.45, USD:1, AED:3.67, GBP:0.79, EUR:0.92, PHP:55.9, BDT:110, SAR:3.75 }
-const flags = { INR:'🇮🇳', USD:'🇺🇸', AED:'🇦🇪', GBP:'🇬🇧', EUR:'🇪🇺', PHP:'🇵🇭', BDT:'🇧🇩', SAR:'🇸🇦' }
+const flags = { INR:'in', USD:'us', AED:'ae', GBP:'gb', EUR:'eu', PHP:'ph', BDT:'bd', SAR:'sa' }
 let fromCur = 'INR', toCur = 'USD'
 
 function calcConvert() {
@@ -633,11 +640,12 @@ function calcConvert() {
   document.getElementById('rateLabel').textContent = '1 ' + fromCur + ' = ' + (rates[toCur] / rates[fromCur]).toFixed(4) + ' ' + toCur + ' via XLM'
 }
 
+const flagCodes = { INR:'in', USD:'us', AED:'ae', GBP:'gb', EUR:'eu', PHP:'ph', BDT:'bd', SAR:'sa' }
 function toggleFromCur() {
   const currs = Object.keys(rates); const idx = currs.indexOf(fromCur)
   fromCur = currs[(idx + 1) % currs.length]
   document.getElementById('fromCur').textContent = fromCur
-  document.getElementById('fromFlag').textContent = flags[fromCur]
+  document.getElementById('fromFlag').src = 'https://flagcdn.com/24x18/' + (flagCodes[fromCur]||'un') + '.png'
   calcConvert()
 }
 
@@ -645,7 +653,7 @@ function toggleToCur() {
   const currs = Object.keys(rates); const idx = currs.indexOf(toCur)
   toCur = currs[(idx + 1) % currs.length]
   document.getElementById('toCur').textContent = toCur
-  document.getElementById('toFlag').textContent = flags[toCur]
+  document.getElementById('toFlag').src = 'https://flagcdn.com/24x18/' + (flagCodes[toCur]||'un') + '.png'
   calcConvert()
 }
 
@@ -657,7 +665,8 @@ const tickerData = [
   { pair:'SGD/INR', val:'61.80', chg:'-0.02%' }, { pair:'CAD/INR', val:'60.40', chg:'+0.09%' },
 ]
 const t = document.getElementById('ticker')
-const html = tickerData.map(d=>`<div class="ticker-item"><span class="flag">${d.pair.split('/')[0]==='INR'?'🇮🇳':d.pair.split('/')[0]==='AED'?'🇦🇪':d.pair.split('/')[0]==='PHP'?'🇵🇭':'🌐'}</span>${d.pair} <strong>${d.val}</strong> <span class="${parseFloat(d.chg)>=0?'up':''}">  ${d.chg}</span></div>`).join('')
+const tickerFlags = { INR:'in', AED:'ae', PHP:'ph', GBP:'gb', EUR:'eu', SAR:'sa', SGD:'sg', CAD:'ca' }
+const html = tickerData.map(d=>{const cc=d.pair.split('/')[0];const fc=tickerFlags[cc]||'un';return`<div class="ticker-item"><img src="https://flagcdn.com/20x15/${fc}.png" style="width:18px;height:13px;border-radius:2px;vertical-align:middle;margin-right:4px"/> ${d.pair} <strong>${d.val}</strong> <span class="${parseFloat(d.chg)>=0?'up':''}">&nbsp;${d.chg}</span></div>`}).join('')
 t.innerHTML = html + html // duplicate for infinite scroll
 
 // ── FAQ ───────────────────────────────────────────────────────────────────────
