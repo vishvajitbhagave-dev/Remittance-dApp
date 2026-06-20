@@ -162,6 +162,24 @@ nav{
 .feature-card p{font-size:.85rem;color:var(--ink3);line-height:1.6}
 
 /* ─── COMPARISON ───────────────────────────────────────────────────────────── */
+.builtdiff-section{padding:96px 5%;background:#fff}
+.builtdiff-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center;margin-top:56px}
+.builtdiff-card{border-radius:20px;padding:32px 28px;border:1.5px solid rgba(26,86,219,.1)}
+.builtdiff-card.old{background:#f8fafc}
+.builtdiff-card.new{background:linear-gradient(135deg,rgba(26,86,219,.06),rgba(56,189,248,.06));border-color:rgba(26,86,219,.25)}
+.builtdiff-label{font-family:var(--display);font-size:1.05rem;font-weight:800;color:var(--ink);margin-bottom:20px;text-align:center}
+.builtdiff-flow{display:flex;flex-direction:column;align-items:center;gap:4px}
+.builtdiff-node{background:#fff;border:1.5px solid rgba(26,86,219,.12);border-radius:10px;padding:8px 18px;font-size:.82rem;font-weight:600;color:var(--ink2);white-space:nowrap}
+.builtdiff-node.highlight{background:var(--blue);color:#fff;border-color:var(--blue)}
+.builtdiff-arrow{color:var(--ink4);font-size:.9rem}
+.builtdiff-meta{display:flex;flex-direction:column;gap:8px;margin-top:20px;font-size:.8rem;color:var(--ink3)}
+.builtdiff-vs{font-family:var(--display);font-size:1.2rem;font-weight:800;color:var(--ink4)}
+.builtdiff-points{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:64px}
+.builtdiff-point{text-align:center;padding:0 12px}
+.builtdiff-point-icon{font-size:2rem;margin-bottom:14px}
+.builtdiff-point h3{font-family:var(--display);font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:8px}
+.builtdiff-point p{font-size:.85rem;color:var(--ink3);line-height:1.6}
+@media(max-width:900px){.builtdiff-grid{grid-template-columns:1fr}.builtdiff-vs{margin:0 auto}.builtdiff-points{grid-template-columns:1fr}}
 .comparison-section{padding:96px 5%}
 .comparison-table{margin-top:56px;border-radius:20px;overflow:hidden;border:1.5px solid rgba(26,86,219,.12);box-shadow:var(--shadow)}
 .comp-head{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;background:var(--ink);padding:16px 24px}
@@ -557,6 +575,73 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
         <div class="feature-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
         <h3>30 Languages</h3>
         <p>Full UI in Hindi, Marathi, Arabic, Filipino, Bengali, Gujarati, and 24 more languages for workers worldwide.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUILT DIFFERENT -->
+<section class="builtdiff-section" id="built-different">
+  <div class="section-inner">
+    <div class="section-tag">Why Blockchain</div>
+    <h2 class="section-h">Built Different. Built Transparent.</h2>
+    <p class="section-sub">Your money isn't sitting in our bank account waiting to be moved. It's on a public ledger anyone can verify, the second you hit send.</p>
+
+    <div class="builtdiff-grid">
+      <div class="builtdiff-card old">
+        <div class="builtdiff-label">Traditional Transfer</div>
+        <div class="builtdiff-flow">
+          <div class="builtdiff-node">You</div>
+          <div class="builtdiff-arrow">↓</div>
+          <div class="builtdiff-node">Your Bank</div>
+          <div class="builtdiff-arrow">↓</div>
+          <div class="builtdiff-node">Correspondent Bank</div>
+          <div class="builtdiff-arrow">↓</div>
+          <div class="builtdiff-node">SWIFT Network</div>
+          <div class="builtdiff-arrow">↓</div>
+          <div class="builtdiff-node">Receiving Bank</div>
+          <div class="builtdiff-arrow">↓</div>
+          <div class="builtdiff-node">Receiver</div>
+        </div>
+        <div class="builtdiff-meta">
+          <span>⏱ 1–3 days</span>
+          <span>🔒 Opaque — you can't see where your money is</span>
+        </div>
+      </div>
+
+      <div class="builtdiff-vs">VS</div>
+
+      <div class="builtdiff-card new">
+        <div class="builtdiff-label">Horizon Transfer</div>
+        <div class="builtdiff-flow">
+          <div class="builtdiff-node highlight">You</div>
+          <div class="builtdiff-arrow">↓</div>
+          <div class="builtdiff-node highlight">Stellar Blockchain</div>
+          <div class="builtdiff-arrow">↓</div>
+          <div class="builtdiff-node highlight">Receiver</div>
+        </div>
+        <div class="builtdiff-meta">
+          <span>⚡ 5–10 seconds</span>
+          <span>👁 Fully transparent — verify any transfer yourself</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="builtdiff-points">
+      <div class="builtdiff-point">
+        <div class="builtdiff-point-icon">🔗</div>
+        <h3>No Middlemen Holding Your Money</h3>
+        <p>Funds move directly between you and the receiver — no bank sits in between, deciding when to release it.</p>
+      </div>
+      <div class="builtdiff-point">
+        <div class="builtdiff-point-icon">👁️</div>
+        <h3>Publicly Verifiable, Always</h3>
+        <p>Every transaction is permanently recorded on the Stellar blockchain — anyone can check it, anytime, with nothing hidden.</p>
+      </div>
+      <div class="builtdiff-point">
+        <div class="builtdiff-point-icon">⚡</div>
+        <h3>Peer-to-Peer, Not Bank-to-Bank</h3>
+        <p>Your money goes straight to the receiver's wallet — not through a chain of banks that each take days and fees.</p>
       </div>
     </div>
   </div>
