@@ -198,6 +198,23 @@ nav{
 .sec-stat-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(5,150,105,.2);border:1px solid rgba(74,222,128,.3);color:#4ade80;font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:999px;margin-top:8px;font-family:var(--mono)}
 
 /* ─── CURRENCIES ───────────────────────────────────────────────────────────── */
+.tracker-section{padding:96px 5%;background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 100%)}
+.tracker-box{max-width:600px;margin:0 auto;background:#fff;border:1.5px solid rgba(26,86,219,.12);border-radius:20px;padding:32px;box-shadow:var(--shadow)}
+.tracker-input-row{display:flex;gap:10px}
+.tracker-input{flex:1;padding:13px 16px;border:1.5px solid #e2e8f0;border-radius:var(--radius-sm);font-size:.88rem;outline:none;font-family:var(--mono);color:var(--ink)}
+.tracker-input:focus{border-color:var(--blue)}
+.tracker-btn{background:var(--blue);color:#fff;border:none;padding:13px 24px;border-radius:var(--radius-sm);font-size:.9rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s}
+.tracker-btn:hover{background:var(--blue2)}
+.tracker-sample-btn{display:block;margin:14px auto 0;background:none;border:none;color:var(--blue);font-size:.82rem;font-weight:600;cursor:pointer;text-decoration:underline}
+.tracker-result{margin-top:24px;text-align:left}
+.tracker-status{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:16px}
+.tracker-status.success{background:rgba(5,150,105,.12);color:var(--green)}
+.tracker-status.error{background:rgba(239,68,68,.12);color:#ef4444}
+.tracker-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(26,86,219,.07);font-size:.85rem}
+.tracker-row span:first-child{color:var(--ink3)}
+.tracker-row span:last-child{color:var(--ink);font-weight:600;font-family:var(--mono);text-align:right;word-break:break-all;max-width:60%}
+.tracker-explorer-link{display:inline-flex;align-items:center;gap:6px;margin-top:16px;color:var(--blue);font-size:.85rem;font-weight:600}
+.tracker-loading{text-align:center;color:var(--ink3);font-size:.85rem;padding:20px 0}
 .currencies-section{padding:80px 5%;background:var(--bg)}
 .currency-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:40px;justify-content:center}
 .currency-chip{display:flex;align-items:center;gap:6px;background:var(--white);border:1.5px solid rgba(26,86,219,.1);border-radius:999px;padding:8px 16px;font-size:.83rem;font-weight:500;color:var(--ink2);transition:all .2s}
@@ -614,6 +631,23 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
   </div>
 </section>
 
+<!-- TRANSFER TRACKER -->
+<section class="tracker-section" id="tracker">
+  <div class="section-inner" style="text-align:center">
+    <div class="section-tag" style="text-align:center">Live Proof</div>
+    <h2 class="section-h" style="text-align:center;margin:0 auto 12px">Track Any Transfer, Live</h2>
+    <p class="section-sub" style="margin:0 auto 40px">Every Horizon transfer is permanently recorded on the Stellar blockchain. Paste any transaction hash below and see the real, live status — no login required.</p>
+    <div class="tracker-box">
+      <div class="tracker-input-row">
+        <input id="trackerInput" class="tracker-input" type="text" placeholder="Paste a Stellar transaction hash..."/>
+        <button class="tracker-btn" onclick="trackTransaction()">Track →</button>
+      </div>
+      <button class="tracker-sample-btn" onclick="loadSampleTransaction()">Try a sample transfer</button>
+      <div id="trackerResult" class="tracker-result"></div>
+    </div>
+  </div>
+</section>
+
 <!-- CURRENCIES -->
 <section class="currencies-section">
   <div class="section-inner" style="text-align:center">
@@ -876,6 +910,43 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
 <script>
 // ── Currency Converter ────────────────────────────────────────────────────────
 const fallbackRates = { INR:83.45, USD:1, AED:3.67, GBP:0.79, EUR:0.92, PHP:55.9, BDT:110, SAR:3.75 }
+
+const SAMPLE_TX_HASH = '043c9cae8a260e7ba5afc44105c34f0185349139a1d45bd18a8f9060686b01ac'
+
+function loadSampleTransaction() {
+  document.getElementById('trackerInput').value = SAMPLE_TX_HASH
+  trackTransaction()
+}
+
+async function trackTransaction() {
+  const hash = document.getElementById('trackerInput').value.trim()
+  const resultEl = document.getElementById('trackerResult')
+  if (!hash) {
+    resultEl.innerHTML = '<div class="tracker-status error">⚠ Please paste a transaction hash</div>'
+    return
+  }
+  resultEl.innerHTML = '<div class="tracker-loading">Fetching live data from Stellar network...</div>'
+  try {
+    const res = await fetch('https://horizon-testnet.stellar.org/transactions/' + hash)
+    if (!res.ok) throw new Error('not found')
+    const tx = await res.json()
+    const date = new Date(tx.created_at).toLocaleString()
+    resultEl.innerHTML = `
+      <div class="tracker-status ${tx.successful ? 'success' : 'error'}">
+        ${tx.successful ? '✓ Confirmed on Stellar Blockchain' : '✕ Transaction Failed'}
+      </div>
+      <div class="tracker-row"><span>Ledger</span><span>${tx.ledger}</span></div>
+      <div class="tracker-row"><span>Timestamp</span><span>${date}</span></div>
+      <div class="tracker-row"><span>From Account</span><span>${tx.source_account}</span></div>
+      <div class="tracker-row"><span>Fee Charged</span><span>${(tx.fee_charged / 10000000).toFixed(7)} XLM</span></div>
+      <div class="tracker-row"><span>Operations</span><span>${tx.operation_count}</span></div>
+      <a class="tracker-explorer-link" href="https://stellar.expert/explorer/testnet/tx/${hash}" target="_blank">View full details on Stellar Expert ↗</a>
+    `
+  } catch (e) {
+    resultEl.innerHTML = '<div class="tracker-status error">⚠ Transaction not found. Double-check the hash and try again.</div>'
+  }
+}
+
 let rates = { ...fallbackRates }
 
 function loadCachedRates() {
