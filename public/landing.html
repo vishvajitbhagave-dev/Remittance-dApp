@@ -106,6 +106,17 @@ nav{
 .conv-input-row{display:flex;align-items:center;gap:8px}
 .conv-input{background:none;border:none;outline:none;font-size:1.5rem;font-weight:700;font-family:var(--display);color:#fff;width:100%}
 .conv-currency{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border-radius:8px;padding:5px 10px;cursor:pointer;flex-shrink:0}
+.conv-curr-wrap{position:relative}
+.conv-curr-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;width:260px;max-height:320px;background:#1a2540;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:50;box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.conv-curr-dropdown.open{display:block}
+.conv-curr-search{width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:#fff;font-size:.82rem;outline:none;margin-bottom:8px;font-family:var(--font)}
+.conv-curr-search::placeholder{color:rgba(255,255,255,.4)}
+.conv-curr-list{max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.conv-curr-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .15s}
+.conv-curr-item:hover{background:rgba(255,255,255,.08)}
+.conv-curr-item img{width:22px;height:15px;border-radius:3px;object-fit:cover;flex-shrink:0}
+.conv-curr-item-code{font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--sky)}
+.conv-curr-item-country{font-size:.78rem;color:rgba(255,255,255,.7)}
 .conv-currency span{font-size:.82rem;font-weight:600;color:#fff;white-space:nowrap}
 .conv-flag{font-size:1.2rem}
 .conv-arrow{text-align:center;color:rgba(255,255,255,.4);font-size:.85rem;margin:4px 0;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -402,10 +413,16 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
         <div class="conv-label">You send</div>
         <div class="conv-input-row">
           <input class="conv-input" type="number" value="1000" id="sendAmt" oninput="calcConvert()"/>
-          <div class="conv-currency" onclick="toggleFromCur()">
-            <img id="fromFlag" src="https://flagcdn.com/w40/in.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
-            <span id="fromCur">INR</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+         <div class="conv-curr-wrap">
+            <div class="conv-currency" onclick="openCurrDropdown('from')">
+              <img id="fromFlag" src="https://flagcdn.com/w40/in.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
+              <span id="fromCur">INR</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="conv-curr-dropdown" id="fromDropdown">
+              <input class="conv-curr-search" id="fromSearch" placeholder="Search currency..." oninput="filterCurrDropdown('from')"/>
+              <div class="conv-curr-list" id="fromList"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -417,10 +434,16 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
         <div class="conv-label">Receiver gets</div>
         <div class="conv-input-row">
           <input class="conv-input" type="number" id="receiveAmt" value="11.22" readonly style="opacity:.8"/>
-          <div class="conv-currency" onclick="toggleToCur()">
-            <img id="toFlag" src="https://flagcdn.com/w40/us.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
-            <span id="toCur">USD</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+         <div class="conv-curr-wrap">
+            <div class="conv-currency" onclick="openCurrDropdown('to')">
+              <img id="toFlag" src="https://flagcdn.com/w40/us.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
+              <span id="toCur">USD</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="conv-curr-dropdown" id="toDropdown">
+              <input class="conv-curr-search" id="toSearch" placeholder="Search currency..." oninput="filterCurrDropdown('to')"/>
+              <div class="conv-curr-list" id="toList"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -852,7 +875,41 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
 
 <script>
 // ── Currency Converter ────────────────────────────────────────────────────────
-const rates = { INR:83.45, USD:1, AED:3.67, GBP:0.79, EUR:0.92, PHP:55.9, BDT:110, SAR:3.75 }
+const fallbackRates = { INR:83.45, USD:1, AED:3.67, GBP:0.79, EUR:0.92, PHP:55.9, BDT:110, SAR:3.75 }
+let rates = { ...fallbackRates }
+
+function loadCachedRates() {
+  try {
+    const cached = localStorage.getItem('horizon_rates')
+    if (cached) {
+      const parsed = JSON.parse(cached)
+      rates = parsed.rates
+      console.log('Loaded cached rates from', new Date(parsed.fetchedAt).toLocaleString())
+    }
+  } catch (e) {
+    console.warn('No valid cache found, using fallback rates')
+  }
+}
+
+async function fetchLiveRates() {
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD')
+    const data = await res.json()
+    if (data && data.rates) {
+      rates = data.rates
+      localStorage.setItem('horizon_rates', JSON.stringify({ rates: data.rates, fetchedAt: Date.now() }))
+      console.log('✅ Live rates updated:', new Date().toLocaleString())
+      calcConvert()
+    }
+  } catch (e) {
+    console.warn('⚠️ Live rate fetch failed, keeping last known rates', e)
+  }
+}
+
+loadCachedRates()
+fetchLiveRates()
+setInterval(fetchLiveRates, 60 * 60 * 1000)
+
 let fromCur = 'INR', toCur = 'USD'
 
 function calcConvert() {
@@ -865,25 +922,63 @@ function calcConvert() {
   document.getElementById('heroReceiveVal').textContent = toAmt.toFixed(2) + ' ' + toCur
 }
 
-const flagCodes = { INR:'in', USD:'us', AED:'ae', GBP:'gb', EUR:'eu', PHP:'ph', BDT:'bd', SAR:'sa' }
-function toggleFromCur() {
-  const currs = Object.keys(rates); const idx = currs.indexOf(fromCur)
-  fromCur = currs[(idx + 1) % currs.length]
-  document.getElementById('fromCur').textContent = fromCur
-  document.getElementById('fromFlag').src = 'https://flagcdn.com/w40/' + (flagCodes[fromCur]||'un') + '.png'
-  document.getElementById('heroFromFlag').src = 'https://flagcdn.com/w40/' + (flagCodes[fromCur]||'un') + '.png'
+function populateCurrList(type, list) {
+  const listEl = document.getElementById(type + 'List')
+  listEl.innerHTML = list.map(c => `
+    <div class="conv-curr-item" onclick="selectCurrency('${type}','${c.code}')">
+      <img src="https://flagcdn.com/w40/${c.flag}.png" onerror="this.style.display='none'"/>
+      <span class="conv-curr-item-code">${c.code}</span>
+      <span class="conv-curr-item-country">${c.country}</span>
+    </div>
+  `).join('')
+}
+
+function filterCurrDropdown(type) {
+  const q = document.getElementById(type + 'Search').value.toLowerCase()
+  const filtered = allCurrData.filter(c =>
+    c.code.toLowerCase().includes(q) || c.country.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
+  )
+  populateCurrList(type, filtered)
+}
+
+function openCurrDropdown(type) {
+  const other = type === 'from' ? 'to' : 'from'
+  document.getElementById(other + 'Dropdown').classList.remove('open')
+  const dropdown = document.getElementById(type + 'Dropdown')
+  if (dropdown.classList.contains('open')) {
+    dropdown.classList.remove('open')
+  } else {
+    document.getElementById(type + 'Search').value = ''
+    populateCurrList(type, allCurrData)
+    dropdown.classList.add('open')
+    setTimeout(() => document.getElementById(type + 'Search').focus(), 50)
+  }
+}
+
+function selectCurrency(type, code) {
+  const c = allCurrData.find(x => x.code === code)
+  const flagCode = c ? c.flag : 'un'
+  if (type === 'from') {
+    fromCur = code
+    document.getElementById('fromCur').textContent = code
+    document.getElementById('fromFlag').src = 'https://flagcdn.com/w40/' + flagCode + '.png'
+    document.getElementById('heroFromFlag').src = 'https://flagcdn.com/w40/' + flagCode + '.png'
+  } else {
+    toCur = code
+    document.getElementById('toCur').textContent = code
+    document.getElementById('toFlag').src = 'https://flagcdn.com/w40/' + flagCode + '.png'
+    document.getElementById('heroToFlag').src = 'https://flagcdn.com/w40/' + flagCode + '.png'
+  }
+  document.getElementById(type + 'Dropdown').classList.remove('open')
   calcConvert()
 }
 
-function toggleToCur() {
-  const currs = Object.keys(rates); const idx = currs.indexOf(toCur)
-  toCur = currs[(idx + 1) % currs.length]
-  document.getElementById('toCur').textContent = toCur
-  document.getElementById('toFlag').src = 'https://flagcdn.com/w40/' + (flagCodes[toCur]||'un') + '.png'
-  document.getElementById('heroToFlag').src = 'https://flagcdn.com/w40/' + (flagCodes[toCur]||'un') + '.png'
-  calcConvert()
-}
-
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.conv-curr-wrap')) {
+    document.getElementById('fromDropdown').classList.remove('open')
+    document.getElementById('toDropdown').classList.remove('open')
+  }
+})
 // ── Ticker ────────────────────────────────────────────────────────────────────
 const tickerData = [
   { pair:'INR/USD', val:'83.45', chg:'+0.12%' }, { pair:'AED/INR', val:'22.72', chg:'+0.08%' },
