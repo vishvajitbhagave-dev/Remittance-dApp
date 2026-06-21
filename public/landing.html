@@ -196,6 +196,32 @@ nav{
 .comp-badge{display:inline-block;background:var(--blue);color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:6px;font-family:var(--mono)}
 
 /* ─── SECURITY ─────────────────────────────────────────────────────────────── */
+.savingscalc-section{padding:96px 5%;background:linear-gradient(180deg,#fff 0%,#f0f4ff 100%)}
+.savingscalc-box{max-width:560px;margin:0 auto;background:#fff;border:1.5px solid rgba(26,86,219,.12);border-radius:24px;padding:36px;box-shadow:var(--shadow-lg);text-align:left}
+.savingscalc-input-row{display:flex;gap:16px;margin-bottom:28px}
+.savingscalc-amount-wrap{flex:1}
+.savingscalc-amount-wrap label{display:block;font-size:.78rem;color:var(--ink3);margin-bottom:6px}
+.savingscalc-amount-input{width:100%;padding:13px 16px;border:1.5px solid #e2e8f0;border-radius:var(--radius-sm);font-size:1.1rem;font-weight:700;font-family:var(--display);outline:none;color:var(--ink)}
+.savingscalc-amount-input:focus{border-color:var(--blue)}
+.savingscalc-curr-wrap{position:relative}
+.savingscalc-curr-btn{background:var(--blue-lt);border:1.5px solid rgba(26,86,219,.15)}
+.savingscalc-curr-btn span{color:var(--blue)}
+.savingscalc-curr-btn svg{stroke:var(--blue)}
+.savingscalc-dropdown{background:#fff;border-color:rgba(26,86,219,.15);right:0;left:auto}
+.savingscalc-dropdown .conv-curr-search{background:#f8fafc;border-color:#e2e8f0;color:var(--ink)}
+.savingscalc-dropdown .conv-curr-item-code{color:var(--blue)}
+.savingscalc-dropdown .conv-curr-item-country{color:var(--ink3)}
+.savingscalc-dropdown .conv-curr-item:hover{background:var(--blue-lt)}
+.savingscalc-results{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.savingscalc-row{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-radius:12px;background:#f8fafc;border:1.5px solid transparent}
+.savingscalc-row.horizon{background:rgba(5,150,105,.08);border-color:rgba(5,150,105,.25)}
+.savingscalc-row-label{font-size:.88rem;font-weight:600;color:var(--ink2)}
+.savingscalc-row.horizon .savingscalc-row-label{color:var(--green)}
+.savingscalc-row-fee{font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--ink)}
+.savingscalc-row.horizon .savingscalc-row-fee{color:var(--green)}
+.savingscalc-savings{text-align:center;background:var(--blue);color:#fff;padding:16px;border-radius:14px;font-family:var(--display);font-size:1.05rem;font-weight:700}
+.savingscalc-savings span{color:#7dd3fc}
+@media(max-width:600px){.savingscalc-input-row{flex-direction:column}}
 .security-section{background:linear-gradient(135deg,#0b1120,#0f2352);padding:96px 5%;position:relative;overflow:hidden}
 .security-section::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(26,86,219,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(26,86,219,.04) 1px,transparent 1px);background-size:50px 50px}
 .security-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;position:relative;z-index:1}
@@ -681,6 +707,56 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
   </div>
 </section>
 
+<!-- SAVINGS CALCULATOR -->
+<section class="savingscalc-section">
+  <div class="section-inner" style="text-align:center">
+    <div class="section-tag" style="text-align:center">Try It Yourself</div>
+    <h2 class="section-h" style="text-align:center;margin:0 auto 12px">Calculate Your Savings</h2>
+    <p class="section-sub" style="margin:0 auto 8px">See exactly how much less you'd pay sending the same amount through Horizon.</p>
+    <p style="font-size:.78rem;color:var(--ink4);margin:0 auto 40px">Typical published fees — actual rates may vary by provider</p>
+
+    <div class="savingscalc-box">
+      <div class="savingscalc-input-row">
+        <div class="savingscalc-amount-wrap">
+          <label>Amount to send</label>
+          <input id="calcAmount" type="number" value="10000" oninput="setTimeout(calculateSavings, 0)" class="savingscalc-amount-input"/>
+        </div>
+        <div class="conv-curr-wrap savingscalc-curr-wrap">
+          <label style="display:block;font-size:.78rem;color:var(--ink3);margin-bottom:6px;text-align:left">Currency</label>
+          <div class="conv-currency savingscalc-curr-btn" onclick="openCalcCurrDropdown()">
+            <img id="calcFlag" src="https://flagcdn.com/w40/in.png" style="width:22px;height:15px;border-radius:3px;object-fit:cover"/>
+            <span id="calcCurLabel">INR</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="conv-curr-dropdown savingscalc-dropdown" id="calcDropdown">
+            <input class="conv-curr-search" id="calcSearch" placeholder="Search currency..." oninput="filterCalcCurrDropdown()"/>
+            <div class="conv-curr-list" id="calcList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="savingscalc-results">
+        <div class="savingscalc-row horizon">
+          <span class="savingscalc-row-label">⚡ Horizon</span>
+          <span class="savingscalc-row-fee" id="calcHorizonFee">—</span>
+        </div>
+        <div class="savingscalc-row">
+          <span class="savingscalc-row-label">Western Union (est.)</span>
+          <span class="savingscalc-row-fee" id="calcWUFee">—</span>
+        </div>
+        <div class="savingscalc-row">
+          <span class="savingscalc-row-label">Bank Transfer (est.)</span>
+          <span class="savingscalc-row-fee" id="calcBankFee">—</span>
+        </div>
+      </div>
+
+      <div class="savingscalc-savings">
+        You save up to <span id="calcSavingsAmount">—</span> by using Horizon
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- SECURITY -->
 <section class="security-section" id="security">
   <div class="section-inner security-inner">
@@ -1036,6 +1112,7 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
 <script>
 // ── Currency Converter ────────────────────────────────────────────────────────
 const fallbackRates = { INR:83.45, USD:1, AED:3.67, GBP:0.79, EUR:0.92, PHP:55.9, BDT:110, SAR:3.75 }
+let rates = { ...fallbackRates }
 
 const SAMPLE_TX_HASH = '043c9cae8a260e7ba5afc44105c34f0185349139a1d45bd18a8f9060686b01ac'
 
@@ -1104,7 +1181,72 @@ async function fetchNetworkStats() {
 fetchNetworkStats()
 setInterval(fetchNetworkStats, 30000)
 
-let rates = { ...fallbackRates }
+let calcCur = 'INR'
+
+function populateCalcCurrList(list) {
+  const listEl = document.getElementById('calcList')
+  listEl.innerHTML = list.map(c => `
+    <div class="conv-curr-item" onclick="selectCalcCurrency('${c.code}')">
+      <img src="https://flagcdn.com/w40/${c.flag}.png" onerror="this.style.display='none'"/>
+      <span class="conv-curr-item-code">${c.code}</span>
+      <span class="conv-curr-item-country">${c.country}</span>
+    </div>
+  `).join('')
+}
+
+function filterCalcCurrDropdown() {
+  const q = document.getElementById('calcSearch').value.toLowerCase()
+  const filtered = allCurrData.filter(c =>
+    c.code.toLowerCase().includes(q) || c.country.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
+  )
+  populateCalcCurrList(filtered)
+}
+
+function openCalcCurrDropdown() {
+  document.getElementById('fromDropdown').classList.remove('open')
+  document.getElementById('toDropdown').classList.remove('open')
+  const dropdown = document.getElementById('calcDropdown')
+  if (dropdown.classList.contains('open')) {
+    dropdown.classList.remove('open')
+  } else {
+    document.getElementById('calcSearch').value = ''
+    populateCalcCurrList(allCurrData)
+    dropdown.classList.add('open')
+    setTimeout(() => document.getElementById('calcSearch').focus(), 50)
+  }
+}
+
+function selectCalcCurrency(code) {
+  const c = allCurrData.find(x => x.code === code)
+  const flagCode = c ? c.flag : 'un'
+  calcCur = code
+  document.getElementById('calcCurLabel').textContent = code
+  document.getElementById('calcFlag').src = 'https://flagcdn.com/w40/' + flagCode + '.png'
+  document.getElementById('calcDropdown').classList.remove('open')
+  calculateSavings()
+}
+
+function calculateSavings() {
+  const amt = parseFloat(document.getElementById('calcAmount').value) || 0
+
+  const horizonFeeINR = 2
+  const horizonFeeUSD = horizonFeeINR / (rates['INR'] || fallbackRates.INR)
+  const horizonFee = horizonFeeUSD * (rates[calcCur] || 1)
+
+  const wuFee = amt * 0.04
+  const bankFee = amt * 0.06
+
+  const fmt = (n) => calcCur + ' ' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  document.getElementById('calcHorizonFee').textContent = fmt(horizonFee)
+  document.getElementById('calcWUFee').textContent = fmt(wuFee)
+  document.getElementById('calcBankFee').textContent = fmt(bankFee)
+
+  const maxSavings = Math.max(wuFee, bankFee) - horizonFee
+  document.getElementById('calcSavingsAmount').textContent = fmt(Math.max(maxSavings, 0))
+}
+
+calculateSavings()
 
 function loadCachedRates() {
   try {
@@ -1205,6 +1347,8 @@ document.addEventListener('click', function(e) {
   if (!e.target.closest('.conv-curr-wrap')) {
     document.getElementById('fromDropdown').classList.remove('open')
     document.getElementById('toDropdown').classList.remove('open')
+    const calcDd = document.getElementById('calcDropdown')
+    if (calcDd) calcDd.classList.remove('open')
   }
 })
 // ── Ticker ────────────────────────────────────────────────────────────────────
