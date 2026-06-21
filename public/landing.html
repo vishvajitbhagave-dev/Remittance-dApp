@@ -233,6 +233,17 @@ nav{
 .tracker-row span:last-child{color:var(--ink);font-weight:600;font-family:var(--mono);text-align:right;word-break:break-all;max-width:60%}
 .tracker-explorer-link{display:inline-flex;align-items:center;gap:6px;margin-top:16px;color:var(--blue);font-size:.85rem;font-weight:600}
 .tracker-loading{text-align:center;color:var(--ink3);font-size:.85rem;padding:20px 0}
+.netstats-section{padding:80px 5%;background:linear-gradient(135deg,#0b1120,#0f2352)}
+.netstats-header{margin-bottom:48px}
+.netstats-section .section-tag{color:var(--sky)}
+.netstats-section .section-h{color:#fff}
+.netstats-section .section-sub{color:rgba(255,255,255,.55)}
+.netstats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.netstats-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px 20px;text-align:center;backdrop-filter:blur(12px)}
+.netstats-val{font-family:var(--display);font-size:1.8rem;font-weight:800;color:#fff;margin-bottom:6px;word-break:break-word}
+.netstats-lbl{font-size:.78rem;color:rgba(255,255,255,.5)}
+.netstats-refresh{text-align:center;margin-top:24px;font-size:.75rem;color:rgba(255,255,255,.35);font-family:var(--mono)}
+@media(max-width:900px){.netstats-grid{grid-template-columns:1fr 1fr}}
 .currencies-section{padding:80px 5%;background:var(--bg)}
 .currency-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:40px;justify-content:center}
 .currency-chip{display:flex;align-items:center;gap:6px;background:var(--white);border:1.5px solid rgba(26,86,219,.1);border-radius:999px;padding:8px 16px;font-size:.83rem;font-weight:500;color:var(--ink2);transition:all .2s}
@@ -733,6 +744,36 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
   </div>
 </section>
 
+<!-- LIVE NETWORK STATS -->
+<section class="netstats-section">
+  <div class="section-inner">
+    <div class="netstats-header">
+      <div class="section-tag" style="text-align:center">Real-Time Data</div>
+      <h2 class="section-h" style="text-align:center;margin:0 auto 12px">The Stellar Network, Right Now</h2>
+      <p class="section-sub" style="margin:0 auto">Pulled live from the Stellar blockchain — not marketing numbers, actual network data.</p>
+    </div>
+    <div class="netstats-grid">
+      <div class="netstats-card">
+        <div class="netstats-val" id="statLedger">—</div>
+        <div class="netstats-lbl">Latest Verified Ledger</div>
+      </div>
+      <div class="netstats-card">
+        <div class="netstats-val" id="statCloseTime">—</div>
+        <div class="netstats-lbl">Avg. Ledger Close Time</div>
+      </div>
+      <div class="netstats-card">
+        <div class="netstats-val" id="statTxCount">—</div>
+        <div class="netstats-lbl">Transactions (Last 10 Ledgers)</div>
+      </div>
+      <div class="netstats-card">
+        <div class="netstats-val" id="statStatus">—</div>
+        <div class="netstats-lbl">Network Status</div>
+      </div>
+    </div>
+    <div class="netstats-refresh" id="netstatsRefresh"></div>
+  </div>
+</section>
+
 <!-- CURRENCIES -->
 <section class="currencies-section">
   <div class="section-inner" style="text-align:center">
@@ -1027,10 +1068,41 @@ async function trackTransaction() {
       <div class="tracker-row"><span>Operations</span><span>${tx.operation_count}</span></div>
       <a class="tracker-explorer-link" href="https://stellar.expert/explorer/testnet/tx/${hash}" target="_blank">View full details on Stellar Expert ↗</a>
     `
-  } catch (e) {
+ } catch (e) {
     resultEl.innerHTML = '<div class="tracker-status error">⚠ Transaction not found. Double-check the hash and try again.</div>'
   }
 }
+
+async function fetchNetworkStats() {
+  const statusEl = document.getElementById('statStatus')
+  try {
+    const res = await fetch('https://horizon-testnet.stellar.org/ledgers?order=desc&limit=10')
+    const data = await res.json()
+    const records = data._embedded.records
+    document.getElementById('statLedger').textContent = '#' + records[0].sequence.toLocaleString()
+   let totalTx = 0
+    let closeDiffs = []
+    for (let i = 0; i < records.length; i++) {
+      totalTx += records[i].successful_transaction_count
+      if (i < records.length - 1) {
+        const t1 = new Date(records[i].closed_at).getTime()
+        const t2 = new Date(records[i+1].closed_at).getTime()
+        closeDiffs.push((t1 - t2) / 1000)
+      }
+    }
+    const avgClose = closeDiffs.reduce((a,b) => a+b, 0) / closeDiffs.length
+    document.getElementById('statCloseTime').textContent = avgClose.toFixed(1) + 's'
+    document.getElementById('statTxCount').textContent = totalTx.toLocaleString()
+    statusEl.innerHTML = '<span style="color:#4ade80">✓ Operational</span>'
+    document.getElementById('netstatsRefresh').textContent = 'Last updated: ' + new Date().toLocaleTimeString()
+  } catch (e) {
+    statusEl.innerHTML = '<span style="color:#f87171">⚠ Unreachable</span>'
+    document.getElementById('netstatsRefresh').textContent = 'Could not reach Stellar network — retrying shortly'
+  }
+}
+
+fetchNetworkStats()
+setInterval(fetchNetworkStats, 30000)
 
 let rates = { ...fallbackRates }
 
