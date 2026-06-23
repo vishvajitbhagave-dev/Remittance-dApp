@@ -447,7 +447,7 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
   <div class="hero-glow2"></div>
   <div class="hero-inner">
     <div class="hero-top">
-      <div class="hero-badge"><span></span> Built on Stellar Blockchain</div>
+     <!-- <div class="hero-badge"><span></span> Built on Stellar Blockchain</div>-->
       <h1>Send Money Home <em>Instantly</em></h1>
       <p class="hero-sub">Cross-border transfers in under 10 seconds for less than Rs.2 fee. No bank account needed. 100+ world currencies. Available 24/7.</p>
       <div class="hero-cta">
@@ -520,13 +520,10 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
         </div>
       </div>
       <div class="fee-row">
-        <span class="fee-label">⚡ Transfer fee (Horizon)</span>
+        <span class="fee-label">Zero bank markup — your total fee stays under Rs.2</span>
         <span class="fee-value">< Rs.2.00</span>
       </div>
-      <div class="fee-row" style="margin-top:6px;background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)">
-        <span class="fee-label" style="color:rgba(255,255,255,.5)">Western Union would charge</span>
-        <span class="fee-value" style="color:#f87171">Rs.300–500</span>
-      </div>
+
     <button class="conv-send-btn" onclick="openModal()">Send Money Now →</button>
     </div>
     </div>
@@ -641,8 +638,9 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
           <div class="builtdiff-node">Receiver</div>
         </div>
         <div class="builtdiff-meta">
-          <span>⏱ 1–3 days</span>
-          <span>🔒 Opaque — you can't see where your money is</span>
+          <span>Slow settlement across multiple banking layers — typically 1 to 3 business days 
+            No visibility into where your funds are at any point in the process
+          </span>
         </div>
       </div>
 
@@ -658,25 +656,26 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
           <div class="builtdiff-node highlight">Receiver</div>
         </div>
         <div class="builtdiff-meta">
-          <span>⚡ 5–10 seconds</span>
-          <span>👁 Fully transparent — verify any transfer yourself</span>
+          <span>Settles directly on the Stellar blockchain in 5 to 10 seconds, every time
+            Every transfer is recorded on a public ledger — search it yourself, no account needed
+          </span>
         </div>
       </div>
     </div>
 
     <div class="builtdiff-points">
       <div class="builtdiff-point">
-        <div class="builtdiff-point-icon">🔗</div>
+        <div class="builtdiff-point-icon">🪙</div>
         <h3>No Middlemen Holding Your Money</h3>
         <p>Funds move directly between you and the receiver — no bank sits in between, deciding when to release it.</p>
       </div>
       <div class="builtdiff-point">
-        <div class="builtdiff-point-icon">👁️</div>
+        <div class="builtdiff-point-icon">🛡️</div>
         <h3>Publicly Verifiable, Always</h3>
         <p>Every transaction is permanently recorded on the Stellar blockchain — anyone can check it, anytime, with nothing hidden.</p>
       </div>
       <div class="builtdiff-point">
-        <div class="builtdiff-point-icon">⚡</div>
+        <div class="builtdiff-point-icon">📲</div>
         <h3>Peer-to-Peer, Not Bank-to-Bank</h3>
         <p>Your money goes straight to the receiver's wallet — not through a chain of banks that each take days and fees.</p>
       </div>
@@ -737,7 +736,7 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
 
       <div class="savingscalc-results">
         <div class="savingscalc-row horizon">
-          <span class="savingscalc-row-label">⚡ Horizon</span>
+          <span class="savingscalc-row-label">🏆 Horizon</span>
           <span class="savingscalc-row-fee" id="calcHorizonFee">—</span>
         </div>
         <div class="savingscalc-row">
@@ -787,17 +786,17 @@ footer{background:#060c1a;padding:60px 5% 32px;color:rgba(255,255,255,.5)}
       <div class="sec-stat-card">
         <div class="sec-stat-val">18/20</div>
         <div class="sec-stat-lbl">Security checks passing</div>
-        <div class="sec-stat-badge">✓ 90% Score</div>
+        <div class="sec-stat-badge">✔️ 90% Score</div>
       </div>
       <div class="sec-stat-card">
         <div class="sec-stat-val">38</div>
         <div class="sec-stat-lbl">Automated tests on every deploy</div>
-        <div class="sec-stat-badge">✓ CI/CD</div>
+        <div class="sec-stat-badge">✔️ CI/CD</div>
       </div>
       <div class="sec-stat-card span2">
         <div class="sec-stat-val">0.1 XLM</div>
         <div class="sec-stat-lbl">Maximum blockchain fee — less than Rs.2 — compared to Rs.300–500 charged by traditional services</div>
-        <div class="sec-stat-badge">✓ Fee Sponsored</div>
+        <div class="sec-stat-badge">✔️ Fee Sponsored</div>
       </div>
     </div>
   </div>
@@ -1125,7 +1124,7 @@ async function trackTransaction() {
   const hash = document.getElementById('trackerInput').value.trim()
   const resultEl = document.getElementById('trackerResult')
   if (!hash) {
-    resultEl.innerHTML = '<div class="tracker-status error">⚠ Please paste a transaction hash</div>'
+    resultEl.innerHTML = '<div class="tracker-status error">📋 Please paste a transaction hash</div>'
     return
   }
   resultEl.innerHTML = '<div class="tracker-loading">Fetching live data from Stellar network...</div>'
@@ -1136,7 +1135,7 @@ async function trackTransaction() {
     const date = new Date(tx.created_at).toLocaleString()
     resultEl.innerHTML = `
       <div class="tracker-status ${tx.successful ? 'success' : 'error'}">
-        ${tx.successful ? '✓ Confirmed on Stellar Blockchain' : '✕ Transaction Failed'}
+        ${tx.successful ? '✔️ Confirmed on Stellar Blockchain' : '❌ Transaction Failed'}
       </div>
       <div class="tracker-row"><span>Ledger</span><span>${tx.ledger}</span></div>
       <div class="tracker-row"><span>Timestamp</span><span>${date}</span></div>
@@ -1146,7 +1145,7 @@ async function trackTransaction() {
       <a class="tracker-explorer-link" href="https://stellar.expert/explorer/testnet/tx/${hash}" target="_blank">View full details on Stellar Expert ↗</a>
     `
  } catch (e) {
-    resultEl.innerHTML = '<div class="tracker-status error">⚠ Transaction not found. Double-check the hash and try again.</div>'
+    resultEl.innerHTML = '<div class="tracker-status error">🔎 Transaction not found. Double-check the hash and try again.</div>'
   }
 }
 
@@ -1170,10 +1169,10 @@ async function fetchNetworkStats() {
     const avgClose = closeDiffs.reduce((a,b) => a+b, 0) / closeDiffs.length
     document.getElementById('statCloseTime').textContent = avgClose.toFixed(1) + 's'
     document.getElementById('statTxCount').textContent = totalTx.toLocaleString()
-    statusEl.innerHTML = '<span style="color:#4ade80">✓ Operational</span>'
+    statusEl.innerHTML = '<span style="color:#4ade80">🟢 Operational</span>'
     document.getElementById('netstatsRefresh').textContent = 'Last updated: ' + new Date().toLocaleTimeString()
   } catch (e) {
-    statusEl.innerHTML = '<span style="color:#f87171">⚠ Unreachable</span>'
+    statusEl.innerHTML = '<span style="color:#f87171">🔴 Unreachable</span>'
     document.getElementById('netstatsRefresh').textContent = 'Could not reach Stellar network — retrying shortly'
   }
 }
@@ -1268,11 +1267,11 @@ async function fetchLiveRates() {
     if (data && data.rates) {
       rates = data.rates
       localStorage.setItem('horizon_rates', JSON.stringify({ rates: data.rates, fetchedAt: Date.now() }))
-      console.log('✅ Live rates updated:', new Date().toLocaleString())
+      console.log('✔️ Live rates updated:', new Date().toLocaleString())
       calcConvert()
     }
   } catch (e) {
-    console.warn('⚠️ Live rate fetch failed, keeping last known rates', e)
+    console.warn('🔁 Live rate fetch failed, keeping last known rates', e)
   }
 }
 
